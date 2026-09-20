@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<!-- Muestra nombres reales de atletas: accesible con el enlace, pero
+     fuera de los buscadores. Ver tambien robots.txt. -->
+<meta name="robots" content="noindex, nofollow">
+<title>AJP en directo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="cabecera-fila">
+    <h1 id="nombre-evento">AJP en directo</h1>
+    <button id="recargar" class="icono" title="Actualizar ahora" aria-label="Actualizar ahora">&#8635;</button>
+  </div>
+  <p id="estado" class="estado" role="status" aria-live="polite">Cargando…</p>
+</header>
+
+<nav class="pestanas" role="tablist">
+  <button class="pestana activa" data-vista="seguidos" role="tab" aria-selected="true">
+    Mis atletas <span id="contador-seguidos" class="chip"></span>
+  </button>
+  <button class="pestana" data-vista="buscar" role="tab" aria-selected="false">Buscar</button>
+  <button class="pestana" data-vista="tatamis" role="tab" aria-selected="false">Tatamis</button>
+</nav>
+
+<div id="aviso" class="aviso oculta" role="status" aria-live="polite"></div>
+
+<main>
+  <section id="vista-seguidos" class="vista"></section>
+
+  <section id="vista-buscar" class="vista oculta">
+    <input id="busqueda" type="search" inputmode="search" autocomplete="off"
+           placeholder="Nombre, club o categoría…" aria-label="Buscar atleta">
+    <div id="resultados"></div>
+  </section>
+
+  <section id="vista-tatamis" class="vista oculta"></section>
+</main>
+
+<div id="detalle" class="detalle oculta" role="dialog" aria-modal="true" aria-labelledby="detalle-nombre">
+  <div class="detalle-caja">
+    <header class="detalle-cabecera">
+      <h2 id="detalle-nombre"></h2>
+      <button id="cerrar-detalle" class="icono" aria-label="Cerrar">&times;</button>
+    </header>
+    <div id="detalle-cuerpo"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
