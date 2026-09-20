@@ -1,0 +1,29 @@
+# Credenciales de sesión de AJP/Smoothcomp. NUNCA deben llegar al repo:
+# es público y estas cookies dan acceso a la cuenta del usuario.
+secrets/
+
+# Publicación: worktree de la rama gh-pages
+.publish/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Capturas de la prueba de humo del frontend
+tmp-capturas/
+
+# Capturas HTML del navegador: se hicieron con la sesión del usuario iniciada y
+# contienen su id de cuenta, su nombre y un token CSRF. El repo es público.
+# Material de investigación: se conservan en local, no se versionan.
+fixtures/*.html
+fixtures/network_log_1535_session.json
+
+# Artefacto generado por el scraper (en gh-pages sí, en main no)
+site/data.json

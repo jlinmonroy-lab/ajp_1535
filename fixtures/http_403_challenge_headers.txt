@@ -1,0 +1,22 @@
+Petición: GET https://ajptour.com/es/event/1535
+Cabeceras enviadas (simulando navegador real):
+  User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+  Accept-Language: es-ES,es;q=0.9,en;q=0.8
+
+Respuesta:
+STATUS: 403
+Connection: close
+Cf-Mitigated: challenge
+Content-Security-Policy: default-src 'none'; script-src 'nonce-V220QQsn1ADivJJS2EJTnQ' 'unsafe-eval' https://challenges.cloudflare.com; style-src 'unsafe-inline'; img-src 'self' https://challenges.cloudflare.com; connect-src 'self' https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com blob:; child-src 'self' https://challenges.cloudflare.com blob:; worker-src blob:
+Server: cloudflare
+CF-RAY: a376db3e6dc303bd-MAD
+Content-Type: text/html; charset=UTF-8
+Content-Length: 5760
+
+Mismo resultado (403, Cf-Mitigated: challenge) en:
+  - https://ajptour.com/es
+  - https://ajptour.com/es/event/1535
+  - https://ajptour.com/es/event/1535/schedule
+
+robots.txt (fixtures/robots.txt) SÍ es accesible sin pasar el challenge (200 OK, sin cabecera Cf-Mitigated).

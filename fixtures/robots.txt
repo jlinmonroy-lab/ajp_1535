@@ -1,0 +1,9 @@
+﻿User-agent: *
+Disallow: /order/
+Disallow: /checkout
+Disallow: /scoreboard
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Disallow: /
+

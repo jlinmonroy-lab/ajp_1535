@@ -1,0 +1,2290 @@
+[
+  {
+    "id": 1042928,
+    "bracket_id": 109143,
+    "name": "Semifinals",
+    "group": "Women's GI / Brown / Black / Master 1 / 70KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 1,
+    "schedule_block_id": [
+      139213
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "",
+    "estimated_start": "2025-09-05T11:05:48+04:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": "walkover",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 25",
+        "country": "BR",
+        "event_registration_id": 900025,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 356",
+        "country": "VE",
+        "event_registration_id": 900356,
+        "club": "Delariva U.A.E",
+        "affiliation": "De La Riva International",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043318,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 5,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-1",
+    "estimated_start": "2025-09-05T14:00:56+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 92",
+        "country": "LB",
+        "event_registration_id": 900092,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 70",
+        "country": "IN",
+        "event_registration_id": 900070,
+        "club": "WESTBAY BJJ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1042929,
+    "bracket_id": 109143,
+    "name": "Semifinals",
+    "group": "Women's GI / Brown / Black / Master 1 / 70KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139213
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-2",
+    "estimated_start": "2025-09-05T11:03:09+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:23",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 131",
+        "country": "BR",
+        "event_registration_id": 900131,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 32",
+        "country": "BR",
+        "event_registration_id": 900032,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043002,
+    "bracket_id": 109225,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 1,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-3",
+    "estimated_start": "2025-09-05T11:06:23+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 187",
+        "country": "BR",
+        "event_registration_id": 900187,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 177",
+        "country": "BR",
+        "event_registration_id": 900177,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1042931,
+    "bracket_id": 109143,
+    "name": "Bronze match",
+    "group": "Women's GI / Brown / Black / Master 1 / 70KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 4,
+    "schedule_block_id": [
+      139213
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-4",
+    "estimated_start": "2025-09-05T11:26:25+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 356",
+        "country": "VE",
+        "event_registration_id": 900356,
+        "club": "Delariva U.A.E",
+        "affiliation": "De La Riva International",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 32",
+        "country": "BR",
+        "event_registration_id": 900032,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043003,
+    "bracket_id": 109225,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-5",
+    "estimated_start": "2025-09-05T11:14:33+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 310",
+        "country": "FR",
+        "event_registration_id": 900310,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 228",
+        "country": "AE",
+        "event_registration_id": 900228,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043004,
+    "bracket_id": 109225,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-6",
+    "estimated_start": "2025-09-05T11:22:47+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:50",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 309",
+        "country": "CO",
+        "event_registration_id": 900309,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 410",
+        "country": "BR",
+        "event_registration_id": 900410,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043005,
+    "bracket_id": 109225,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 4,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-7",
+    "estimated_start": "2025-09-05T11:34:48+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 385",
+        "country": "BR",
+        "event_registration_id": 900385,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 121",
+        "country": "BR",
+        "event_registration_id": 900121,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043006,
+    "bracket_id": 109225,
+    "name": "Semifinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 5,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-8",
+    "estimated_start": "2025-09-05T11:42:33+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:03",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 187",
+        "country": "BR",
+        "event_registration_id": 900187,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 310",
+        "country": "FR",
+        "event_registration_id": 900310,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043007,
+    "bracket_id": 109225,
+    "name": "Semifinals",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 6,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-9",
+    "estimated_start": "2025-09-05T11:48:02+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "02:52",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 410",
+        "country": "BR",
+        "event_registration_id": 900410,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 121",
+        "country": "BR",
+        "event_registration_id": 900121,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043011,
+    "bracket_id": 109196,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Brown / Master 2 / 94KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139793
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-10",
+    "estimated_start": "2025-09-05T11:45:26+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:03",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 393",
+        "country": "CO",
+        "event_registration_id": 900393,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 252",
+        "country": "CO",
+        "event_registration_id": 900252,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043008,
+    "bracket_id": 109225,
+    "name": "Bronze match",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 7,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-11",
+    "estimated_start": "2025-09-05T11:56:22+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 310",
+        "country": "FR",
+        "event_registration_id": 900310,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 121",
+        "country": "BR",
+        "event_registration_id": 900121,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043014,
+    "bracket_id": 109196,
+    "name": "Semifinals",
+    "group": "Men's GI / Brown / Master 2 / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 5,
+    "schedule_block_id": [
+      139793
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-12",
+    "estimated_start": "2025-09-05T11:52:26+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:41",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 291",
+        "country": "CO",
+        "event_registration_id": 900291,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 393",
+        "country": "CO",
+        "event_registration_id": 900393,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043015,
+    "bracket_id": 109196,
+    "name": "Semifinals",
+    "group": "Men's GI / Brown / Master 2 / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 6,
+    "schedule_block_id": [
+      139793
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-13",
+    "estimated_start": "2025-09-05T11:54:10+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:19",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 41",
+        "country": "MA",
+        "event_registration_id": 900041,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 146",
+        "country": "CO",
+        "event_registration_id": 900146,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043009,
+    "bracket_id": 109225,
+    "name": "Final",
+    "group": "Men's GI / Black / Master 2 / 85KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 8,
+    "schedule_block_id": [
+      139792
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-14",
+    "estimated_start": "2025-09-05T12:03:15+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "06:00",
+    "wonBy": "decision",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 187",
+        "country": "BR",
+        "event_registration_id": 900187,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 410",
+        "country": "BR",
+        "event_registration_id": 900410,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043016,
+    "bracket_id": 109196,
+    "name": "Bronze match",
+    "group": "Men's GI / Brown / Master 2 / 94KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 7,
+    "schedule_block_id": [
+      139793
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-15",
+    "estimated_start": "2025-09-05T12:12:33+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:16",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 393",
+        "country": "CO",
+        "event_registration_id": 900393,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 41",
+        "country": "MA",
+        "event_registration_id": 900041,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040754,
+    "bracket_id": 109219,
+    "name": null,
+    "group": "Women's GI / Purple / Master 1 / 70KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 1,
+    "schedule_block_id": [
+      139289
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-16",
+    "estimated_start": "2025-09-05T12:13:39+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 443",
+        "country": "BR",
+        "event_registration_id": 900443,
+        "club": "UFC GYM Middle East",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 321",
+        "country": "IR",
+        "event_registration_id": 900321,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043315,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-17",
+    "estimated_start": "2025-09-05T12:21:26+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "04:02",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 35",
+        "country": "EG",
+        "event_registration_id": 900035,
+        "club": "Atom Jiu Jitsu",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 277",
+        "country": "SA",
+        "event_registration_id": 900277,
+        "club": "Alqadsiah Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043017,
+    "bracket_id": 109196,
+    "name": "Final",
+    "group": "Men's GI / Brown / Master 2 / 94KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 8,
+    "schedule_block_id": [
+      139793
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-18",
+    "estimated_start": "2025-09-05T12:27:07+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "03:31",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 291",
+        "country": "CO",
+        "event_registration_id": 900291,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 146",
+        "country": "CO",
+        "event_registration_id": 900146,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040755,
+    "bracket_id": 109219,
+    "name": "Bronze match",
+    "group": "Women's GI / Purple / Master 1 / 70KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139289
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-19",
+    "estimated_start": "2025-09-05T12:34:50+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "03:59",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 376",
+        "country": "RU",
+        "event_registration_id": 900376,
+        "club": "Dento Dojo",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 443",
+        "country": "BR",
+        "event_registration_id": 900443,
+        "club": "UFC GYM Middle East",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043316,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-20",
+    "estimated_start": "2025-09-05T12:40:39+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 10",
+        "country": "KW",
+        "event_registration_id": 900010,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 271",
+        "country": "SD",
+        "event_registration_id": 900271,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043317,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 4,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-21",
+    "estimated_start": "2025-09-05T12:47:36+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "04:45",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 342",
+        "country": "AE",
+        "event_registration_id": 900342,
+        "club": "Al Wasl Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 94",
+        "country": "BR",
+        "event_registration_id": 900094,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040756,
+    "bracket_id": 109219,
+    "name": "Final",
+    "group": "Women's GI / Purple / Master 1 / 70KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139289
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-22",
+    "estimated_start": "2025-09-05T12:53:47+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "06:00",
+    "wonBy": "decision",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 321",
+        "country": "IR",
+        "event_registration_id": 900321,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 443",
+        "country": "BR",
+        "event_registration_id": 900443,
+        "club": "UFC GYM Middle East",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043319,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 6,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-23",
+    "estimated_start": "2025-09-05T14:06:53+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:21",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 345",
+        "country": "KW",
+        "event_registration_id": 900345,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 210",
+        "country": "AE",
+        "event_registration_id": 900210,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043320,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 7,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-24",
+    "estimated_start": "2025-09-05T14:08:09+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 347",
+        "country": "MA",
+        "event_registration_id": 900347,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 387",
+        "country": "AZ",
+        "event_registration_id": 900387,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043321,
+    "bracket_id": 109159,
+    "name": "Eighth-finals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 8,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-25",
+    "estimated_start": "2025-09-05T14:14:44+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 439",
+        "country": "TN",
+        "event_registration_id": 900439,
+        "club": "Emirates Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 197",
+        "country": "EG",
+        "event_registration_id": 900197,
+        "club": "Atom Jiu Jitsu",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043322,
+    "bracket_id": 109159,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 9,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-26",
+    "estimated_start": "2025-09-05T14:26:19+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:55",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 18",
+        "country": "JO",
+        "event_registration_id": 900018,
+        "club": "The Dojo Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 35",
+        "country": "EG",
+        "event_registration_id": 900035,
+        "club": "Atom Jiu Jitsu",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043323,
+    "bracket_id": 109159,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 10,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-27",
+    "estimated_start": "2025-09-05T14:28:02+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 10",
+        "country": "KW",
+        "event_registration_id": 900010,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 94",
+        "country": "BR",
+        "event_registration_id": 900094,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043324,
+    "bracket_id": 109159,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 11,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-28",
+    "estimated_start": "2025-09-05T14:34:48+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 92",
+        "country": "LB",
+        "event_registration_id": 900092,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 345",
+        "country": "KW",
+        "event_registration_id": 900345,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043325,
+    "bracket_id": 109159,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 12,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-29",
+    "estimated_start": "2025-09-05T14:42:09+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:51",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 387",
+        "country": "AZ",
+        "event_registration_id": 900387,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 197",
+        "country": "EG",
+        "event_registration_id": 900197,
+        "club": "Atom Jiu Jitsu",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043326,
+    "bracket_id": 109159,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 13,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-30",
+    "estimated_start": "2025-09-05T14:43:48+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "02:10",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 18",
+        "country": "JO",
+        "event_registration_id": 900018,
+        "club": "The Dojo Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 10",
+        "country": "KW",
+        "event_registration_id": 900010,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043327,
+    "bracket_id": 109159,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 14,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-31",
+    "estimated_start": "2025-09-05T14:51:31+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 92",
+        "country": "LB",
+        "event_registration_id": 900092,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 387",
+        "country": "AZ",
+        "event_registration_id": 900387,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043441,
+    "bracket_id": 109163,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Amateur / 94KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 1,
+    "schedule_block_id": [
+      139832
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-32",
+    "estimated_start": "2025-09-05T14:47:05+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "03:11",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 57",
+        "country": "SA",
+        "event_registration_id": 900057,
+        "club": "Spiderteamksa ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 54",
+        "country": "IN",
+        "event_registration_id": 900054,
+        "club": "WESTBAY BJJ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043328,
+    "bracket_id": 109159,
+    "name": "Bronze match",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 4,
+    "state": "finished",
+    "match_nr": 15,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-33",
+    "estimated_start": "2025-09-05T15:11:57+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 10",
+        "country": "KW",
+        "event_registration_id": 900010,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 387",
+        "country": "AZ",
+        "event_registration_id": 900387,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043442,
+    "bracket_id": 109163,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Amateur / 94KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139832
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-34",
+    "estimated_start": "2025-09-05T15:00:14+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "02:40",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 389",
+        "country": "KZ",
+        "event_registration_id": 900389,
+        "club": "Armjj International Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 133",
+        "country": "JO",
+        "event_registration_id": 900133,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040426,
+    "bracket_id": 109173,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-35",
+    "estimated_start": "2025-09-05T15:05:09+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 434",
+        "country": "AE",
+        "event_registration_id": 900434,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 126",
+        "country": "AE",
+        "event_registration_id": 900126,
+        "club": "Abu Dhabi Police Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043329,
+    "bracket_id": 109159,
+    "name": "Final",
+    "group": "Men's GI / Blue / Amateur / 69KG",
+    "round": 4,
+    "state": "finished",
+    "match_nr": 16,
+    "schedule_block_id": [
+      139820
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-36",
+    "estimated_start": "2025-09-05T15:20:28+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "01:08",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 18",
+        "country": "JO",
+        "event_registration_id": 900018,
+        "club": "The Dojo Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 92",
+        "country": "LB",
+        "event_registration_id": 900092,
+        "club": "Al Jazira Jiu-Jitsu Club",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043443,
+    "bracket_id": 109163,
+    "name": "Bronze match",
+    "group": "Men's GI / Blue / Amateur / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139832
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-37",
+    "estimated_start": "2025-09-05T15:22:47+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 54",
+        "country": "IN",
+        "event_registration_id": 900054,
+        "club": "WESTBAY BJJ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 133",
+        "country": "JO",
+        "event_registration_id": 900133,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040427,
+    "bracket_id": 109173,
+    "name": "Quarterfinals",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-38",
+    "estimated_start": "2025-09-05T15:29:41+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:25",
+    "wonBy": "stoppage",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 8",
+        "country": "MA",
+        "event_registration_id": 900008,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 203",
+        "country": "KZ",
+        "event_registration_id": 900203,
+        "club": "Mario Bros BJJ Kazakhstan",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040429,
+    "bracket_id": 109173,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 5,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-39",
+    "estimated_start": "2025-09-05T15:33:33+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 234",
+        "country": "KZ",
+        "event_registration_id": 900234,
+        "club": "Alatau  Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 434",
+        "country": "AE",
+        "event_registration_id": 900434,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043444,
+    "bracket_id": 109163,
+    "name": "Final",
+    "group": "Men's GI / Blue / Amateur / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 4,
+    "schedule_block_id": [
+      139832
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-40",
+    "estimated_start": "2025-09-05T15:40:22+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 57",
+        "country": "SA",
+        "event_registration_id": 900057,
+        "club": "Spiderteamksa ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 389",
+        "country": "KZ",
+        "event_registration_id": 900389,
+        "club": "Armjj International Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040430,
+    "bracket_id": 109173,
+    "name": "Semifinals",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 6,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-41",
+    "estimated_start": "2025-09-05T15:47:38+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 203",
+        "country": "KZ",
+        "event_registration_id": 900203,
+        "club": "Mario Bros BJJ Kazakhstan",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 7",
+        "country": "BR",
+        "event_registration_id": 900007,
+        "club": "Tsuna",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043373,
+    "bracket_id": 109216,
+    "name": null,
+    "group": "Men's GI / White / Master 1 / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 1,
+    "schedule_block_id": [
+      139286
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-42",
+    "estimated_start": "2025-09-05T15:54:19+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:55",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 415",
+        "country": "AE",
+        "event_registration_id": 900415,
+        "club": "Abu Dhabi Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 397",
+        "country": "PH",
+        "event_registration_id": 900397,
+        "club": "ATRIXION COMBAT SPORTS",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040431,
+    "bracket_id": 109173,
+    "name": "Bronze match",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 7,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-43",
+    "estimated_start": "2025-09-05T16:08:46+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 234",
+        "country": "KZ",
+        "event_registration_id": 900234,
+        "club": "Alatau  Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 7",
+        "country": "BR",
+        "event_registration_id": 900007,
+        "club": "Tsuna",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043374,
+    "bracket_id": 109216,
+    "name": "Bronze match",
+    "group": "Men's GI / White / Master 1 / 69KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139286
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-44",
+    "estimated_start": "2025-09-05T16:01:18+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 362",
+        "country": "AE",
+        "event_registration_id": 900362,
+        "club": "Abu Dhabi Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 397",
+        "country": "PH",
+        "event_registration_id": 900397,
+        "club": "ATRIXION COMBAT SPORTS",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040341,
+    "bracket_id": 109162,
+    "name": "Quarterfinals",
+    "group": "Men's GI / White / Master 2 / 94KG",
+    "round": 1,
+    "state": "finished",
+    "match_nr": 2,
+    "schedule_block_id": [
+      139232
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-45",
+    "estimated_start": "2025-09-05T15:56:14+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "03:49",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 156",
+        "country": "AE",
+        "event_registration_id": 900156,
+        "club": "Abu Dhabi Police Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 108",
+        "country": "AZ",
+        "event_registration_id": 900108,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040432,
+    "bracket_id": 109173,
+    "name": "Final",
+    "group": "Men's GI / Blue / Master 2 / 85KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 8,
+    "schedule_block_id": [
+      139243
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-46",
+    "estimated_start": "2025-09-05T16:15:06+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 434",
+        "country": "AE",
+        "event_registration_id": 900434,
+        "club": "M.O.D UAE",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 203",
+        "country": "KZ",
+        "event_registration_id": 900203,
+        "club": "Mario Bros BJJ Kazakhstan",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1043375,
+    "bracket_id": 109216,
+    "name": "Final",
+    "group": "Men's GI / White / Master 1 / 69KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 3,
+    "schedule_block_id": [
+      139286
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-47",
+    "estimated_start": "2025-09-05T16:26:46+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "00:40",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 415",
+        "country": "AE",
+        "event_registration_id": 900415,
+        "club": "Abu Dhabi Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 397",
+        "country": "PH",
+        "event_registration_id": 900397,
+        "club": "ATRIXION COMBAT SPORTS",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040344,
+    "bracket_id": 109162,
+    "name": "Semifinals",
+    "group": "Men's GI / White / Master 2 / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 5,
+    "schedule_block_id": [
+      139232
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-48",
+    "estimated_start": "2025-09-05T16:28:37+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "04:13",
+    "wonBy": "disqualification",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 346",
+        "country": "GB-ENG",
+        "event_registration_id": 900346,
+        "club": "971 MMA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 156",
+        "country": "AE",
+        "event_registration_id": 900156,
+        "club": "Abu Dhabi Police Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040345,
+    "bracket_id": 109162,
+    "name": "Semifinals",
+    "group": "Men's GI / White / Master 2 / 94KG",
+    "round": 2,
+    "state": "finished",
+    "match_nr": 6,
+    "schedule_block_id": [
+      139232
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-49",
+    "estimated_start": "2025-09-05T16:35:27+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 15",
+        "country": "FR",
+        "event_registration_id": 900015,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 398",
+        "country": "KW",
+        "event_registration_id": 900398,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040346,
+    "bracket_id": 109162,
+    "name": "Bronze match",
+    "group": "Men's GI / White / Master 2 / 94KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 7,
+    "schedule_block_id": [
+      139232
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-50",
+    "estimated_start": "2025-09-05T16:45:03+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "05:00",
+    "wonBy": "points",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 156",
+        "country": "AE",
+        "event_registration_id": 900156,
+        "club": "Abu Dhabi Police Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 398",
+        "country": "KW",
+        "event_registration_id": 900398,
+        "club": "Kuwait Jiu-Jitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "id": 1040347,
+    "bracket_id": 109162,
+    "name": "Final",
+    "group": "Men's GI / White / Master 2 / 94KG",
+    "round": 3,
+    "state": "finished",
+    "match_nr": 8,
+    "schedule_block_id": [
+      139232
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "1-51",
+    "estimated_start": "2025-09-05T16:51:45+04:00",
+    "winnerFromBracket": null,
+    "time_passed": "03:44",
+    "wonBy": "submission",
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 346",
+        "country": "GB-ENG",
+        "event_registration_id": 900346,
+        "club": "971 MMA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": true,
+        "status": "ok"
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 15",
+        "country": "FR",
+        "event_registration_id": 900015,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": "ok"
+      }
+    ]
+  }
+]

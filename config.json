@@ -1,0 +1,22 @@
+{
+  "eventId": "1535",
+  "eventName": "AJP NO-GI MADRID INTERNATIONAL JIU-JITSU CHAMPIONSHIP 2026",
+  "baseUrl": "https://ajptour.com",
+  "lang": "en",
+
+  "refreshSeconds": 75,
+  "requestPauseSeconds": 2.0,
+  "timeoutSeconds": 30,
+  "staleAfterFailures": 3,
+
+  "output": "site/data.json",
+
+  "streams": [],
+
+  "git": {
+    "enabled": false,
+    "branch": "gh-pages",
+    "path": "data.json",
+    "message": "datos del evento"
+  }
+}

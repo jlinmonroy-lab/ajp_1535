@@ -1,0 +1,3 @@
+# Normaliza los finales de línea: se trabaja en Windows y se publica en Linux.
+* text=auto eol=lf
+*.png binary

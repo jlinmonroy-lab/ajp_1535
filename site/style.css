@@ -1,0 +1,241 @@
+/* Pensado para mirarlo de pie en un pabellón: contraste alto, texto grande,
+   objetivos táctiles amplios y nada que dependa del color para entenderse. */
+:root {
+  --fondo: #0e1116;
+  --superficie: #171c24;
+  --superficie-2: #1f2631;
+  --borde: #2b3442;
+  --texto: #f2f5f9;
+  --texto-tenue: #9aa7b8;
+  --acento: #3f8cff;
+  --vivo: #ff4d4f;
+  --ok: #2ecc71;
+  --oro: #f5c518;
+  --plata: #c8d0da;
+  --bronce: #cd7f32;
+  --radio: 12px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --fondo: #f4f6fa;
+    --superficie: #ffffff;
+    --superficie-2: #eef1f6;
+    --borde: #d6dce6;
+    --texto: #10151c;
+    --texto-tenue: #5b6878;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: 2rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- Cabecera ---------- */
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+  padding: max(env(safe-area-inset-top), .7rem) 16px .6rem;
+}
+.cabecera-fila { display: flex; align-items: center; gap: .5rem; }
+.cabecera h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.estado { margin: .3rem 0 0; font-size: .8rem; color: var(--texto-tenue); }
+.estado.vieja { color: var(--vivo); font-weight: 600; }
+
+.icono {
+  background: var(--superficie-2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  flex: none;
+}
+.icono:active { background: var(--borde); }
+
+/* ---------- Pestañas ---------- */
+.pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  position: sticky;
+  top: 62px;
+  background: var(--fondo);
+  z-index: 9;
+}
+.pestana {
+  flex: 1;
+  padding: .65rem .4rem;
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pestana.activa { background: var(--acento); color: #fff; border-color: var(--acento); }
+.chip {
+  display: inline-block;
+  min-width: 1.2em;
+  padding: 0 .35em;
+  border-radius: 999px;
+  background: rgba(255,255,255,.22);
+  font-size: .75rem;
+}
+
+main { padding: 0 16px; }
+.vista.oculta, .oculta { display: none; }
+
+/* ---------- Buscador ---------- */
+#busqueda {
+  width: 100%;
+  padding: .8rem 1rem;
+  margin: .2rem 0 .8rem;
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+}
+#busqueda:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+
+/* ---------- Tarjetas ---------- */
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: .8rem;
+  margin-bottom: .6rem;
+}
+.tarjeta-cabecera { display: flex; align-items: center; gap: .7rem; }
+.foto {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--superficie-2);
+  flex: none;
+}
+.nombre { font-weight: 650; }
+.sub { font-size: .8rem; color: var(--texto-tenue); }
+.crece { flex: 1; min-width: 0; }
+/* Han de ser de bloque: en un span inline, text-overflow no recorta nada y el
+   texto largo se desliza por debajo del botón de seguir. */
+.crece .nombre, .crece .sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seguir {
+  flex: none;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto);
+  border-radius: 999px;
+  padding: .45rem .8rem;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.seguir.activo { background: var(--acento); border-color: var(--acento); color: #fff; }
+
+/* ---------- Combates ---------- */
+.combate {
+  display: flex;
+  gap: .6rem;
+  align-items: baseline;
+  padding: .55rem 0;
+  border-top: 1px solid var(--borde);
+  font-size: .9rem;
+}
+.combate:first-child { border-top: 0; }
+.hora { font-variant-numeric: tabular-nums; font-weight: 650; flex: none; }
+.detalle-combate { flex: 1; min-width: 0; }
+.rival { overflow: hidden; text-overflow: ellipsis; }
+
+.etiqueta {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border-radius: 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto-tenue);
+  white-space: nowrap;
+}
+.etiqueta.vivo { background: var(--vivo); border-color: var(--vivo); color: #fff; }
+.etiqueta.ganado { background: var(--ok); border-color: var(--ok); color: #05210f; }
+.etiqueta.perdido { background: transparent; border-color: var(--vivo); color: var(--vivo); }
+
+.medalla { font-size: .95rem; flex: none; }
+.medalla[data-m="gold"] { color: var(--oro); }
+.medalla[data-m="silver"] { color: var(--plata); }
+.medalla[data-m="bronze"] { color: var(--bronce); }
+
+.vacio { color: var(--texto-tenue); text-align: center; padding: 2.5rem 1rem; }
+.seccion-titulo {
+  margin: 1.1rem 0 .5rem;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--texto-tenue);
+}
+.enlace-stream {
+  display: inline-block;
+  margin-top: .4rem;
+  color: var(--acento);
+  font-size: .85rem;
+  font-weight: 600;
+}
+
+/* ---------- Detalle ---------- */
+.detalle {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  align-items: flex-end;
+  z-index: 20;
+}
+/* Debe ganar a `.detalle`, que se declara después de `.oculta` y con la misma
+   especificidad: sin esto el panel queda invisible pero tapando la pantalla
+   entera, y ningún clic llega a la página. */
+.detalle.oculta { display: none; }
+.detalle-caja {
+  background: var(--fondo);
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  border-radius: 18px 18px 0 0;
+  padding: 1rem 16px calc(1rem + env(safe-area-inset-bottom));
+}
+.detalle-cabecera { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+.detalle-cabecera h2 { margin: 0; font-size: 1.05rem; flex: 1; }
+
+@media (min-width: 640px) {
+  .detalle { align-items: center; justify-content: center; }
+  .detalle-caja { max-width: 560px; border-radius: 18px; }
+  main, .cabecera, .pestanas { max-width: 720px; margin-inline: auto; }
+}

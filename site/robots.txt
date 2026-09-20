@@ -1,0 +1,5 @@
+# Esta web muestra nombres reales de atletas de un evento en curso.
+# Es accesible para quien tenga el enlace, pero no queremos que quede
+# indexada ni archivada por los buscadores.
+User-agent: *
+Disallow: /
