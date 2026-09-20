@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<!-- Muestra nombres reales de atletas: accesible con el enlace, pero
+     fuera de los buscadores. Ver tambien robots.txt. -->
+<meta name="robots" content="noindex, nofollow">
+<title>FC Team | Competidores</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="cabecera-fila">
+    <img class="logo" src="img/logo.png" alt="FC Team" width="40" height="40" onerror="this.remove()">
+    <h1 id="nombre-evento">FC Team | Competidores</h1>
+    <button id="recargar" class="icono" title="Actualizar ahora" aria-label="Actualizar ahora">&#8635;</button>
+  </div>
+  <p id="estado" class="estado" role="status" aria-live="polite">Cargando…</p>
+</header>
+
+<nav class="pestanas" role="tablist">
+  <button class="pestana activa" data-vista="seguidos" role="tab" aria-selected="true">
+    Mis atletas <span id="contador-seguidos" class="chip"></span>
+  </button>
+  <button class="pestana" data-vista="buscar" role="tab" aria-selected="false">Buscar</button>
+  <button class="pestana" data-vista="tatamis" role="tab" aria-selected="false">Tatamis</button>
+</nav>
+
+<div id="aviso" class="aviso oculta" role="status" aria-live="polite"></div>
+
+<main>
+  <section id="vista-seguidos" class="vista">
+    <!-- Solo en el panel local. Fuera de #lista-seguidos para que el repintado
+         de cada refresco no borre lo que se está escribiendo. -->
+    <form id="alta-grupo" class="tarjeta alta-grupo oculta" autocomplete="off">
+      <h2 class="seccion-titulo">Añadir al grupo</h2>
+      <input name="nombre" type="text" required placeholder="Nombre y apellidos, como en Smoothcomp"
+             aria-label="Nombre del atleta">
+      <input name="club" type="text" placeholder="Club (opcional)" aria-label="Club">
+      <button type="submit" class="seguir activo">Añadir</button>
+      <p class="sub">Sin club, se le reconoce por el nombre en cualquier club.</p>
+    </form>
+    <div id="lista-seguidos"></div>
+  </section>
+
+  <section id="vista-buscar" class="vista oculta">
+    <input id="busqueda" type="search" inputmode="search" autocomplete="off"
+           placeholder="Nombre, club o categoría…" aria-label="Buscar atleta">
+    <div id="resultados"></div>
+  </section>
+
+  <section id="vista-tatamis" class="vista oculta"></section>
+</main>
+
+<div id="detalle" class="detalle oculta" role="dialog" aria-modal="true" aria-labelledby="detalle-nombre">
+  <div class="detalle-caja">
+    <header class="detalle-cabecera">
+      <h2 id="detalle-nombre"></h2>
+      <button id="cerrar-detalle" class="icono" aria-label="Cerrar">&times;</button>
+    </header>
+    <div id="detalle-cuerpo"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
