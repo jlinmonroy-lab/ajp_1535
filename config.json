@@ -13,6 +13,7 @@
     "enabled": false,
     "worktree": "C:/Users/gork-/ajp-publish",
     "branch": "gh-pages",
-    "message": "datos del evento"
+    "message": "datos del evento",
+    "maxMinutesSinPublish": 5
   }
 }

@@ -17,10 +17,15 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 # Ficheros del sitio que acompañan al data.json en la rama publicada.
 ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
+
+# Campos que cambian en cada ciclo aunque no haya pasado nada en el tatami.
+# Compararlos haría que "no hay cambios" no ahorrase nunca un push.
+VOLATILES = ("fetchedAt", "stale", "staleSince", "_nonce")
 
 
 def escribir_json(destino: Path, estado: dict) -> int:
@@ -51,6 +56,24 @@ def _git(args, cwd, log, silencioso=False):
     return resultado
 
 
+def _sustancia(ruta: Path):
+    """El contenido que de verdad importa: sin las marcas de tiempo."""
+    try:
+        datos = json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return {k: v for k, v in datos.items() if k not in VOLATILES}
+
+
+def _minutos_desde_ultimo_push(worktree: Path):
+    """Edad del commit publicado, en minutos. None si no se puede saber."""
+    r = subprocess.run(["git", "log", "-1", "--format=%ct"], cwd=str(worktree),
+                       capture_output=True, text=True)
+    if r.returncode != 0 or not r.stdout.strip().isdigit():
+        return None
+    return (time.time() - int(r.stdout.strip())) / 60
+
+
 def sincronizar_estaticos(origen: Path, worktree: Path, log) -> int:
     """Copia los ficheros del sitio que hayan cambiado. Devuelve cuántos."""
     copiados = 0
@@ -68,6 +91,35 @@ def sincronizar_estaticos(origen: Path, worktree: Path, log) -> int:
     return copiados
 
 
+def hay_que_publicar(cfg, data_json: Path, worktree: Path, log):
+    """Decide si este ciclo merece un push.
+
+    GitHub Pages reconstruye en cada push y tiene un límite blando de 10
+    builds/hora; a 75s por ciclo serían ~48. Con el schedule parado —de
+    madrugada, entre jornadas, o en un evento terminado— lo único que cambia es
+    `fetchedAt`, así que publicar por eso gastaría builds sin dar información
+    nueva a nadie.
+
+    Aun así se publica de vez en cuando aunque no cambie nada, porque la web
+    muestra "actualizado hace X" y esa antigüedad tiene que ser cierta.
+    """
+    publicado = worktree / "data.json"
+    if not publicado.exists():
+        return True, "primera publicación"
+
+    if _sustancia(data_json) != _sustancia(publicado):
+        return True, "hay cambios en el schedule"
+
+    limite = (cfg.get("publish") or {}).get("maxMinutesSinPublish", 5)
+    minutos = _minutos_desde_ultimo_push(worktree)
+    if minutos is None:
+        return True, "no se pudo leer la fecha del último push"
+    if minutos >= limite:
+        return True, f"refresco periódico ({minutos:.0f} min sin publicar)"
+
+    return False, f"sin cambios de fondo ({minutos:.1f} min desde el último push)"
+
+
 def publicar(cfg, data_json: Path, log=print) -> bool:
     """Copia el data.json al worktree de gh-pages y lo sube.
 
@@ -83,17 +135,22 @@ def publicar(cfg, data_json: Path, log=print) -> bool:
         log(f"  el worktree {worktree} no existe; revisa config.json")
         return False
 
-    sincronizar_estaticos(data_json.parent, worktree, log)
+    # Un cambio en el propio sitio (HTML/CSS/JS) sí justifica publicar aunque
+    # los datos estén igual.
+    estaticos = sincronizar_estaticos(data_json.parent, worktree, log)
+
+    procede, motivo = hay_que_publicar(cfg, data_json, worktree, log)
+    if not procede and not estaticos:
+        log(f"  no se publica: {motivo}")
+        return False
+
     shutil.copy2(data_json, worktree / "data.json")
 
     if _git(["add", "-A"], worktree, log).returncode != 0:
         return False
-
-    # Sin cambios reales no se publica: evita un push por ciclo cuando el
-    # schedule está parado, que es justo lo que agota el límite de builds.
     if _git(["diff", "--cached", "--quiet"], worktree, log,
             silencioso=True).returncode == 0:
-        log("  sin cambios respecto a lo publicado")
+        log("  el contenido publicado ya era idéntico")
         return False
 
     mensaje = pub.get("message", "datos del evento")
@@ -103,5 +160,5 @@ def publicar(cfg, data_json: Path, log=print) -> bool:
     if _git(["push", "--force", "origin", rama], worktree, log).returncode != 0:
         return False
 
-    log(f"  publicado en {rama}")
+    log(f"  publicado en {rama}: {motivo if procede else 'sitio actualizado'}")
     return True

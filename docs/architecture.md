@@ -65,21 +65,43 @@ que se apartan de la especificación inicial:
 2. **`medals` es una lista** (no un solo campo), porque un atleta puede competir en varias
    categorías. `bestMedal` resume la mejor.
 
-## Riesgo abierto: latencia de publicación
+## Latencia de publicación: medida y validada
 
-GitHub Pages reconstruye en cada push y recomienda un máximo aproximado de 10 builds/hora; un push
-cada 75s son ~48/hora. **Está sin medir.** Si la mediana supera los 2 min exigidos, solo cambia
-`publish.py`:
+Medido el 2026-09-20 con `research/measure_latency.py --ciclos 15 --intervalo 75`
+(informe completo en `docs/latencia.md`):
 
-- servir `data.json` desde `raw.githubusercontent.com` (sin build, cache ~5 min), o
-- pasar a la Opción B (Cloudflare Worker + KV, escritura sin build).
+| vía | medidas | mediana | p90 | máximo | sobrescritos | 429 |
+| --- | --- | --- | --- | --- | --- | --- |
+| **GitHub Pages** | 15 | **21,1s** | 23,4s | 24,1s | 0 | **0** |
+| raw.githubusercontent | 1 | 272,9s | — | — | — | 0 |
 
-El parseo y el frontend no cambian en ninguno de los dos casos.
+**Opción A validada.** Pages publica en ~21s de forma muy estable (todas las medidas entre 18,9s
+y 24,1s), seis veces por debajo del requisito de 2 min, y aguantó 15 builds seguidos a ritmo de
+~48/hora sin un solo 429 pese al límite blando documentado de 10/hora.
+
+`raw.githubusercontent` queda **descartado**: sus 272,9s confirman su cache de ~5 min.
+
+Dos advertencias que conviene no olvidar:
+
+1. **19 minutos no prueban 10 horas.** El límite de Pages es *blando*: que no saltara en 15 builds
+   no garantiza que aguante los ~480 de una jornada completa. Durante el evento hay que vigilar
+   que `data.json` se siga actualizando; si apareciera un 429, la salida es publicar mediante un
+   workflow propio de GitHub Actions, donde ese límite no se aplica.
+2. Para reducir el riesgo, `publicar()` **no publica cuando no ha cambiado nada de fondo**
+   (comparando sin `fetchedAt`/`stale`), con un refresco de cortesía cada 5 minutos para que la
+   antigüedad que muestra la web sea cierta. Subir `refreshSeconds` a 90 o 120 bajaría el ritmo a
+   30-40 builds/hora si hiciera falta más margen.
+
+Si algún día hay que cambiar de vía, solo se toca `publish.py`: el parseo y el frontend no se
+enteran.
 
 ## Pendiente
 
-1. Crear el repo en GitHub, la rama `gh-pages` y activar Pages.
-2. **Medir la latencia real** de publicación antes de dar la arquitectura por buena.
-3. Repetir la captura contra el evento 1535 cuando publiquen su schedule, y comprobar el
+1. ~~Crear el repo, la rama `gh-pages` y activar Pages.~~ Hecho:
+   https://jlinmonroy-lab.github.io/ajp_1535/
+2. ~~Medir la latencia real.~~ Hecho: 21,1s de mediana, Opción A validada.
+3. **Ensayo general**: dejar el scraper en bucle con `publish.enabled`, comprobando que publica,
+   que marca `stale` al perder la red y que se recupera solo.
+4. Repetir la captura contra el evento 1535 cuando publiquen su schedule, y comprobar el
    comportamiento de los estados `running`/`seeded`, que no se ha podido observar en un evento AJP.
-4. Streams por tatami: sin fuente automatizable; se configuran a mano en `config.json`.
+5. Streams por tatami: sin fuente automatizable; se configuran a mano en `config.json`.
