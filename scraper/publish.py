@@ -4,14 +4,23 @@ Publicación del data.json.
 Aislado a propósito del resto: si GitHub Pages no diera la latencia necesaria,
 esto es lo único que habría que cambiar (ver docs/architecture.md).
 
-Escribe siempre en local y, si está configurado, hace commit y push sobre una
-rama dedicada con --amend para no acumular un commit por ciclo.
+El data.json se escribe siempre en local (para poder probar sin publicar) y,
+si la publicación está activada, se copia a un worktree de la rama gh-pages y
+se sube. El worktree vive fuera de OneDrive a propósito: un commit cada 75s
+dentro de una carpeta sincronizada acaba en bloqueos de fichero.
+
+Se usa `commit --amend` + `push --force` para que el historial de datos sea
+siempre un único commit y no crezca sin control durante el evento.
 """
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+
+# Ficheros del sitio que acompañan al data.json en la rama publicada.
+ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
 
 
 def escribir_json(destino: Path, estado: dict) -> int:
@@ -34,44 +43,65 @@ def escribir_json(destino: Path, estado: dict) -> int:
     return len(texto.encode("utf-8"))
 
 
-def _git(args, cwd, log):
+def _git(args, cwd, log, silencioso=False):
     resultado = subprocess.run(["git", *args], cwd=str(cwd),
                                capture_output=True, text=True)
-    if resultado.returncode != 0:
-        log(f"  git {' '.join(args)}: {resultado.stderr.strip()[:200]}")
-        return False
-    return True
+    if resultado.returncode != 0 and not silencioso:
+        log(f"  git {' '.join(args[:2])}: {resultado.stderr.strip()[:200]}")
+    return resultado
 
 
-def publicar_git(cfg, repo_dir: Path, log=print) -> bool:
-    """Commit + push del data.json sobre la rama de publicación.
+def sincronizar_estaticos(origen: Path, worktree: Path, log) -> int:
+    """Copia los ficheros del sitio que hayan cambiado. Devuelve cuántos."""
+    copiados = 0
+    for nombre in ESTATICOS:
+        fuente = origen / nombre
+        if not fuente.exists():
+            continue
+        destino = worktree / nombre
+        if destino.exists() and destino.read_bytes() == fuente.read_bytes():
+            continue
+        shutil.copy2(fuente, destino)
+        copiados += 1
+    if copiados:
+        log(f"  {copiados} fichero(s) del sitio actualizados")
+    return copiados
 
-    Usa --amend y --force sobre una rama dedicada, de modo que el historial de
-    datos sea siempre un único commit y no ensucie el del código.
+
+def publicar(cfg, data_json: Path, log=print) -> bool:
+    """Copia el data.json al worktree de gh-pages y lo sube.
+
+    Devuelve True si se publicó algo. No lanza: un fallo al publicar no debe
+    tumbar el bucle del scraper, que seguirá intentándolo en el ciclo siguiente.
     """
-    git_cfg = cfg.get("git") or {}
-    if not git_cfg.get("enabled"):
+    pub = cfg.get("publish") or {}
+    if not pub.get("enabled"):
         return False
 
-    rama = git_cfg.get("branch", "gh-pages")
-    ruta = git_cfg.get("path", "data.json")
-
-    if not _git(["add", "--", ruta], repo_dir, log):
+    worktree = Path(pub["worktree"])
+    if not (worktree / ".git").exists():
+        log(f"  el worktree {worktree} no existe; revisa config.json")
         return False
 
-    # Sin cambios que publicar: no se toca nada (evita un push por ciclo inútil).
-    sin_cambios = subprocess.run(
-        ["git", "diff", "--cached", "--quiet", "--", ruta],
-        cwd=str(repo_dir), capture_output=True)
-    if sin_cambios.returncode == 0:
+    sincronizar_estaticos(data_json.parent, worktree, log)
+    shutil.copy2(data_json, worktree / "data.json")
+
+    if _git(["add", "-A"], worktree, log).returncode != 0:
+        return False
+
+    # Sin cambios reales no se publica: evita un push por ciclo cuando el
+    # schedule está parado, que es justo lo que agota el límite de builds.
+    if _git(["diff", "--cached", "--quiet"], worktree, log,
+            silencioso=True).returncode == 0:
         log("  sin cambios respecto a lo publicado")
         return False
 
-    mensaje = git_cfg.get("message", "datos del evento")
-    if not _git(["commit", "--amend", "-m", mensaje], repo_dir, log):
+    mensaje = pub.get("message", "datos del evento")
+    if _git(["commit", "--amend", "-m", mensaje], worktree, log).returncode != 0:
         return False
-    if not _git(["push", "--force", "origin", rama], repo_dir, log):
+    rama = pub.get("branch", "gh-pages")
+    if _git(["push", "--force", "origin", rama], worktree, log).returncode != 0:
         return False
 
-    log(f"  publicado en la rama {rama}")
+    log(f"  publicado en {rama}")
     return True

@@ -18,7 +18,7 @@ sys.path.insert(0, str(RAIZ))
 
 from scraper.fetch import ErrorOrigen, leer_schedule  # noqa: E402
 from scraper.parse import construir_estado  # noqa: E402
-from scraper.publish import escribir_json, publicar_git  # noqa: E402
+from scraper.publish import escribir_json, publicar  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
 
@@ -106,7 +106,7 @@ def main():
         if estado is not None:
             tam = escribir_json(destino, estado)
             log(f"  escrito {destino.name} ({tam / 1024:.0f} KB)")
-            publicar_git(cfg, destino.parent, log=log)
+            publicar(cfg, destino, log=log)
 
         if args.once:
             return 0
