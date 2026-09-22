@@ -1,6 +1,17 @@
 {
-  "eventId": "1535",
-  "eventName": "AJP NO-GI MADRID INTERNATIONAL JIU-JITSU CHAMPIONSHIP 2026",
+  "events": [
+    {
+      "id": "1535",
+      "label": "No-Gi",
+      "name": "AJP NO-GI MADRID INTERNATIONAL 2026"
+    },
+    {
+      "id": "1526",
+      "label": "Gi",
+      "name": "AJP TOUR EUROPE CONTINENTAL 2026"
+    }
+  ],
+  "venue": "Polideportivo José Caballero, Madrid · 26-27 sep 2026",
   "baseUrl": "https://ajptour.com",
   "lang": "en",
   "refreshSeconds": 75,

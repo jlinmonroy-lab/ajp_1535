@@ -40,9 +40,11 @@ def main():
         for m in mats if (carpeta / f"matches_{m['id']}.json").exists()
     }
 
+    evento = {"id": args.event_id, "label": "Prueba",
+              "name": f"Datos de prueba (evento {args.event_id})"}
     estado = construir_estado(
-        evento={"id": args.event_id, "name": f"Datos de prueba (evento {args.event_id})"},
-        dias=dias, mats=mats, combates_por_mat=combates,
+        eventos=[evento],
+        datos_por_evento={args.event_id: (dias, mats, combates)},
         fetched_at=datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
     )
 

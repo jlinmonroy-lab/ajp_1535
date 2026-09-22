@@ -102,8 +102,9 @@ def preparar_config(puerto):
     TMP.mkdir(exist_ok=True)
     cfg = json.loads((RAIZ / "config.json").read_text(encoding="utf-8"))
     cfg.update({
-        "eventId": "1257",
-        "eventName": "Ensayo general",
+        # Los dos eventos, como el fin de semana del torneo.
+        "events": [{"id": "1535", "label": "No-Gi", "name": "Ensayo No-Gi"},
+                   {"id": "1526", "label": "Gi", "name": "Ensayo Gi"}],
         "baseUrl": f"http://127.0.0.1:{puerto}",
         "refreshSeconds": 12,
         "requestPauseSeconds": 0.05,
@@ -131,7 +132,7 @@ def main():
     log("Arrancando origen simulado (torneo en vivo)")
     mock = subprocess.Popen(
         [sys.executable, "-u", str(RAIZ / "research" / "mock_origen.py"),
-         "--puerto", str(args.puerto), "--simular-vivo"],
+         "--puerto", str(args.puerto), "--eventos", "1535,1526", "--simular-vivo"],
         cwd=str(RAIZ), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(2.5)
 
@@ -162,10 +163,15 @@ def main():
         log("Torneo en marcha otra vez")
         marca = scraper.marca()
         ok = scraper.esperar("publicado en gh-pages", marca)
-        estados = Counter(m["state"] for m in datos(salida)["matches"])
+        d = datos(salida)
+        estados = Counter(m["state"] for m in d["matches"])
         en_curso = estados.get("running", 0)
+        eventos_con_combates = {m["eventId"] for m in d["matches"]}
+        unificados = sum(1 for a in d["athletes"] if len(a.get("events", [])) > 1)
         resultados["C: publica los cambios"] = ok
         resultados["C: hay combates en curso"] = en_curso > 0
+        resultados["C: llegan los dos eventos"] = len(eventos_con_combates) == 2
+        resultados["C: atletas unificados entre eventos"] = unificados > 0
         log(f"  C -> {'PASA' if ok else 'FALLA'} · estados: {dict(estados)}")
 
         # --- D: el origen se cae -----------------------------------------
@@ -185,7 +191,10 @@ def main():
         control(args.puerto, "funcionar")
         log("Origen restaurado: debería recuperarse sin tocar nada")
         marca = scraper.marca()
-        ok = scraper.esperar("combates,", marca, limite=90)
+        # "atletas," solo aparece en el resumen de un ciclo que fue bien.
+        # Antes se buscaba "combates," y el desglose por evento lo rompió:
+        # conviene anclarse a algo que no cambie al tocar el formato.
+        ok = scraper.esperar("atletas,", marca, limite=90)
         time.sleep(3)
         d = datos(salida)
         resultados["E: se recupera solo"] = ok and not d["stale"]

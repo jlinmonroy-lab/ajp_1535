@@ -48,27 +48,49 @@ def cargar_config(args, anterior=None):
         log(f"  no se pudo releer {ruta.name} ({type(e).__name__}); sigo con la anterior")
         return anterior
 
-    if args.event and args.event != cfg.get("eventId"):
-        # Al apuntar a otro evento, el nombre configurado ya no vale: mejor sin
-        # nombre que con el del evento equivocado.
-        cfg["eventId"] = args.event
-        cfg["eventName"] = None
+    if args.event:
+        # Al apuntar a un evento suelto, los nombres configurados ya no valen.
+        cfg["events"] = [{"id": args.event, "label": None, "name": None}]
     return cfg
 
 
 def un_ciclo(cfg, estado_previo):
-    """Lee, convierte y publica. Devuelve el estado nuevo, o None si falló."""
-    dias, mats, combates = leer_schedule(cfg, log=log)
+    """Lee todos los eventos, los combina y devuelve el estado nuevo.
+
+    Un evento que falle no invalida el ciclo: el día del torneo es normal que
+    uno esté publicado y el otro todavía no. Solo se da el ciclo por fallido si
+    no se pudo leer ninguno.
+    """
+    eventos = cfg.get("events") or []
+    if not eventos:
+        raise ErrorOrigen("no hay eventos configurados")
+
+    datos = {}
+    fallos = []
+    for evento in eventos:
+        event_id = str(evento["id"])
+        etiqueta = evento.get("label") or event_id
+        try:
+            datos[event_id] = leer_schedule(cfg, event_id, log=log)
+        except ErrorOrigen as e:
+            fallos.append(f"{etiqueta}: {e}")
+            log(f"  evento {etiqueta} no disponible ({e})")
+
+    if not datos:
+        raise ErrorOrigen("; ".join(fallos) or "ningún evento devolvió datos")
 
     estado = construir_estado(
-        evento={"id": cfg["eventId"], "name": cfg.get("eventName")},
-        dias=dias, mats=mats, combates_por_mat=combates,
-        fetched_at=ahora_iso(),
+        eventos=eventos, datos_por_evento=datos, fetched_at=ahora_iso(),
         streams=cfg.get("streams") or [],
     )
     en_curso = sum(1 for m in estado["matches"] if m["state"] == "running")
-    log(f"  {len(estado['matches'])} combates, {len(estado['athletes'])} atletas, "
-        f"{len(estado['mats'])} tatamis, {en_curso} en curso")
+    por_evento = ", ".join(
+        f"{e.get('label') or e['id']}: "
+        f"{sum(1 for m in estado['matches'] if m['eventId'] == str(e['id']))}"
+        for e in eventos)
+    log(f"  {len(estado['matches'])} combates ({por_evento}), "
+        f"{len(estado['athletes'])} atletas, {len(estado['mats'])} tatamis, "
+        f"{en_curso} en curso")
     return estado
 
 
@@ -90,7 +112,9 @@ def main():
     cfg = cargar_config(args)
     destino = RAIZ / cfg.get("output", "site/data.json")
 
-    log(f"Evento {cfg['eventId']} · refresco {cfg.get('refreshSeconds', 75)}s "
+    nombres = ", ".join(f"{e.get('label') or e['id']} ({e['id']})"
+                        for e in cfg.get("events", []))
+    log(f"Eventos: {nombres} · refresco {cfg.get('refreshSeconds', 75)}s "
         f"· salida {destino}")
 
     ultimo_bueno = None

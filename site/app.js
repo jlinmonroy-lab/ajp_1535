@@ -71,9 +71,13 @@ async function cargar() {
     datos = await resp.json();
     porId = new Map(datos.matches.map((m) => [m.id, m]));
 
-    if (datos.event?.name) {
-      $('#nombre-evento').textContent = datos.event.name;
-      document.title = datos.event.name;
+    const eventos = datos.events || [];
+    if (eventos.length) {
+      const etiquetas = eventos.map((e) => e.label || e.id).join(' + ');
+      $('#nombre-evento').textContent = eventos.length === 1
+        ? (eventos[0].name || etiquetas)
+        : `AJP Madrid · ${etiquetas}`;
+      document.title = $('#nombre-evento').textContent;
     }
     pintar();
   } catch (e) {
@@ -101,15 +105,22 @@ function combatesDe(atleta) {
   return atleta.matchIds.map((id) => porId.get(id)).filter(Boolean);
 }
 
-function rivalDe(combate, registrationId) {
-  return combate.sides.find((s) => s.registrationId !== registrationId) || null;
+// Se compara por athleteId, no por inscripción: la misma persona tiene un
+// event_registration_id distinto en cada uno de los dos eventos.
+function rivalDe(combate, athleteId) {
+  return combate.sides.find((s) => s.athleteId !== athleteId) || null;
 }
 
-function etiquetaResultado(combate, registrationId) {
+function etiquetaEvento(combate) {
+  return combate.eventLabel
+    ? `<span class="etiqueta evento">${escapar(combate.eventLabel)}</span>` : '';
+}
+
+function etiquetaResultado(combate, athleteId) {
   if (combate.state === 'running') return '<span class="etiqueta vivo">EN CURSO</span>';
   if (combate.state !== 'finished') return '<span class="etiqueta">Pendiente</span>';
 
-  const yo = combate.sides.find((s) => s.registrationId === registrationId);
+  const yo = combate.sides.find((s) => s.athleteId === athleteId);
   if (!yo) return '<span class="etiqueta">Terminado</span>';
   const clase = yo.isWinner ? 'ganado' : 'perdido';
   const texto = yo.isWinner ? 'Ganó' : 'Perdió';
@@ -117,8 +128,8 @@ function etiquetaResultado(combate, registrationId) {
   return `<span class="etiqueta ${clase}">${texto}${escapar(modo)}</span>`;
 }
 
-function filaCombate(combate, registrationId) {
-  const rival = rivalDe(combate, registrationId);
+function filaCombate(combate, athleteId) {
+  const rival = rivalDe(combate, athleteId);
   const nombreRival = rival ? rival.name : 'Por determinar';
   const ronda = combate.round ? `${escapar(combate.round)} · ` : '';
   return `
@@ -126,15 +137,15 @@ function filaCombate(combate, registrationId) {
       <span class="hora">${hora(combate.estimatedStart)}</span>
       <span class="detalle-combate">
         <span class="rival">vs ${escapar(nombreRival)}</span><br>
-        <span class="sub">${ronda}${escapar(combate.mat || '')}</span>
+        <span class="sub">${etiquetaEvento(combate)} ${ronda}${escapar(combate.mat || '')}</span>
       </span>
-      ${etiquetaResultado(combate, registrationId)}
+      ${etiquetaResultado(combate, athleteId)}
     </div>`;
 }
 
 /* ---------- Vistas ---------- */
 function tarjetaAtleta(atleta, { conCombates = false } = {}) {
-  const sigue = seguidos.has(atleta.registrationId);
+  const sigue = seguidos.has(atleta.id);
   const medalla = atleta.bestMedal
     ? `<span class="medalla" data-m="${atleta.bestMedal}">${MEDALLAS[atleta.bestMedal]}</span>` : '';
   const foto = atleta.image
@@ -145,7 +156,7 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
   if (conCombates) {
     const lista = combatesDe(atleta);
     combates = lista.length
-      ? lista.map((c) => filaCombate(c, atleta.registrationId)).join('')
+      ? lista.map((c) => filaCombate(c, atleta.id)).join('')
       : '<p class="sub">Sin combates en el schedule todavía.</p>';
   }
 
@@ -153,12 +164,12 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
     <article class="tarjeta">
       <div class="tarjeta-cabecera">
         ${foto}
-        <span class="crece" data-atleta="${escapar(atleta.registrationId)}">
+        <span class="crece" data-atleta="${escapar(atleta.id)}">
           <span class="nombre">${escapar(atleta.name)} ${medalla}</span><br>
           <span class="sub">${escapar(atleta.club || '—')} · ${escapar(atleta.categories[0] || '')}</span>
         </span>
         <button class="seguir ${sigue ? 'activo' : ''}"
-                data-seguir="${escapar(atleta.registrationId)}">${sigue ? 'Siguiendo' : 'Seguir'}</button>
+                data-seguir="${escapar(atleta.id)}">${sigue ? 'Siguiendo' : 'Seguir'}</button>
       </div>
       ${combates}
     </article>`;
@@ -174,9 +185,9 @@ function pintarSeguidos() {
     return;
   }
 
-  const mios = datos.athletes.filter((a) => seguidos.has(a.registrationId));
+  const mios = datos.athletes.filter((a) => seguidos.has(a.id));
   if (!mios.length) {
-    caja.innerHTML = `<p class="vacio">Tus atletas no aparecen en este evento.</p>`;
+    caja.innerHTML = `<p class="vacio">Tus atletas no aparecen en estos eventos.</p>`;
     return;
   }
 
@@ -198,10 +209,10 @@ function pintarSeguidos() {
           <span class="hora">${hora(combate.estimatedStart)}</span>
           <span class="crece">
             <span class="nombre">${escapar(atleta.name)}</span><br>
-            <span class="sub">vs ${escapar((rivalDe(combate, atleta.registrationId) || {}).name || 'Por determinar')}
-              · ${escapar(combate.mat || '')}</span>
+            <span class="sub">vs ${escapar((rivalDe(combate, atleta.id) || {}).name || 'Por determinar')}
+              · ${etiquetaEvento(combate)} ${escapar(combate.mat || '')}</span>
           </span>
-          ${etiquetaResultado(combate, atleta.registrationId)}
+          ${etiquetaResultado(combate, atleta.id)}
         </div>
       </article>`).join('');
   }
@@ -233,19 +244,23 @@ function pintarBusqueda() {
 
 function pintarTatamis() {
   const caja = $('#vista-tatamis');
-  const porMat = new Map(datos.mats.map((m) => [m.name, []]));
+  // Por clave evento:tatami, no por nombre: los dos eventos comparten pabellón
+  // y pueden tener un "Mat 1" cada uno.
+  const porMat = new Map(datos.mats.map((m) => [m.key, []]));
   for (const c of datos.matches) {
-    if (porMat.has(c.mat)) porMat.get(c.mat).push(c);
+    if (porMat.has(c.matKey)) porMat.get(c.matKey).push(c);
   }
 
-  const streams = new Map((datos.streams || []).map((s) => [s.mat, s.url]));
+  const streams = new Map((datos.streams || [])
+    .map((s) => [s.matKey || `${s.eventId || ''}:${s.mat}`, s.url]));
 
-  caja.innerHTML = datos.mats.map((mat) => {
-    const combates = porMat.get(mat.name) || [];
+  const tarjeta = (mat) => {
+    const combates = porMat.get(mat.key) || [];
     const enCurso = combates.filter((c) => c.state === 'running');
     const siguientes = combates.filter((c) => c.state !== 'finished' && c.state !== 'running');
     const mostrar = [...enCurso, ...siguientes].slice(0, 5);
-    const url = streams.get(mat.name);
+    const url = streams.get(mat.key) || streams.get(`${mat.eventId}:${mat.name}`)
+      || streams.get(mat.name);
 
     return `
       <article class="tarjeta">
@@ -268,7 +283,16 @@ function pintarTatamis() {
           : '<p class="sub">Sin combates pendientes.</p>'}
         ${url ? `<a class="enlace-stream" href="${escapar(url)}" target="_blank" rel="noopener">Ver retransmisión ↗</a>` : ''}
       </article>`;
-  }).join('');
+  };
+
+  // Un bloque por evento, para no mezclar tatamis de Gi y No-Gi.
+  caja.innerHTML = (datos.events || []).map((ev) => {
+    const suyos = datos.mats.filter((m) => m.eventId === ev.id);
+    if (!suyos.length) return '';
+    const titulo = (datos.events.length > 1)
+      ? `<h2 class="seccion-titulo">${escapar(ev.label || ev.id)}</h2>` : '';
+    return titulo + suyos.map(tarjeta).join('');
+  }).join('') || '<p class="vacio">Todavía no hay tatamis publicados.</p>';
 }
 
 function pintar() {
@@ -280,8 +304,8 @@ function pintar() {
 }
 
 /* ---------- Detalle de atleta ---------- */
-function abrirDetalle(registrationId) {
-  const atleta = datos.athletes.find((a) => a.registrationId === registrationId);
+function abrirDetalle(athleteId) {
+  const atleta = datos.athletes.find((a) => a.id === athleteId);
   if (!atleta) return;
 
   $('#detalle-nombre').textContent = atleta.name;
@@ -289,11 +313,18 @@ function abrirDetalle(registrationId) {
     ? `<p class="sub">${atleta.medals.map((m) =>
         `${MEDALLAS[m.medal]} ${escapar(m.category || '')}`).join('<br>')}</p>`
     : '';
+  // Si compite en los dos eventos conviene que se vea: sus combates de Gi y
+  // No-Gi aparecen mezclados en una sola lista ordenada por hora.
+  const enEventos = (atleta.events || [])
+    .map((id) => (datos.events.find((e) => e.id === id) || {}).label || id);
+  const eventos = enEventos.length > 1
+    ? `<p class="sub">Compite en: ${escapar(enEventos.join(' y '))}</p>` : '';
   $('#detalle-cuerpo').innerHTML = `
     <p class="sub">${escapar(atleta.club || '—')}${atleta.country ? ' · ' + escapar(atleta.country) : ''}</p>
+    ${eventos}
     ${medallas}
     <h3 class="seccion-titulo">Combates</h3>
-    ${combatesDe(atleta).map((c) => filaCombate(c, atleta.registrationId)).join('') || '<p class="sub">Sin combates.</p>'}`;
+    ${combatesDe(atleta).map((c) => filaCombate(c, atleta.id)).join('') || '<p class="sub">Sin combates.</p>'}`;
   $('#detalle').classList.remove('oculta');
 }
 

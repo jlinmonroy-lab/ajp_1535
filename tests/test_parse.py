@@ -74,8 +74,8 @@ class TestEventoReal(unittest.TestCase):
                 "Falta fixtures/event_1257: ejecuta research/capture_event.py 1257")
         dias, mats, combates = cargar_fixture()
         cls.estado = construir_estado(
-            evento={"id": "1257", "name": "AJP evento de prueba"},
-            dias=dias, mats=mats, combates_por_mat=combates,
+            eventos=[{"id": "1257", "label": "Prueba", "name": "AJP evento de prueba"}],
+            datos_por_evento={"1257": (dias, mats, combates)},
             fetched_at="2026-09-20T12:00:00Z",
         )
 
@@ -105,7 +105,7 @@ class TestEventoReal(unittest.TestCase):
     def test_atletas_y_sus_combates(self):
         atletas = self.estado["athletes"]
         self.assertGreater(len(atletas), 100)
-        por_id = {a["registrationId"]: a for a in atletas}
+        por_id = {a["id"]: a for a in atletas}
         ids_combate = {m["id"] for m in self.estado["matches"]}
         for a in atletas:
             self.assertTrue(a["matchIds"], f"atleta {a['name']} sin combates")
@@ -114,7 +114,7 @@ class TestEventoReal(unittest.TestCase):
         # Coherencia inversa: cada lado de cada combate existe como atleta.
         for m in self.estado["matches"]:
             for lado in m["sides"]:
-                self.assertIn(lado["registrationId"], por_id)
+                self.assertIn(lado["athleteId"], por_id)
 
     def test_medallas(self):
         medallas = derivar_medallas(self.estado["matches"])
@@ -144,7 +144,7 @@ class TestEventoReal(unittest.TestCase):
         bronces = [m for m in self.estado["matches"]
                    if (m["round"] or "").lower() == "bronze match"]
         for bronce in bronces:
-            implicados = [l["registrationId"] for l in bronce["sides"]]
+            implicados = [l["athleteId"] for l in bronce["sides"]]
             con_bronce = [
                 rid for rid in implicados
                 if any(e["bracketId"] == bronce["bracketId"] and e["medal"] == "bronze"
@@ -160,7 +160,7 @@ class TestEventoReal(unittest.TestCase):
         for final in finales:
             for lado in final["sides"]:
                 esperado = "gold" if lado["isWinner"] else "silver"
-                entrada = next(e for e in medallas[lado["registrationId"]]
+                entrada = next(e for e in medallas[lado["athleteId"]]
                                if e["bracketId"] == final["bracketId"])
                 self.assertEqual(entrada["medal"], esperado)
 
@@ -193,9 +193,10 @@ class TestDeduplicacion(unittest.TestCase):
                      {"type": "registration", "event_registration_id": 22,
                       "name": "Dos", "isWinner": False}]}
         estado = construir_estado(
-            evento={"id": "x", "name": "x"}, dias=[],
-            mats=[{"id": 1, "name": "Mat 1"}, {"id": 2, "name": "Mat 2"}],
-            combates_por_mat={1: [crudo], 2: [crudo]},
+            eventos=[{"id": "x", "label": "X", "name": "x"}],
+            datos_por_evento={"x": ([], [{"id": 1, "name": "Mat 1"},
+                                         {"id": 2, "name": "Mat 2"}],
+                                    {1: [crudo], 2: [crudo]})},
             fetched_at="2026-01-01T00:00:00Z")
         self.assertEqual(len(estado["matches"]), 1)
         self.assertEqual(len(estado["athletes"]), 2)
@@ -209,8 +210,8 @@ class TestDeduplicacion(unittest.TestCase):
                       "name": "Uno", "isWinner": False},
                      {"type": "winner", "name": "Winner from 1-2"}]}
         estado = construir_estado(
-            evento={"id": "x", "name": "x"}, dias=[],
-            mats=[{"id": 1, "name": "Mat 1"}], combates_por_mat={1: [crudo]},
+            eventos=[{"id": "x", "label": "X", "name": "x"}],
+            datos_por_evento={"x": ([], [{"id": 1, "name": "Mat 1"}], {1: [crudo]})},
             fetched_at="2026-01-01T00:00:00Z")
         self.assertEqual(len(estado["matches"][0]["sides"]), 1)
         self.assertEqual(len(estado["athletes"]), 1)

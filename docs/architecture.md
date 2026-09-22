@@ -55,6 +55,28 @@ Consecuencias sobre el diseño original:
 
 Sin dependencias: todo con biblioteca estándar. `patchright` solo lo usan los scripts de `research/`.
 
+## Dos eventos, una sola web
+
+El 26-27 de septiembre coinciden en el Polideportivo José Caballero dos eventos AJP distintos:
+**1535** (No-Gi) y **1526** (Europe Continental, Gi). Se sirven combinados para que quien compita
+en ambos vea todos sus combates juntos y ordenados por hora.
+
+Eso obliga a tres cosas:
+
+1. **Identidad de los combates y tatamis por evento.** Smoothcomp numera por evento, así que dos
+   eventos pueden repetir id de combate, de bracket y de tatami, y los dos tienen un "Mat 1". Los
+   ids llevan el evento delante y la clave de un tatami es `eventId:matId`.
+2. **Atletas unificados por nombre + club.** `event_registration_id` es único por evento: la misma
+   persona llega con dos identificadores y nada en los datos los relaciona. Se agrupa por nombre y
+   club normalizados (sin acentos ni mayúsculas), y el atleta guarda sus `registrationIds` y los
+   `events` en los que compite. Riesgo asumido: un nombre escrito distinto en cada inscripción
+   saldría duplicado, y dos homónimos del mismo club se fusionarían.
+3. **Un evento que falle no tumba al otro.** Es lo normal estos días, con uno publicado y el otro
+   aún en 403: se publica lo que haya y solo se cuenta como fallo si no se puede leer ninguno.
+
+Coste por ciclo: ~22 peticiones (1 + días + tatamis, por evento). El `data.json` pasa a ~905 KB en
+crudo pero **58 KB comprimidos**, que es lo que viaja: Pages sirve con `Content-Encoding: gzip`.
+
 ## Modelo de datos
 
 Ver `docs/data-source.md` para el origen y `scraper/parse.py` para la forma exacta. Dos decisiones

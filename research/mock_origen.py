@@ -26,7 +26,7 @@ matar el proceso:
     /control/descongelar   -> vuelve a avanzar
     /control/estado        -> resumen de en qué punto va el torneo
 
-Uso:  python research/mock_origen.py [--puerto 8899] [--evento 1257] [--simular-vivo]
+Uso:  python research/mock_origen.py [--eventos 1535,1526] [--simular-vivo]
 """
 import argparse
 import json
@@ -50,18 +50,15 @@ TERMINAN_POR_LECTURA = 2
 RESULTADOS = ("points", "submission", "decision", "walkover", "disqualification")
 
 
-class Origen:
-    """Los datos del evento y, si procede, su evolución durante el torneo."""
+class Evento:
+    """Un evento servido por el mock, con su propia copia de los datos."""
 
-    def __init__(self, event_id, simular_vivo):
-        carpeta = RAIZ / "fixtures" / f"event_{event_id}"
+    def __init__(self, event_id, fixture, indice, simular_vivo):
+        carpeta = RAIZ / "fixtures" / f"event_{fixture}"
         if not carpeta.exists():
             raise SystemExit(f"No existe {carpeta}; captura antes con capture_event.py")
 
-        self.candado = threading.Lock()
-        self.fallar = False
-        self.congelado = False
-        self.lecturas = 0
+        self.id = str(event_id)
         self.dias = json.loads((carpeta / "days.json").read_text(encoding="utf-8"))
 
         self.mats = []
@@ -75,8 +72,34 @@ class Origen:
             if fichero.exists():
                 self.combates[m["id"]] = json.loads(fichero.read_text(encoding="utf-8"))
 
+        if indice:
+            self._separar_del_primero(indice)
         if simular_vivo:
             self._reiniciar_torneo()
+
+    def _separar_del_primero(self, indice):
+        """Hace que el segundo evento se parezca a lo que pasará de verdad.
+
+        Los mismos atletas compiten en Gi y en No-Gi, pero con inscripciones
+        distintas: se desplazan los `event_registration_id` conservando nombre y
+        club, que es justo lo que pone a prueba la unificación. Los tatamis se
+        renombran para comprobar que no se mezclan los de un evento con otro.
+        """
+        desplazamiento = 500000 * indice
+        for i, m in enumerate(self.mats):
+            m["id"] += desplazamiento
+            m["name"] = f"Mat {chr(ord('A') + i)}"
+        self.combates = {
+            mat["id"]: lista
+            for mat, lista in zip(self.mats, list(self.combates.values()))
+        }
+        for lista in self.combates.values():
+            for c in lista:
+                c["id"] += desplazamiento
+                c["bracket_id"] += desplazamiento
+                for plaza in c.get("seats", []):
+                    if plaza.get("event_registration_id") is not None:
+                        plaza["event_registration_id"] += desplazamiento
 
     def _reiniciar_torneo(self):
         """Devuelve todos los combates al estado previo al arranque."""
@@ -107,13 +130,28 @@ class Origen:
             c["time_passed"] = "00:42"
 
     def resumen(self):
-        combates = self._todos()
         cuenta = {}
-        for c in combates:
+        for c in self._todos():
             cuenta[c["state"]] = cuenta.get(c["state"], 0) + 1
+        return {"id": self.id, "tatamis": len(self.mats),
+                "combates": len(self._todos()), "estados": cuenta}
+
+
+class Origen:
+    """Todos los eventos servidos, más el control de fallos y congelación."""
+
+    def __init__(self, ids, fixture, simular_vivo):
+        self.candado = threading.Lock()
+        self.fallar = False
+        self.congelado = False
+        self.lecturas = 0
+        self.eventos = {str(e): Evento(e, fixture, i, simular_vivo)
+                        for i, e in enumerate(ids)}
+
+    def resumen(self):
         return {"lecturas": self.lecturas, "fallando": self.fallar,
-                "congelado": self.congelado, "combates": len(combates),
-                "estados": cuenta}
+                "congelado": self.congelado,
+                "eventos": [e.resumen() for e in self.eventos.values()]}
 
 
 def crear_handler(origen, simular_vivo):
@@ -153,22 +191,31 @@ def crear_handler(origen, simular_vivo):
                     return self._responder(503, {"error": "origen caído (simulado)"})
 
                 if m := RUTA_DIAS.match(ruta):
+                    evento = origen.eventos.get(m.group(1))
+                    if evento is None:
+                        # Igual que AJP con un evento sin schedule publicado.
+                        return self._responder(403, {"error": "not allowed"})
                     origen.lecturas += 1
                     if simular_vivo and not origen.congelado:
-                        origen.avanzar()
-                    return self._responder(200, origen.dias)
+                        evento.avanzar()
+                    return self._responder(200, evento.dias)
 
                 if m := RUTA_MATS.match(ruta):
-                    dia = int(m.group(2))
-                    if not any(d["id"] == dia for d in origen.dias):
+                    evento = origen.eventos.get(m.group(1))
+                    if evento is None:
+                        return self._responder(403, {"error": "not allowed"})
+                    if not any(d["id"] == int(m.group(2)) for d in evento.dias):
                         return self._responder(404, {"error": "día desconocido"})
-                    return self._responder(200, origen.mats)
+                    return self._responder(200, evento.mats)
 
                 if m := RUTA_COMBATES.match(ruta):
+                    evento = origen.eventos.get(m.group(1))
+                    if evento is None:
+                        return self._responder(403, {"error": "not allowed"})
                     mat = int(m.group(2))
-                    if mat not in origen.combates:
+                    if mat not in evento.combates:
                         return self._responder(404, {"error": "tatami desconocido"})
-                    return self._responder(200, origen.combates[mat])
+                    return self._responder(200, evento.combates[mat])
 
             self._responder(404, {"error": "ruta no reconocida"})
 
@@ -178,18 +225,23 @@ def crear_handler(origen, simular_vivo):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--puerto", type=int, default=8899)
-    p.add_argument("--evento", default="1257")
+    p.add_argument("--eventos", default="1257",
+                   help="ids a servir, separados por comas (p.ej. 1535,1526)")
+    p.add_argument("--fixture", default="1257",
+                   help="carpeta de fixtures de la que salen los datos")
     p.add_argument("--simular-vivo", action="store_true",
                    help="el torneo avanza: seeded -> running -> finished")
     args = p.parse_args()
 
-    origen = Origen(args.evento, args.simular_vivo)
+    ids = [e.strip() for e in args.eventos.split(",") if e.strip()]
+    origen = Origen(ids, args.fixture, args.simular_vivo)
     servidor = HTTPServer(("127.0.0.1", args.puerto),
                           crear_handler(origen, args.simular_vivo))
 
-    print(f"Origen simulado en http://127.0.0.1:{args.puerto} "
-          f"(evento {args.evento}, {len(origen.mats)} tatamis, "
-          f"{sum(len(v) for v in origen.combates.values())} combates)")
+    print(f"Origen simulado en http://127.0.0.1:{args.puerto}")
+    for e in origen.eventos.values():
+        print(f"  evento {e.id}: {len(e.mats)} tatamis, "
+              f"{sum(len(v) for v in e.combates.values())} combates")
     if args.simular_vivo:
         print("Modo en vivo: cada lectura del schedule avanza el torneo.")
     print("Control: /control/fallar · /control/funcionar · /control/estado")

@@ -6,6 +6,7 @@ Así se puede probar entero contra fixtures/event_1257/ sin tocar el origen.
 
 La forma de los datos de origen está documentada en docs/data-source.md.
 """
+import unicodedata
 from collections import OrderedDict
 
 # Nombres de ronda que deciden las medallas. Son los que usa AJP en su schedule.
@@ -48,17 +49,45 @@ def parse_categoria(group):
             "ageGroup": edad, "weight": peso, "gi": gi}
 
 
-def parse_combate(crudo, mat):
-    """Un combate del origen, con el tatami del endpoint del que procede.
+def normalizar(texto):
+    """Minúsculas y sin acentos, para comparar nombres y clubes.
+
+    Mismo criterio que usa el buscador del frontend, para que lo que allí se
+    considera "el mismo nombre" coincida con lo que aquí se unifica.
+    """
+    limpio = unicodedata.normalize("NFD", (texto or "").strip().lower())
+    return "".join(c for c in limpio if unicodedata.category(c) != "Mn")
+
+
+def clave_atleta(lado):
+    """Identidad de una persona a través de los dos eventos.
+
+    `event_registration_id` es único por evento, así que quien compita en Gi y
+    en No-Gi aparece con dos identificadores distintos y no hay nada en los
+    datos que los relacione. Se unifica por nombre + club, asumiendo el riesgo
+    conocido: si AJP escribe el nombre distinto en cada inscripción saldrá
+    duplicado, y dos personas homónimas del mismo club se fusionarían.
+    """
+    return f"{normalizar(lado.get('name'))}|{normalizar(lado.get('club'))}"
+
+
+def parse_combate(crudo, mat, evento):
+    """Un combate del origen, con su tatami y el evento al que pertenece.
 
     En el tenant de AJP el combate no trae el nombre del tatami: se conoce
-    porque se pidió a /mat/{id}/matches.json.
+    porque se pidió a /mat/{id}/matches.json. Y como los dos eventos comparten
+    pabellón y pueden tener tatamis con el mismo nombre, la identidad del
+    tatami es el par evento + matId, nunca el nombre suelto.
     """
     plazas = [s for s in crudo.get("seats", []) if s.get("type") == "registration"]
     return {
-        "id": str(crudo["id"]),
-        "bracketId": str(crudo.get("bracket_id")) if crudo.get("bracket_id") else None,
+        "id": f"{evento['id']}-{crudo['id']}",
+        "eventId": str(evento["id"]),
+        "eventLabel": evento.get("label"),
+        "bracketId": (f"{evento['id']}-{crudo['bracket_id']}"
+                      if crudo.get("bracket_id") else None),
         "matId": mat["id"],
+        "matKey": f"{evento['id']}:{mat['id']}",
         "mat": mat.get("name"),
         "round": crudo.get("name"),
         "roundNr": crudo.get("round"),
@@ -70,6 +99,7 @@ def parse_combate(crudo, mat):
         "state": crudo.get("state"),
         "wonBy": crudo.get("wonBy"),
         "sides": [{
+            "athleteId": clave_atleta(s),
             "registrationId": str(s.get("event_registration_id")),
             "name": s.get("name"),
             "club": s.get("club") or None,
@@ -98,8 +128,9 @@ def derivar_medallas(combates):
     "Final"; en ese caso, si solo tiene un combate, ese hace de final.
 
     Un atleta puede competir en varias categorías (Gi y No-Gi, adultos y master)
-    y ganar una medalla en cada una, así que devuelve una lista por atleta:
-    {registrationId: [{"bracketId", "category", "medal"}, ...]}.
+    y ganar una medalla en cada una, así que devuelve una lista por atleta,
+    indexada por su identidad unificada entre eventos:
+    {athleteId: [{"bracketId", "category", "medal", "eventId"}, ...]}.
     """
     por_bracket = OrderedDict()
     for c in combates:
@@ -107,14 +138,14 @@ def derivar_medallas(combates):
 
     medallas = {}
 
-    def medalla_en(rid, bracket_id):
-        for entrada in medallas.get(rid, []):
+    def medalla_en(atleta_id, bracket_id):
+        for entrada in medallas.get(atleta_id, []):
             if entrada["bracketId"] == bracket_id:
                 return entrada["medal"]
         return None
 
     def anotar(lado, combate, medalla):
-        entradas = medallas.setdefault(lado["registrationId"], [])
+        entradas = medallas.setdefault(lado["athleteId"], [])
         # Un atleta no puede tener dos medallas en el mismo bracket: gana la mejor
         # (quien pierde la final ya es plata aunque antes ganara otro combate).
         for entrada in entradas:
@@ -123,6 +154,7 @@ def derivar_medallas(combates):
                     entrada["medal"] = medalla
                 return
         entradas.append({"bracketId": combate["bracketId"],
+                         "eventId": combate["eventId"],
                          "category": combate["category"].get("raw"),
                          "medal": medalla})
 
@@ -149,7 +181,7 @@ def derivar_medallas(combates):
             ganadores = [l for l in bronce["sides"] if l["isWinner"]]
             perdedores = [l for l in bronce["sides"] if not l["isWinner"]]
             for candidato in ganadores + perdedores:
-                if medalla_en(candidato["registrationId"], bronce["bracketId"]) is None:
+                if medalla_en(candidato["athleteId"], bronce["bracketId"]) is None:
                     anotar(candidato, bronce, "bronze")
                     break
 
@@ -164,7 +196,11 @@ def mejor_medalla(entradas):
 
 
 def construir_atletas(combates):
-    """Un atleta por plaza de inscripción, con sus combates y su medalla.
+    """Un atleta por persona, aunque compita en los dos eventos.
+
+    Se agrupa por la identidad unificada (nombre + club), no por inscripción:
+    quien luche en Gi y en No-Gi tiene dos `event_registration_id` distintos y
+    debe salir en una sola ficha, con todos sus combates juntos.
 
     Los combates van referenciados por id en vez de anidados: cada combate tiene
     dos atletas y anidarlo lo duplicaría en el JSON que descargan los móviles.
@@ -174,24 +210,31 @@ def construir_atletas(combates):
 
     for c in combates:
         for lado in c["sides"]:
-            rid = lado["registrationId"]
-            atleta = atletas.get(rid)
+            clave = lado["athleteId"]
+            atleta = atletas.get(clave)
             if atleta is None:
-                atleta = atletas[rid] = {
-                    "registrationId": rid,
+                atleta = atletas[clave] = {
+                    "id": clave,
+                    "registrationIds": [],
+                    "events": [],
                     "name": lado["name"],
                     "club": lado["club"],
                     "country": lado["country"],
                     "image": lado["image"],
                     "categories": [],
                     "matchIds": [],
-                    "medals": medallas.get(rid, []),
-                    "bestMedal": mejor_medalla(medallas.get(rid, [])),
+                    "medals": medallas.get(clave, []),
+                    "bestMedal": mejor_medalla(medallas.get(clave, [])),
                 }
             atleta["matchIds"].append(c["id"])
-            categoria = c["category"].get("raw")
-            if categoria and categoria not in atleta["categories"]:
-                atleta["categories"].append(categoria)
+            for lista, valor in (("registrationIds", lado["registrationId"]),
+                                 ("events", c["eventId"]),
+                                 ("categories", c["category"].get("raw"))):
+                if valor and valor not in atleta[lista]:
+                    atleta[lista].append(valor)
+            # La foto puede faltar en una inscripción y estar en la otra.
+            if not atleta["image"] and lado["image"]:
+                atleta["image"] = lado["image"]
 
     return list(atletas.values())
 
@@ -204,38 +247,61 @@ def clave_orden(combate):
             combate.get("matchNr") or 0)
 
 
-def construir_estado(*, evento, dias, mats, combates_por_mat, fetched_at,
+def construir_estado(*, eventos, datos_por_evento, fetched_at,
                      streams=None, stale=False, stale_since=None):
-    """Arma el data.json completo a partir de las respuestas crudas.
+    """Arma el data.json combinando todos los eventos configurados.
 
-    `combates_por_mat` es {matId: [combate crudo, ...]}. Los combates se
-    deduplican por id: uno movido de tatami a mitad de lectura puede aparecer
-    en dos listas.
+    `eventos` es la lista de {id, label, name} y `datos_por_evento` un
+    {event_id: (dias, mats, combates_por_mat)} con las respuestas crudas. Un
+    evento sin datos (todavía sin schedule publicado) simplemente no aporta
+    nada, sin romper el resto.
+
+    Los combates se deduplican por id: uno movido de tatami a mitad de lectura
+    aparece en dos listas. El id lleva el evento delante, así que dos eventos
+    no pueden pisarse aunque Smoothcomp repita numeración.
     """
-    mats_por_id = {m["id"]: m for m in mats}
-
+    resumen_eventos = []
+    todos_mats = []
     vistos = {}
-    for mat_id, crudos in combates_por_mat.items():
-        mat = mats_por_id.get(mat_id, {"id": mat_id, "name": None})
-        for crudo in crudos:
-            combate = parse_combate(crudo, mat)
-            vistos.setdefault(combate["id"], combate)
+
+    for evento in eventos:
+        event_id = str(evento["id"])
+        dias, mats, combates_por_mat = datos_por_evento.get(event_id, ([], [], {}))
+
+        resumen_eventos.append({
+            "id": event_id,
+            "label": evento.get("label"),
+            "name": evento.get("name"),
+            "days": [{"id": d.get("id"), "name": d.get("name"), "date": d.get("date")}
+                     for d in dias],
+        })
+
+        for m in mats:
+            todos_mats.append({
+                "key": f"{event_id}:{m.get('id')}",
+                "id": m.get("id"),
+                "name": m.get("name"),
+                "eventId": event_id,
+                "eventLabel": evento.get("label"),
+                "estimatedStart": m.get("estimated_start"),
+                "estimatedEnd": m.get("estimated_end"),
+            })
+
+        mats_por_id = {m["id"]: m for m in mats}
+        for mat_id, crudos in combates_por_mat.items():
+            mat = mats_por_id.get(mat_id, {"id": mat_id, "name": None})
+            for crudo in crudos:
+                combate = parse_combate(crudo, mat, evento)
+                vistos.setdefault(combate["id"], combate)
 
     combates = sorted(vistos.values(), key=clave_orden)
 
     return {
-        "event": {
-            "id": str(evento.get("id")),
-            "name": evento.get("name"),
-            "days": [{"id": d.get("id"), "name": d.get("name"), "date": d.get("date")}
-                     for d in dias],
-        },
+        "events": resumen_eventos,
         "fetchedAt": fetched_at,
         "stale": stale,
         "staleSince": stale_since,
-        "mats": [{"id": m.get("id"), "name": m.get("name"),
-                  "estimatedStart": m.get("estimated_start"),
-                  "estimatedEnd": m.get("estimated_end")} for m in mats],
+        "mats": todos_mats,
         "streams": streams or [],
         "matches": combates,
         "athletes": construir_atletas(combates),

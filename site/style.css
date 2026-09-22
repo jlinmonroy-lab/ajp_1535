@@ -186,6 +186,15 @@ main { padding: 0 16px; }
   white-space: nowrap;
 }
 .etiqueta.vivo { background: var(--vivo); border-color: var(--vivo); color: #fff; }
+/* Distingue de un vistazo el combate de Gi del de No-Gi: los dos eventos
+   ocurren el mismo fin de semana en el mismo pabellón. */
+.etiqueta.evento {
+  background: transparent;
+  border-color: var(--acento);
+  color: var(--acento);
+  font-size: .68rem;
+  margin-right: .25rem;
+}
 .etiqueta.ganado { background: var(--ok); border-color: var(--ok); color: #05210f; }
 .etiqueta.perdido { background: transparent; border-color: var(--vivo); color: var(--vivo); }
 

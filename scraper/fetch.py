@@ -58,9 +58,9 @@ def _como_lista(valor):
     return valor if isinstance(valor, list) else [valor]
 
 
-def leer_schedule(cfg, log=print):
-    """Lee días, tatamis y combates. Devuelve (dias, mats, combates_por_mat)."""
-    base = f"{cfg['baseUrl']}/{cfg['lang']}/event/{cfg['eventId']}/schedule/new"
+def leer_schedule(cfg, event_id, log=print):
+    """Lee un evento. Devuelve (dias, mats, combates_por_mat)."""
+    base = f"{cfg['baseUrl']}/{cfg['lang']}/event/{event_id}/schedule/new"
     pausa = cfg.get("requestPauseSeconds", 2.0)
     timeout = cfg.get("timeoutSeconds", 30)
 
