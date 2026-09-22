@@ -31,8 +31,23 @@ def log(mensaje):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {mensaje}", flush=True)
 
 
-def cargar_config(args):
-    cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
+def cargar_config(args, anterior=None):
+    """Lee la configuración. Si no se puede, sigue con la que ya había.
+
+    Se relee en cada ciclo para poder ajustar cosas durante el evento —el
+    intervalo, los enlaces de los streams— sin parar el scraper. Como el fichero
+    puede leerse justo mientras alguien lo guarda, un JSON a medias no debe
+    tumbar el bucle: se avisa y se sigue con el anterior.
+    """
+    ruta = Path(args.config) if args.config else CONFIG
+    try:
+        cfg = json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        if anterior is None:
+            raise
+        log(f"  no se pudo releer {ruta.name} ({type(e).__name__}); sigo con la anterior")
+        return anterior
+
     if args.event and args.event != cfg.get("eventId"):
         # Al apuntar a otro evento, el nombre configurado ya no vale: mejor sin
         # nombre que con el del evento equivocado.
@@ -69,14 +84,14 @@ def main():
     p = argparse.ArgumentParser(description="Scraper del schedule de AJP Tour")
     p.add_argument("--once", action="store_true", help="un solo ciclo y salir")
     p.add_argument("--event", help="id de evento, sobreescribe config.json")
+    p.add_argument("--config", help="ruta de configuración alternativa")
     args = p.parse_args()
 
     cfg = cargar_config(args)
     destino = RAIZ / cfg.get("output", "site/data.json")
-    intervalo = cfg.get("refreshSeconds", 75)
-    limite_fallos = cfg.get("staleAfterFailures", 3)
 
-    log(f"Evento {cfg['eventId']} · refresco {intervalo}s · salida {destino}")
+    log(f"Evento {cfg['eventId']} · refresco {cfg.get('refreshSeconds', 75)}s "
+        f"· salida {destino}")
 
     ultimo_bueno = None
     fallos = 0
@@ -84,6 +99,13 @@ def main():
 
     while True:
         inicio = time.time()
+        # Releer antes de cada ciclo: permite ajustar el ritmo o añadir streams
+        # con el scraper en marcha.
+        cfg = cargar_config(args, anterior=cfg)
+        destino = RAIZ / cfg.get("output", "site/data.json")
+        intervalo = cfg.get("refreshSeconds", 75)
+        limite_fallos = cfg.get("staleAfterFailures", 3)
+
         try:
             estado = un_ciclo(cfg, ultimo_bueno)
             ultimo_bueno, fallos, primer_fallo = estado, 0, None

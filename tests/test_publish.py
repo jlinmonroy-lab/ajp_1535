@@ -123,5 +123,45 @@ class TestDecisionDePublicar(unittest.TestCase):
         self.assertFalse(procede)
 
 
+
+class TestConfigRecargable(unittest.TestCase):
+    """La configuración se relee en cada ciclo, y eso puede pillarla a medias.
+
+    Durante el evento se podrá ajustar el ritmo o añadir los enlaces de streams
+    sin parar el scraper; leer justo mientras alguien guarda el fichero no debe
+    tumbar el bucle.
+    """
+
+    def setUp(self):
+        from argparse import Namespace
+        self.tmp = tempfile.TemporaryDirectory()
+        self.ruta = Path(self.tmp.name) / "config.json"
+        self.args = Namespace(config=str(self.ruta), event=None)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_lee_la_configuracion(self):
+        from scraper.main import cargar_config
+        self.ruta.write_text(json.dumps({"eventId": "1", "refreshSeconds": 75}),
+                             encoding="utf-8")
+        cfg = cargar_config(self.args)
+        self.assertEqual(cfg["refreshSeconds"], 75)
+
+    def test_json_a_medias_conserva_la_anterior(self):
+        from scraper.main import cargar_config
+        buena = {"eventId": "1", "refreshSeconds": 75}
+        self.ruta.write_text(json.dumps(buena), encoding="utf-8")
+        cfg = cargar_config(self.args)
+
+        self.ruta.write_text('{"eventId": "1", "refresh', encoding="utf-8")  # truncado
+        self.assertEqual(cargar_config(self.args, anterior=cfg), buena)
+
+    def test_sin_anterior_si_falla_propaga(self):
+        from scraper.main import cargar_config
+        self.ruta.write_text("{roto", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            cargar_config(self.args)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
