@@ -59,6 +59,20 @@ corre el scraper. Cada persona puede, además, seguir a quien quiera en su propi
 El panel escucha únicamente en `127.0.0.1`, para que nadie de la wifi del pabellón pueda cambiar la
 lista de todos.
 
+## Ver cómo se comportará durante el torneo
+
+```sh
+python research/simular_evento.py
+```
+
+Reproduce las dos jornadas en unos minutos sobre una **copia aislada** en `tmp-demo/`, servida en
+<http://127.0.0.1:8766>: los combates arrancan y terminan, los horarios se retrasan, los cuadros
+avanzan y caen las medallas. Los del grupo tienen guion (oro, plata y bronce) para que se vea el
+recorrido completo.
+
+No toca `site/data.json` ni publica nada, y la copia lleva un banner rojo de SIMULACIÓN. Los
+resultados son inventados.
+
 ## Configuración
 
 Todo en `config.json`: `eventId`, ritmo de refresco, pausa entre peticiones, umbral de `stale`,

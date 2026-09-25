@@ -27,3 +27,6 @@ fixtures/network_log_1535_session.json
 
 # Artefacto generado por el scraper (en gh-pages sí, en main no)
 site/data.json
+
+# Simulación del torneo (copia aislada, nunca se publica)
+tmp-demo/
