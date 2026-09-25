@@ -207,5 +207,45 @@ class TestPlazasPorDeterminar(unittest.TestCase):
         self.assertEqual(estado["athletes"], [])
 
 
+
+class TestGrupoCompartido(unittest.TestCase):
+    """La lista que ve todo el mundo al abrir la web.
+
+    localStorage vive en cada navegador, así que la única forma de que una
+    selección llegue a todos los móviles es publicarla en el data.json.
+    """
+
+    def setUp(self):
+        a = combate(1, "Ana Pérez", "Gracie Madrid", 111, "Otro", "Club B", 222)
+        self.datos = {"1535": ([], [{"id": 1, "name": "Mat 1"}], {1: [a]})}
+
+    def _estado(self, grupo):
+        return construir_estado(eventos=EVENTOS, datos_por_evento=self.datos,
+                                fetched_at="2026-09-26T09:00:00Z", grupo=grupo)
+
+    def test_marca_a_los_del_grupo(self):
+        estado = self._estado({"nombre": "Equipo",
+                               "atletas": [{"id": "ana perez|gracie madrid",
+                                            "name": "Ana Pérez"}]})
+        ana = next(a for a in estado["athletes"] if a["name"] == "Ana Pérez")
+        otro = next(a for a in estado["athletes"] if a["name"] == "Otro")
+        self.assertTrue(ana["inGroup"])
+        self.assertFalse(otro["inGroup"])
+        self.assertEqual(estado["group"]["name"], "Equipo")
+
+    def test_sin_grupo_nadie_esta_marcado(self):
+        estado = self._estado(None)
+        self.assertFalse(any(a["inGroup"] for a in estado["athletes"]))
+        self.assertEqual(estado["group"]["athletes"], [])
+
+    def test_un_atleta_que_no_compite_no_rompe_nada(self):
+        # Alguien que al final no se inscribió, o un id mal escrito a mano.
+        estado = self._estado({"nombre": "Equipo",
+                               "atletas": [{"id": "fulano|club fantasma",
+                                            "name": "Fulano"}]})
+        self.assertFalse(any(a["inGroup"] for a in estado["athletes"]))
+        # La entrada se conserva: la lista no debe vaciarse sola.
+        self.assertEqual(len(estado["group"]["athletes"]), 1)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

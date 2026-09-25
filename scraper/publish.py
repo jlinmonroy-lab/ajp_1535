@@ -28,11 +28,16 @@ ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
 VOLATILES = ("fetchedAt", "stale", "staleSince", "_nonce")
 
 
-def escribir_json(destino: Path, estado: dict) -> int:
+def escribir_json(destino: Path, estado: dict, intentos: int = 4) -> int:
     """Escritura atómica: el frontend nunca debe leer un JSON a medias.
 
     Se escribe a un temporal en la misma carpeta y se reemplaza de golpe, que en
     el mismo sistema de ficheros es atómico.
+
+    En Windows, `os.replace` falla si otro proceso tiene el destino abierto en
+    ese instante, y aquí pasa de verdad: el scraper relee `config.json` en cada
+    ciclo mientras el panel puede estar guardándolo. Es una ventana de
+    milisegundos, así que basta con reintentar en lugar de abortar.
     """
     destino.parent.mkdir(parents=True, exist_ok=True)
     texto = json.dumps(estado, ensure_ascii=False, separators=(",", ":"))
@@ -41,7 +46,14 @@ def escribir_json(destino: Path, estado: dict) -> int:
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(texto)
-        os.replace(temporal, destino)
+        for intento in range(intentos):
+            try:
+                os.replace(temporal, destino)
+                break
+            except OSError:
+                if intento == intentos - 1:
+                    raise
+                time.sleep(0.15 * (intento + 1))
     except BaseException:
         Path(temporal).unlink(missing_ok=True)
         raise

@@ -26,5 +26,9 @@
     "branch": "gh-pages",
     "message": "datos del evento",
     "maxMinutesSinPublish": 5
+  },
+  "grupo": {
+    "nombre": "Nuestro equipo",
+    "atletas": []
   }
 }

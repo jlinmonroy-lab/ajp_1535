@@ -39,6 +39,26 @@ python -m unittest discover -s tests
 python research/smoke_site.py            # recorre el frontend y captura pantallas
 ```
 
+## Durante el torneo
+
+Dos procesos en el portátil:
+
+```sh
+python -m scraper.main      # lee AJP y publica cada 75s
+python -m scraper.panel     # panel local, solo en este equipo
+```
+
+El panel sirve la web en <http://127.0.0.1:8765> y **ahí** aparece el botón
+**«Seguir para todos»** en cada atleta. Al pulsarlo se añade a la lista del grupo, que viaja en el
+`data.json` y la ve todo el mundo sin tener que seguir a nadie. Tarda hasta ~2 minutos en llegar a
+los móviles (ciclo del scraper + publicación de Pages + refresco del navegador).
+
+En la web pública ese botón no existe: escribir la lista solo puede hacerse desde el equipo donde
+corre el scraper. Cada persona puede, además, seguir a quien quiera en su propio móvil.
+
+El panel escucha únicamente en `127.0.0.1`, para que nadie de la wifi del pabellón pueda cambiar la
+lista de todos.
+
 ## Configuración
 
 Todo en `config.json`: `eventId`, ritmo de refresco, pausa entre peticiones, umbral de `stale`,

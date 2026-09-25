@@ -9,6 +9,11 @@ const REFRESCO_MS = 30000;
 const CLAVE_SEGUIDOS = 'ajp:seguidos';
 const CLAVE_DIA = 'ajp:dia';
 const CANAL_AJP = 'https://youtube.com/channel/UC7m2_Wx33tfrMYYVMVqIOzg/videos';
+
+// El botón "Seguir para todos" escribe en la configuración del scraper, y eso
+// solo puede hacerse desde el portátil donde corre. En la web pública ni se
+// enseña: sería una opción que nadie podría usar.
+const ESdPANEL = ['localhost', '127.0.0.1'].includes(location.hostname);
 const MEDALLAS = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
 let datos = null;
@@ -194,6 +199,8 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
   const sigue = seguidos.has(atleta.id);
   const medalla = atleta.bestMedal
     ? `<span class="medalla" data-m="${atleta.bestMedal}">${MEDALLAS[atleta.bestMedal]}</span>` : '';
+  // Explica por qué está en la lista alguien a quien no has seguido tú.
+  const delGrupo = atleta.inGroup ? '<span class="etiqueta grupo">grupo</span> ' : '';
   const foto = atleta.image
     ? `<img class="foto" src="${escapar(atleta.image)}" alt="" loading="lazy">`
     : '<span class="foto"></span>';
@@ -212,28 +219,30 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
         ${foto}
         <span class="crece" data-atleta="${escapar(atleta.id)}">
           <span class="nombre">${escapar(atleta.name)} ${medalla}</span><br>
-          <span class="sub">${escapar(atleta.club || '—')} · ${escapar(atleta.categories[0] || '')}</span>
+          <span class="sub">${delGrupo}${escapar(atleta.club || '—')} · ${escapar(atleta.categories[0] || '')}</span>
         </span>
         <button class="seguir ${sigue ? 'activo' : ''}"
                 data-seguir="${escapar(atleta.id)}">${sigue ? 'Siguiendo' : 'Seguir'}</button>
       </div>
+      ${ESdPANEL ? `<button class="todos ${atleta.inGroup ? 'activo' : ''}"
+            data-todos="${escapar(atleta.id)}" data-nombre="${escapar(atleta.name)}">
+            ${atleta.inGroup ? '✓ Lo ve todo el grupo' : 'Seguir para todos'}</button>` : ''}
       ${combates}
     </article>`;
 }
 
+function esMio(atleta) {
+  return atleta.inGroup || seguidos.has(atleta.id);
+}
+
 function pintarSeguidos() {
   const caja = $('#vista-seguidos');
-  $('#contador-seguidos').textContent = seguidos.size || '';
+  const mios = datos.athletes.filter(esMio);
+  $('#contador-seguidos').textContent = mios.length || '';
 
-  if (!seguidos.size) {
-    caja.innerHTML = `<p class="vacio">Todavía no sigues a nadie.<br>
-      Usa <strong>Buscar</strong> para añadir atletas y sus combates aparecerán aquí.</p>`;
-    return;
-  }
-
-  const mios = datos.athletes.filter((a) => seguidos.has(a.id));
   if (!mios.length) {
-    caja.innerHTML = `<p class="vacio">Tus atletas no aparecen en estos eventos.</p>`;
+    caja.innerHTML = `<p class="vacio">Todavía no hay atletas en la lista.<br>
+      Usa <strong>Buscar</strong> para añadir a quien quieras seguir.</p>`;
     return;
   }
 
@@ -352,6 +361,43 @@ function pintar() {
   else pintarTatamis();
 }
 
+/* ---------- Lista del grupo (solo desde el panel) ---------- */
+async function marcarParaTodos(boton) {
+  const id = boton.dataset.todos;
+  const atleta = datos.athletes.find((a) => a.id === id);
+  const accion = atleta?.inGroup ? 'quitar' : 'añadir';
+
+  boton.disabled = true;
+  boton.textContent = 'Guardando…';
+  try {
+    const resp = await fetch('/api/grupo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, name: boton.dataset.nombre, accion }),
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    // Se refleja en el acto, aunque el data.json publicado tarde un ciclo en
+    // traerlo: si no, parecería que el botón no ha hecho nada.
+    if (atleta) atleta.inGroup = accion === 'añadir';
+    pintar();
+    avisar(accion === 'añadir'
+      ? 'Añadido. En un par de minutos lo verá todo el grupo.'
+      : 'Quitado de la lista del grupo.');
+  } catch (e) {
+    boton.disabled = false;
+    avisar(`No se pudo guardar (${e.message}). ¿Está el panel arrancado?`, true);
+  }
+}
+
+function avisar(texto, error = false) {
+  const caja = $('#aviso');
+  caja.textContent = texto;
+  caja.className = `aviso ${error ? 'error' : ''}`;
+  clearTimeout(avisar._t);
+  avisar._t = setTimeout(() => { caja.className = 'aviso oculta'; }, 5000);
+}
+
 /* ---------- Detalle de atleta ---------- */
 function abrirDetalle(athleteId) {
   const atleta = datos.athletes.find((a) => a.id === athleteId);
@@ -405,6 +451,9 @@ document.addEventListener('click', (ev) => {
     pintar();
     return;
   }
+  const paraTodos = ev.target.closest('[data-todos]');
+  if (paraTodos) return marcarParaTodos(paraTodos);
+
   const seguir = ev.target.closest('[data-seguir]');
   if (seguir) {
     const id = seguir.dataset.seguir;

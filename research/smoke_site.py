@@ -71,7 +71,9 @@ def main():
         captura("busqueda")
 
         print("Siguiendo al primero")
-        botones = page.query_selector_all("[data-seguir]")
+        # Acotado a los resultados: "Mis atletas" también tiene botones de
+        # seguir, y los suyos están ocultos mientras se mira la búsqueda.
+        botones = page.query_selector_all("#resultados [data-seguir]")
         if not botones:
             errores.append("la búsqueda no devolvió ningún atleta")
         else:
@@ -82,7 +84,7 @@ def main():
             captura("mis-atletas")
 
         print("Abriendo la ficha del atleta")
-        ficha = page.query_selector("[data-atleta]")
+        ficha = page.query_selector("#vista-seguidos [data-atleta]")
         if ficha:
             ficha.click()
             page.wait_for_timeout(500)

@@ -82,6 +82,7 @@ def un_ciclo(cfg, estado_previo):
     estado = construir_estado(
         eventos=eventos, datos_por_evento=datos, fetched_at=ahora_iso(),
         streams=cfg.get("streams") or [],
+        grupo=cfg.get("grupo"),
     )
     en_curso = sum(1 for m in estado["matches"] if m["state"] == "running")
     por_evento = ", ".join(

@@ -261,7 +261,7 @@ def clave_orden(combate):
 
 
 def construir_estado(*, eventos, datos_por_evento, fetched_at,
-                     streams=None, stale=False, stale_since=None):
+                     streams=None, grupo=None, stale=False, stale_since=None):
     """Arma el data.json combinando todos los eventos configurados.
 
     `eventos` es la lista de {id, label, name} y `datos_por_evento` un
@@ -310,14 +310,28 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
                 vistos.setdefault(combate["id"], combate)
 
     combates = sorted(vistos.values(), key=clave_orden)
+    atletas = construir_atletas(combates)
+
+    # La lista que ve todo el grupo sin tener que seguir a nadie. Se marca aquí
+    # para que el frontend no tenga que cruzar listas en cada repintado.
+    grupo = grupo or {}
+    del_grupo = {a.get("id") for a in (grupo.get("atletas") or []) if a.get("id")}
+    for atleta in atletas:
+        atleta["inGroup"] = atleta["id"] in del_grupo
 
     return {
         "events": resumen_eventos,
+        "group": {
+            "name": grupo.get("nombre") or None,
+            # Se conservan tal cual, incluidos los que no compiten (alguien que
+            # al final no se inscribió): así la lista no se pierde sola.
+            "athletes": grupo.get("atletas") or [],
+        },
         "fetchedAt": fetched_at,
         "stale": stale,
         "staleSince": stale_since,
         "mats": todos_mats,
         "streams": streams or [],
         "matches": combates,
-        "athletes": construir_atletas(combates),
+        "athletes": atletas,
     }

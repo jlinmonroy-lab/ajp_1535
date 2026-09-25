@@ -121,6 +121,36 @@ body {
 }
 .dia.activo { background: var(--superficie-2); color: var(--texto); border-color: var(--acento); }
 
+/* Botón del panel local: decide a quién ve todo el grupo, así que se
+   distingue del "seguir" personal. */
+.todos {
+  display: block;
+  width: 100%;
+  margin-top: .6rem;
+  padding: .5rem;
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--texto-tenue);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.todos.activo { border-style: solid; border-color: var(--ok); color: var(--ok); }
+.todos:disabled { opacity: .6; cursor: default; }
+
+.etiqueta.grupo { border-color: var(--ok); color: var(--ok); margin-right: .3rem; }
+
+.aviso {
+  margin: 0 16px .6rem;
+  padding: .6rem .8rem;
+  border-radius: var(--radio);
+  background: var(--superficie-2);
+  border: 1px solid var(--ok);
+  font-size: .85rem;
+}
+.aviso.error { border-color: var(--vivo); color: var(--vivo); }
+
 main { padding: 0 16px; }
 .vista.oculta, .oculta { display: none; }
 
