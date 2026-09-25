@@ -29,6 +29,19 @@
   },
   "grupo": {
     "nombre": "Nuestro equipo",
-    "atletas": []
+    "atletas": [
+      {
+        "id": "alan bernal huertas|mathias ribeiro team",
+        "name": "Alan Bernal Huertas"
+      },
+      {
+        "id": "alex patino|mathias ribeiro team",
+        "name": "Alex Patino"
+      },
+      {
+        "id": "victor perez|mathias ribeiro team",
+        "name": "Victor Perez"
+      }
+    ]
   }
 }

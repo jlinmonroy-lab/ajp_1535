@@ -7,20 +7,24 @@
 
 const REFRESCO_MS = 30000;
 const CLAVE_SEGUIDOS = 'ajp:seguidos';
-const CLAVE_DIA = 'ajp:dia';
 const CANAL_AJP = 'https://youtube.com/channel/UC7m2_Wx33tfrMYYVMVqIOzg/videos';
 
 // El botón "Seguir para todos" escribe en la configuración del scraper, y eso
 // solo puede hacerse desde el portátil donde corre. En la web pública ni se
 // enseña: sería una opción que nadie podría usar.
 const ESdPANEL = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+// Lo pulsado en el panel tarda un ciclo en volver dentro del data.json. Hasta
+// que vuelva se recuerda aquí; si no, el refresco de cada 30s lo desmarcaría y
+// parecería que el botón no funciona.
+const pendientesGrupo = new Map();   // athleteId -> { alta, momento }
+const ESPERA_CONFIRMACION_MS = 3 * 60 * 1000;
 const MEDALLAS = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
 let datos = null;
 let etag = null;
 let porId = new Map();      // id de combate -> combate
 let vista = 'seguidos';
-let dia = null;             // jornada seleccionada ('2026-09-26')
 
 /* ---------- Almacenamiento local ----------
    Puede fallar (modo privado, cookies bloqueadas) y la app debe seguir
@@ -60,42 +64,12 @@ function hora(iso) {
 }
 
 /* ---------- Jornadas ----------
-   El torneo son dos días con los mismos horarios, así que hay que poder elegir
-   cuál se mira; por defecto, el de hoy. */
-function diasDelTorneo() {
-  return [...new Set((datos?.matches || []).map((m) => m.day).filter(Boolean))].sort();
-}
-
-function etiquetaDia(iso) {
+   Hubo un selector Sábado/Domingo, pero no aportaba: las fichas enseñan todos
+   los combates del atleta de todas formas, así que las dos jornadas se veían
+   casi iguales. Ahora se muestra todo junto y cada combate dice su día. */
+function diaCorto(iso) {
   const d = new Date(`${iso}T12:00:00`);
-  return isNaN(d) ? iso
-    : d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
-}
-
-function diaPorDefecto() {
-  const dias = diasDelTorneo();
-  if (!dias.length) return null;
-  let guardado = null;
-  try { guardado = localStorage.getItem(CLAVE_DIA); } catch { /* sin persistencia */ }
-  if (guardado && dias.includes(guardado)) return guardado;
-  const hoy = new Date().toISOString().slice(0, 10);
-  return dias.includes(hoy) ? hoy : dias[0];
-}
-
-function pintarDias() {
-  const caja = $('#dias');
-  const dias = diasDelTorneo();
-  // Con una sola jornada el selector sobra y solo quita sitio.
-  caja.innerHTML = dias.length > 1
-    ? dias.map((d) => `<button class="dia ${d === dia ? 'activo' : ''}" data-dia="${d}">
-        ${escapar(etiquetaDia(d))}</button>`).join('')
-    : '';
-}
-
-// Los combates de la jornada elegida. Las fichas de atleta enseñan todos, para
-// no esconder que alguien compite también el otro día.
-function deLaJornada(combates) {
-  return dia ? combates.filter((c) => c.day === dia) : combates;
+  return isNaN(d) ? '' : d.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
 }
 
 function hace(iso) {
@@ -117,8 +91,7 @@ async function cargar() {
     etag = resp.headers.get('ETag');
     datos = await resp.json();
     porId = new Map(datos.matches.map((m) => [m.id, m]));
-    if (!dia || !diasDelTorneo().includes(dia)) dia = diaPorDefecto();
-    pintarDias();
+    revisarPendientes();
 
     const eventos = datos.events || [];
     if (eventos.length) {
@@ -136,12 +109,25 @@ async function cargar() {
   }
 }
 
+// Tres ciclos del scraper. Pasado eso, o se ha parado o ha dejado de publicar.
+const LIMITE_SIN_REFRESCO_MS = 4 * 60 * 1000;
+
 function pintarEstado() {
   if (!datos) return;
   const estado = $('#estado');
   const total = `${datos.matches.length} combates · ${datos.athletes.length} atletas`;
+  const antiguedad = Date.now() - new Date(datos.fetchedAt);
+
   if (datos.stale) {
+    // El scraper vive pero el origen le falla: él mismo lo marcó.
     estado.textContent = `⚠ Datos sin actualizar desde ${hora(datos.staleSince)} · ${total}`;
+    estado.classList.add('vieja');
+  } else if (antiguedad > LIMITE_SIN_REFRESCO_MS) {
+    // Nadie está generando datos. Es distinto de `stale`, que lo pone el propio
+    // scraper: aquí puede que ni esté corriendo, y callarse haría creer que todo
+    // va bien mientras la web enseña una foto vieja.
+    estado.textContent = `⚠ Sin actualizarse desde ${hace(datos.fetchedAt)}`
+      + (ESdPANEL ? ' — ¿está corriendo el scraper?' : '') + ` · ${total}`;
     estado.classList.add('vieja');
   } else {
     estado.textContent = `Actualizado ${hace(datos.fetchedAt)} · ${total}`;
@@ -181,14 +167,14 @@ function filaCombate(combate, athleteId) {
   const rival = rivalDe(combate, athleteId);
   const nombreRival = rival ? rival.name : 'Por determinar';
   const ronda = combate.round ? `${escapar(combate.round)} · ` : '';
-  const otroDia = combate.day && combate.day !== dia
-    ? `<span class="etiqueta">${escapar(etiquetaDia(combate.day).split(',')[0])}</span> ` : '';
+  const cuando = combate.day
+    ? `<span class="etiqueta">${escapar(diaCorto(combate.day))}</span> ` : '';
   return `
     <div class="combate">
       <span class="hora">${hora(combate.estimatedStart)}</span>
       <span class="detalle-combate">
         <span class="rival">vs ${escapar(nombreRival)}</span><br>
-        <span class="sub">${otroDia}${etiquetaEvento(combate)} ${ronda}${escapar(combate.mat || '')}</span>
+        <span class="sub">${cuando}${etiquetaEvento(combate)} ${ronda}${escapar(combate.mat || '')}</span>
       </span>
       ${etiquetaResultado(combate, athleteId)}
     </div>`;
@@ -200,7 +186,7 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
   const medalla = atleta.bestMedal
     ? `<span class="medalla" data-m="${atleta.bestMedal}">${MEDALLAS[atleta.bestMedal]}</span>` : '';
   // Explica por qué está en la lista alguien a quien no has seguido tú.
-  const delGrupo = atleta.inGroup ? '<span class="etiqueta grupo">grupo</span> ' : '';
+  const delGrupo = enGrupo(atleta) ? '<span class="etiqueta grupo">grupo</span> ' : '';
   const foto = atleta.image
     ? `<img class="foto" src="${escapar(atleta.image)}" alt="" loading="lazy">`
     : '<span class="foto"></span>';
@@ -224,15 +210,35 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
         <button class="seguir ${sigue ? 'activo' : ''}"
                 data-seguir="${escapar(atleta.id)}">${sigue ? 'Siguiendo' : 'Seguir'}</button>
       </div>
-      ${ESdPANEL ? `<button class="todos ${atleta.inGroup ? 'activo' : ''}"
+      ${ESdPANEL ? `<button class="todos ${enGrupo(atleta) ? 'activo' : ''}"
             data-todos="${escapar(atleta.id)}" data-nombre="${escapar(atleta.name)}">
-            ${atleta.inGroup ? '✓ Lo ve todo el grupo' : 'Seguir para todos'}</button>` : ''}
+            ${enGrupo(atleta) ? '✓ Lo ve todo el grupo' : 'Seguir para todos'}</button>` : ''}
       ${combates}
     </article>`;
 }
 
+function enGrupo(atleta) {
+  const pendiente = pendientesGrupo.get(atleta.id);
+  return pendiente ? pendiente.alta : !!atleta.inGroup;
+}
+
 function esMio(atleta) {
-  return atleta.inGroup || seguidos.has(atleta.id);
+  return enGrupo(atleta) || seguidos.has(atleta.id);
+}
+
+// Deja de recordar lo pendiente en cuanto el data.json publicado lo confirma, y
+// avisa si pasa demasiado tiempo sin que llegue: marcar algo que nadie va a ver
+// sería peor que decir que no se ha publicado.
+function revisarPendientes() {
+  for (const [id, pendiente] of [...pendientesGrupo]) {
+    const atleta = datos.athletes.find((a) => a.id === id);
+    if (atleta && !!atleta.inGroup === pendiente.alta) {
+      pendientesGrupo.delete(id);
+    } else if (Date.now() - pendiente.momento > ESPERA_CONFIRMACION_MS) {
+      pendientesGrupo.delete(id);
+      avisar('El cambio no se ha publicado. ¿Está corriendo el scraper?', true);
+    }
+  }
 }
 
 function pintarSeguidos() {
@@ -249,7 +255,7 @@ function pintarSeguidos() {
   // Lo primero que quiere ver alguien en el pabellón: qué toca ahora y qué viene.
   const proximos = [];
   for (const a of mios) {
-    for (const c of deLaJornada(combatesDe(a))) {
+    for (const c of combatesDe(a)) {
       if (c.state !== 'finished') proximos.push({ atleta: a, combate: c });
     }
   }
@@ -260,12 +266,12 @@ function pintarSeguidos() {
     html += '<h2 class="seccion-titulo">Próximos combates</h2>';
     html += proximos.slice(0, 8).map(({ atleta, combate }) => `
       <article class="tarjeta">
-        <div class="tarjeta-cabecera">
+        <div class="tarjeta-cabecera proximo">
           <span class="hora">${hora(combate.estimatedStart)}</span>
           <span class="crece">
             <span class="nombre">${escapar(atleta.name)}</span><br>
             <span class="sub">vs ${escapar((rivalDe(combate, atleta.id) || {}).name || 'Por determinar')}
-              · ${etiquetaEvento(combate)} ${escapar(combate.mat || '')}</span>
+              · ${combate.day ? escapar(diaCorto(combate.day)) + ' ' : ''}${etiquetaEvento(combate)} ${escapar(combate.mat || '')}</span>
           </span>
           ${etiquetaResultado(combate, atleta.id)}
         </div>
@@ -307,7 +313,7 @@ function pintarTatamis() {
   for (const m of datos.mats) {
     if (!porMat.has(m.name)) porMat.set(m.name, []);
   }
-  for (const c of deLaJornada(datos.matches)) {
+  for (const c of datos.matches) {
     if (porMat.has(c.mat)) porMat.get(c.mat).push(c);
   }
 
@@ -335,7 +341,7 @@ function pintarTatamis() {
               <span class="hora">${hora(c.estimatedStart)}</span>
               <span class="detalle-combate">
                 <span class="rival">${escapar(c.sides.map((s) => s.name).join(' vs ') || 'Por determinar')}</span><br>
-                <span class="sub">${etiquetaEvento(c)} ${escapar(c.category.raw || '')}</span>
+                <span class="sub">${c.day ? escapar(diaCorto(c.day)) + ' ' : ''}${etiquetaEvento(c)} ${escapar(c.category.raw || '')}</span>
               </span>
               ${c.state === 'running' ? '<span class="etiqueta vivo">EN CURSO</span>' : ''}
             </div>`).join('')
@@ -365,7 +371,7 @@ function pintar() {
 async function marcarParaTodos(boton) {
   const id = boton.dataset.todos;
   const atleta = datos.athletes.find((a) => a.id === id);
-  const accion = atleta?.inGroup ? 'quitar' : 'añadir';
+  const accion = (atleta && enGrupo(atleta)) ? 'quitar' : 'añadir';
 
   boton.disabled = true;
   boton.textContent = 'Guardando…';
@@ -377,9 +383,9 @@ async function marcarParaTodos(boton) {
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
-    // Se refleja en el acto, aunque el data.json publicado tarde un ciclo en
-    // traerlo: si no, parecería que el botón no ha hecho nada.
-    if (atleta) atleta.inGroup = accion === 'añadir';
+    // Se recuerda hasta que el data.json publicado lo confirme, para que el
+    // refresco periódico no lo desmarque a los pocos segundos.
+    pendientesGrupo.set(id, { alta: accion === 'añadir', momento: Date.now() });
     pintar();
     avisar(accion === 'añadir'
       ? 'Añadido. En un par de minutos lo verá todo el grupo.'
@@ -443,14 +449,6 @@ document.querySelectorAll('.pestana').forEach((boton) => {
 // Delegación: las tarjetas se repintan enteras en cada ciclo, así que no sirve
 // enganchar escuchadores a cada botón.
 document.addEventListener('click', (ev) => {
-  const botonDia = ev.target.closest('[data-dia]');
-  if (botonDia) {
-    dia = botonDia.dataset.dia;
-    try { localStorage.setItem(CLAVE_DIA, dia); } catch { /* sin persistencia */ }
-    pintarDias();
-    pintar();
-    return;
-  }
   const paraTodos = ev.target.closest('[data-todos]');
   if (paraTodos) return marcarParaTodos(paraTodos);
 

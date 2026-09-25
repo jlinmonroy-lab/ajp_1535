@@ -28,7 +28,8 @@ ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
 VOLATILES = ("fetchedAt", "stale", "staleSince", "_nonce")
 
 
-def escribir_json(destino: Path, estado: dict, intentos: int = 4) -> int:
+def escribir_json(destino: Path, estado: dict, intentos: int = 4,
+                  compacto: bool = True) -> int:
     """Escritura atómica: el frontend nunca debe leer un JSON a medias.
 
     Se escribe a un temporal en la misma carpeta y se reemplaza de golpe, que en
@@ -40,7 +41,10 @@ def escribir_json(destino: Path, estado: dict, intentos: int = 4) -> int:
     milisegundos, así que basta con reintentar en lugar de abortar.
     """
     destino.parent.mkdir(parents=True, exist_ok=True)
-    texto = json.dumps(estado, ensure_ascii=False, separators=(",", ":"))
+    # Compacto para el data.json, que pesa cerca de un mega y viaja a los
+    # móviles; legible para config.json, que se edita a mano.
+    texto = (json.dumps(estado, ensure_ascii=False, separators=(",", ":")) if compacto
+             else json.dumps(estado, ensure_ascii=False, indent=2) + "\n")
 
     fd, temporal = tempfile.mkstemp(dir=str(destino.parent), suffix=".tmp")
     try:

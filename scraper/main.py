@@ -18,6 +18,7 @@ sys.path.insert(0, str(RAIZ))
 
 from scraper.fetch import ErrorOrigen, leer_schedule  # noqa: E402
 from scraper.parse import construir_estado  # noqa: E402
+from scraper.panel import arrancar_en_hilo  # noqa: E402
 from scraper.publish import escribir_json, publicar  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
@@ -108,10 +109,18 @@ def main():
     p.add_argument("--once", action="store_true", help="un solo ciclo y salir")
     p.add_argument("--event", help="id de evento, sobreescribe config.json")
     p.add_argument("--config", help="ruta de configuración alternativa")
+    p.add_argument("--sin-panel", action="store_true",
+                   help="no levantar el panel local del grupo")
+    p.add_argument("--puerto-panel", type=int, default=8765)
     args = p.parse_args()
 
     cfg = cargar_config(args)
     destino = RAIZ / cfg.get("output", "site/data.json")
+
+    # El panel viaja con el scraper: son las dos mitades de lo mismo y tenerlos
+    # en comandos separados ya provocó marcar atletas que no se publicaban.
+    if not args.sin_panel:
+        arrancar_en_hilo(args.puerto_panel, log=log)
 
     nombres = ", ".join(f"{e.get('label') or e['id']} ({e['id']})"
                         for e in cfg.get("events", []))

@@ -21,6 +21,7 @@ Uso:  python -m scraper.panel [--puerto 8765]
 import argparse
 import json
 import sys
+import threading
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -57,7 +58,7 @@ def actualizar_grupo(atleta_id, nombre, accion):
 
     cfg["grupo"] = {"nombre": grupo["nombre"], "atletas": atletas}
     # Atómico: el scraper puede estar releyendo el fichero justo ahora.
-    escribir_json(CONFIG, cfg)
+    escribir_json(CONFIG, cfg, compacto=False)
     return cfg["grupo"]
 
 
@@ -117,20 +118,46 @@ class Handler(SimpleHTTPRequestHandler):
         return self._json(200, grupo)
 
 
+def crear_servidor(puerto=8765):
+    """El servidor listo para servir. Lanza OSError si el puerto está ocupado."""
+    handler = partial(Handler, directory=str(SITIO))
+    # Solo 127.0.0.1: en la wifi del pabellón, abrirlo a la red dejaría que
+    # cualquiera cambiase lo que ve todo el grupo.
+    return ThreadingHTTPServer(("127.0.0.1", puerto), handler)
+
+
+def arrancar_en_hilo(puerto=8765, log=print):
+    """Levanta el panel junto al scraper. Devuelve el servidor, o None si falla.
+
+    Va en un hilo daemon para que un Ctrl+C cierre las dos cosas a la vez. Si el
+    puerto está ocupado no se aborta nada: lo que no puede faltar es el bucle que
+    alimenta la web.
+    """
+    try:
+        servidor = crear_servidor(puerto)
+    except OSError as e:
+        log(f"  panel no disponible en el puerto {puerto} ({e}); sigo sin él")
+        return None
+
+    threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    grupo = grupo_de(leer_config())
+    log(f"Panel en http://127.0.0.1:{puerto} · grupo «{grupo['nombre']}»: "
+        f"{len(grupo['atletas'])} atleta(s)")
+    return servidor
+
+
 def main():
     p = argparse.ArgumentParser(description="Panel local del grupo")
     p.add_argument("--puerto", type=int, default=8765)
     args = p.parse_args()
 
-    handler = partial(Handler, directory=str(SITIO))
-    # Solo 127.0.0.1: en la wifi del pabellón, abrirlo a la red dejaría que
-    # cualquiera cambiase lo que ve todo el grupo.
-    servidor = ThreadingHTTPServer(("127.0.0.1", args.puerto), handler)
-
+    servidor = crear_servidor(args.puerto)
     grupo = grupo_de(leer_config())
     print(f"Panel en http://127.0.0.1:{args.puerto}")
     print(f"Grupo «{grupo['nombre']}»: {len(grupo['atletas'])} atleta(s)")
     print("Ahí verás el botón «Seguir para todos»; en la web pública no aparece.")
+    print("\nAVISO: esto es SOLO el panel. Sin `python -m scraper.main` corriendo,")
+    print("lo que marques se guarda pero no se publica para nadie.")
     try:
         servidor.serve_forever()
     except KeyboardInterrupt:
