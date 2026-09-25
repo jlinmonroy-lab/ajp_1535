@@ -1,0 +1,1288 @@
+[
+  {
+    "id": 1247396,
+    "bracket_id": 135495,
+    "name": null,
+    "group": "Boys GI / Kids 2 / White / 26KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175929
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-1",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:30:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 629",
+        "country": "ES",
+        "event_registration_id": 900629,
+        "club": "Rom Jiu-jitsu team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 307",
+        "country": "IT",
+        "event_registration_id": 900307,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247350,
+    "bracket_id": 135487,
+    "name": "Quarterfinals",
+    "group": "Boys GI / Kids 3 / Grey / 34KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175921
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-2",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:33:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 532",
+        "country": "BG",
+        "event_registration_id": 900532,
+        "club": "Icon Jiu-jitsu Team Bulgaria",
+        "affiliation": "ICON JIU-JITSU TEAM INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 103",
+        "country": "ES",
+        "event_registration_id": 900103,
+        "club": "HENKO JIUJITSU ACADEMY",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247397,
+    "bracket_id": 135495,
+    "name": "Bronze match",
+    "group": "Boys GI / Kids 2 / White / 26KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175929
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-3",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:36:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 610",
+        "country": "PE",
+        "event_registration_id": 900610,
+        "club": "Kano Jiu-Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-1",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247353,
+    "bracket_id": 135487,
+    "name": "Semifinals",
+    "group": "Boys GI / Kids 3 / Grey / 34KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 5,
+    "schedule_block_id": [
+      175921
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-4",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:39:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 195",
+        "country": "FR",
+        "event_registration_id": 900195,
+        "club": "Equipe Elite",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-2",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247354,
+    "bracket_id": 135487,
+    "name": "Semifinals",
+    "group": "Boys GI / Kids 3 / Grey / 34KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 6,
+    "schedule_block_id": [
+      175921
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-5",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:42:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 191",
+        "country": "VE",
+        "event_registration_id": 900191,
+        "club": "Barcelona Jiu Jitsu - Haubert Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 603",
+        "country": "HK",
+        "event_registration_id": 900603,
+        "club": "Gracie Barra Shunyi",
+        "affiliation": "Gracie Barra International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247398,
+    "bracket_id": 135495,
+    "name": "Final",
+    "group": "Boys GI / Kids 2 / White / 26KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      175929
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-6",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:45:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-1",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-3",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247355,
+    "bracket_id": 135487,
+    "name": "Bronze match",
+    "group": "Boys GI / Kids 3 / Grey / 34KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 7,
+    "schedule_block_id": [
+      175921
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-7",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:48:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Loser from 6-4",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-5",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247369,
+    "bracket_id": 135490,
+    "name": "Final",
+    "group": "Girls GI / Kids 3 / White / 36KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175924
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-8",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:51:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 173",
+        "country": "ES",
+        "event_registration_id": 900173,
+        "club": "CORAGEM JIU-JITSU",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 243",
+        "country": "BR",
+        "event_registration_id": 900243,
+        "club": "PLSPB Cicero Costha International",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247370,
+    "bracket_id": 135491,
+    "name": "Final",
+    "group": "Boys GI / Kids 3 / White / 38KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175925
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-9",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:54:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 344",
+        "country": "ES",
+        "event_registration_id": 900344,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 663",
+        "country": "LV",
+        "event_registration_id": 900663,
+        "club": "GMNSM",
+        "affiliation": "Alliance International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247356,
+    "bracket_id": 135487,
+    "name": "Final",
+    "group": "Boys GI / Kids 3 / Grey / 34KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 8,
+    "schedule_block_id": [
+      175921
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-10",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T10:57:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-4",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-5",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247406,
+    "bracket_id": 135500,
+    "name": null,
+    "group": "Boys GI / Infant / Grey / 34KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175934
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-11",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:00:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 91",
+        "country": "IT",
+        "event_registration_id": 900091,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 451",
+        "country": "MD",
+        "event_registration_id": 900451,
+        "club": "Focus Jiu Jitsu",
+        "affiliation": "FOCUS JIU JITSU International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247450,
+    "bracket_id": 135515,
+    "name": "Final",
+    "group": "Girls GI / Infant / Grey / 44KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175949
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-12",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 203",
+        "country": "PE",
+        "event_registration_id": 900203,
+        "club": "Zion Brazilian Jiu-Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 58",
+        "country": "IT",
+        "event_registration_id": 900058,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247407,
+    "bracket_id": 135500,
+    "name": "Bronze match",
+    "group": "Boys GI / Infant / Grey / 34KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175934
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-13",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:08:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 124",
+        "country": "IT",
+        "event_registration_id": 900124,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-11",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247465,
+    "bracket_id": 135526,
+    "name": "Final",
+    "group": "Boys GI / Junior / White / 60KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175960
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-14",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:12:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 120",
+        "country": "VE",
+        "event_registration_id": 900120,
+        "club": "Barcelona Jiu Jitsu - Haubert Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 425",
+        "country": "CO",
+        "event_registration_id": 900425,
+        "club": "Checkmat International",
+        "affiliation": "Checkmat International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247454,
+    "bracket_id": 135519,
+    "name": "Final",
+    "group": "Girls GI / Junior / Grey / 40KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175953
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-15",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:16:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 166",
+        "country": "IT",
+        "event_registration_id": 900166,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 656",
+        "country": "BR",
+        "event_registration_id": 900656,
+        "club": "Genesis Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247408,
+    "bracket_id": 135500,
+    "name": "Final",
+    "group": "Boys GI / Infant / Grey / 34KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      175934
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-16",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:20:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-11",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-13",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247474,
+    "bracket_id": 135531,
+    "name": "Final",
+    "group": "Girls GI / Junior / Grey / 44KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175965
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-17",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:24:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 259",
+        "country": "IT",
+        "event_registration_id": 900259,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 520",
+        "country": "ES",
+        "event_registration_id": 900520,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247455,
+    "bracket_id": 135520,
+    "name": "Final",
+    "group": "Boys GI / Junior / Yellow / 45KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175954
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-18",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:28:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 570",
+        "country": "LT",
+        "event_registration_id": 900570,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 573",
+        "country": "LT",
+        "event_registration_id": 900573,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247464,
+    "bracket_id": 135525,
+    "name": "Final",
+    "group": "Boys GI / Teen / Grey / 42KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175959
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-19",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:32:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 146",
+        "country": "GE",
+        "event_registration_id": 900146,
+        "club": "Jtsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 118",
+        "country": "ES",
+        "event_registration_id": 900118,
+        "club": "Dream Art Valencia",
+        "affiliation": "DREAM ART international",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247452,
+    "bracket_id": 135517,
+    "name": "Final",
+    "group": "Girls GI / Teen / Grey / 52KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175951
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-20",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:36:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 242",
+        "country": "BR",
+        "event_registration_id": 900242,
+        "club": "PLSPB Cicero Costha International",
+        "affiliation": "PSLPB Cicero Costha International",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 239",
+        "country": "ES",
+        "event_registration_id": 900239,
+        "club": "Brasa Cta",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247412,
+    "bracket_id": 135502,
+    "name": "Final",
+    "group": "Boys GI / Teen / Grey - Yellow / 67KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175936
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-21",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:40:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 541",
+        "country": "ES",
+        "event_registration_id": 900541,
+        "club": "DG ENT",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 14",
+        "country": "ES",
+        "event_registration_id": 900014,
+        "club": "Six Blades Jiu-Jitsu",
+        "affiliation": "SIX BLADES JIU-JITSU INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247475,
+    "bracket_id": 135532,
+    "name": null,
+    "group": "Girls GI / Teen / Orange/Green / 52KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175966
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-22",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:44:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 295",
+        "country": "ES",
+        "event_registration_id": 900295,
+        "club": "Zion Brazilian Jiu-Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 435",
+        "country": "BR",
+        "event_registration_id": 900435,
+        "club": "Marbella Fight School",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247512,
+    "bracket_id": 135544,
+    "name": "Quarterfinals",
+    "group": "Youth Men's GI / White / 55KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175978
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-23",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:48:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 211",
+        "country": "ES",
+        "event_registration_id": 900211,
+        "club": "DG ENT",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 565",
+        "country": "ES",
+        "event_registration_id": 900565,
+        "club": "Crazy Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247476,
+    "bracket_id": 135532,
+    "name": "Bronze match",
+    "group": "Girls GI / Teen / Orange/Green / 52KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175966
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-24",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:53:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 590",
+        "country": "LT",
+        "event_registration_id": 900590,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-22",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247515,
+    "bracket_id": 135544,
+    "name": "Semifinals",
+    "group": "Youth Men's GI / White / 55KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 5,
+    "schedule_block_id": [
+      175978
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-25",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T11:57:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 178",
+        "country": "IT",
+        "event_registration_id": 900178,
+        "club": "TEAM ITALIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-23",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247516,
+    "bracket_id": 135544,
+    "name": "Semifinals",
+    "group": "Youth Men's GI / White / 55KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 6,
+    "schedule_block_id": [
+      175978
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-26",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:02:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 351",
+        "country": "ES",
+        "event_registration_id": 900351,
+        "club": "Team Gil Catarino",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 578",
+        "country": "ES",
+        "event_registration_id": 900578,
+        "club": "SDC Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247477,
+    "bracket_id": 135532,
+    "name": "Final",
+    "group": "Girls GI / Teen / Orange/Green / 52KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      175966
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-27",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:07:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-22",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-24",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247517,
+    "bracket_id": 135544,
+    "name": "Bronze match",
+    "group": "Youth Men's GI / White / 55KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 7,
+    "schedule_block_id": [
+      175978
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-28",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:11:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Loser from 6-25",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-26",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247505,
+    "bracket_id": 135542,
+    "name": null,
+    "group": "Youth Women's GI / Blue / 52KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      175976
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-29",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:16:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 691",
+        "country": "ES",
+        "event_registration_id": 900691,
+        "club": "Círculo de Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 10",
+        "country": "CU",
+        "event_registration_id": 900010,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247518,
+    "bracket_id": 135544,
+    "name": "Final",
+    "group": "Youth Men's GI / White / 55KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 8,
+    "schedule_block_id": [
+      175978
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-30",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:21:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-25",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-26",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247506,
+    "bracket_id": 135542,
+    "name": "Bronze match",
+    "group": "Youth Women's GI / Blue / 52KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      175976
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-31",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:26:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 463",
+        "country": "LT",
+        "event_registration_id": 900463,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-29",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247507,
+    "bracket_id": 135542,
+    "name": "Final",
+    "group": "Youth Women's GI / Blue / 52KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      175976
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-32",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:31:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-29",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-31",
+        "isWinner": false
+      }
+    ]
+  }
+]

@@ -1,0 +1,275 @@
+[
+  {
+    "id": 1247744,
+    "bracket_id": 135603,
+    "name": "Final",
+    "group": "Boys NO-GI / Infant / Yellow / 42KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176037
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-1",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 31",
+        "country": "ES",
+        "event_registration_id": 900031,
+        "club": "Team Ganbaru",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 98",
+        "country": "ES",
+        "event_registration_id": 900098,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247746,
+    "bracket_id": 135605,
+    "name": null,
+    "group": "Boys NO-GI / Teen / Grey / 62KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176039
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-2",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 7",
+        "country": "ES",
+        "event_registration_id": 900007,
+        "club": "Proart Jiu-Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 61",
+        "country": "PE",
+        "event_registration_id": 900061,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247771,
+    "bracket_id": 135615,
+    "name": null,
+    "group": "Youth Men's NO-GI / Blue / 73KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176049
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-3",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:08:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 103",
+        "country": "PT",
+        "event_registration_id": 900103,
+        "club": "Commando Group",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 37",
+        "country": "ES",
+        "event_registration_id": 900037,
+        "club": "ARENAS DOJO - FIT",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247747,
+    "bracket_id": 135605,
+    "name": "Bronze match",
+    "group": "Boys NO-GI / Teen / Grey / 62KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176039
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-4",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:13:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 115",
+        "country": "ES",
+        "event_registration_id": 900115,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 4-2",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247772,
+    "bracket_id": 135615,
+    "name": "Bronze match",
+    "group": "Youth Men's NO-GI / Blue / 73KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176049
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-5",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:17:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 159",
+        "country": "ES",
+        "event_registration_id": 900159,
+        "club": "Factory Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 4-3",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247748,
+    "bracket_id": 135605,
+    "name": "Final",
+    "group": "Boys NO-GI / Teen / Grey / 62KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176039
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-6",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:22:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 4-2",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 4-4",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247773,
+    "bracket_id": 135615,
+    "name": "Final",
+    "group": "Youth Men's NO-GI / Blue / 73KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176049
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "4-7",
+    "mat_name": "Mat 4",
+    "estimated_start": "2026-09-27T12:26:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 4-3",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 4-5",
+        "isWinner": false
+      }
+    ]
+  }
+]

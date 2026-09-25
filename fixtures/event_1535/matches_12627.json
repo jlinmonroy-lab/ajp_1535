@@ -1,0 +1,244 @@
+[
+  {
+    "id": 1247758,
+    "bracket_id": 135610,
+    "name": "Final",
+    "group": "Boys NO-GI / Infant / Grey / 46KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176044
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-1",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 167",
+        "country": "RU",
+        "event_registration_id": 900167,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 202",
+        "country": "UA",
+        "event_registration_id": 900202,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247752,
+    "bracket_id": 135607,
+    "name": "Semifinals",
+    "group": "Boys NO-GI / Teen / White / 67KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176041
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-2",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 135",
+        "country": "ES",
+        "event_registration_id": 900135,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 95",
+        "country": "VE",
+        "event_registration_id": 900095,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247753,
+    "bracket_id": 135607,
+    "name": "Semifinals",
+    "group": "Boys NO-GI / Teen / White / 67KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176041
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-3",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:08:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 138",
+        "country": "ES",
+        "event_registration_id": 900138,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 102",
+        "country": "ES",
+        "event_registration_id": 900102,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247774,
+    "bracket_id": 135616,
+    "name": "Final",
+    "group": "Youth Men's NO-GI / White / 55KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176050
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-4",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:12:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 43",
+        "country": "IT",
+        "event_registration_id": 900043,
+        "club": "TEAM ITALIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 163",
+        "country": "ES",
+        "event_registration_id": 900163,
+        "club": "Crazy Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247754,
+    "bracket_id": 135607,
+    "name": "Bronze match",
+    "group": "Boys NO-GI / Teen / White / 67KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176041
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-5",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:17:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Loser from 3-2",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 3-3",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247755,
+    "bracket_id": 135607,
+    "name": "Final",
+    "group": "Boys NO-GI / Teen / White / 67KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 4,
+    "schedule_block_id": [
+      176041
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "3-6",
+    "mat_name": "Mat 3",
+    "estimated_start": "2026-09-27T12:21:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 3-2",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 3-3",
+        "isWinner": false
+      }
+    ]
+  }
+]

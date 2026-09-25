@@ -143,5 +143,69 @@ class TestEventoSinPublicar(unittest.TestCase):
         self.assertEqual([m for m in estado["mats"] if m["eventId"] == "1526"], [])
 
 
+class TestJornadas(unittest.TestCase):
+    """El torneo dura dos días con los mismos horarios en cada uno.
+
+    Sin la jornada en el modelo, un combate del domingo a las 12:00 sería
+    indistinguible de uno del sábado a la misma hora.
+    """
+
+    def setUp(self):
+        sabado = combate(1, "A", "CA", 1, "B", "CB", 2,
+                         hora="2026-09-26T16:40:00+02:00")
+        domingo = combate(2, "C", "CC", 3, "D", "CD", 4, bracket=2,
+                          hora="2026-09-27T12:00:00+02:00")
+        # Los seis tatamis físicos se reutilizan cada día con ids distintos.
+        mats = [{"id": 10, "name": "Mat 1", "dayId": 1, "dayName": "Saturday",
+                 "dayDate": "2026-09-26T16:40:00+02:00"},
+                {"id": 20, "name": "Mat 1", "dayId": 2, "dayName": "Sunday",
+                 "dayDate": "2026-09-27T12:00:00+02:00"}]
+        self.estado = estado_con({
+            "1535": ([], mats, {10: [sabado], 20: [domingo]}),
+        })
+
+    def test_cada_combate_sabe_su_jornada(self):
+        dias = sorted(m["day"] for m in self.estado["matches"])
+        self.assertEqual(dias, ["2026-09-26", "2026-09-27"])
+
+    def test_el_nombre_de_la_jornada_viene_del_tatami(self):
+        por_dia = {m["day"]: m["dayName"] for m in self.estado["matches"]}
+        self.assertEqual(por_dia["2026-09-26"], "Saturday")
+        self.assertEqual(por_dia["2026-09-27"], "Sunday")
+
+    def test_el_mismo_tatami_fisico_en_dos_jornadas_no_se_mezcla(self):
+        # Mismo nombre "Mat 1", dos entradas distintas, una por jornada.
+        mat1 = [m for m in self.estado["mats"] if m["name"] == "Mat 1"]
+        self.assertEqual(len(mat1), 2)
+        self.assertEqual(len({m["key"] for m in mat1}), 2)
+        self.assertCountEqual([m["day"] for m in mat1],
+                              ["2026-09-26", "2026-09-27"])
+
+
+class TestPlazasPorDeterminar(unittest.TestCase):
+    """Un bracket sin empezar tiene plazas 'tbd' esperando al ganador.
+
+    En el torneo real, 291 de los 822 combates no tienen todavía ningún atleta
+    conocido, así que la app debe aguantarlo sin romperse.
+    """
+
+    def test_combate_con_una_plaza_pendiente(self):
+        c = combate(1, "A", "CA", 1, "B", "CB", 2)
+        c["seats"][1] = {"type": "tbd", "name": "Winner of 1-2"}
+        estado = estado_con({"1535": ([], [{"id": 1, "name": "Mat 1"}], {1: [c]})})
+
+        self.assertEqual(len(estado["matches"][0]["sides"]), 1)
+        self.assertEqual(len(estado["athletes"]), 1)
+
+    def test_combate_sin_ningun_atleta_conocido(self):
+        c = combate(1, "A", "CA", 1, "B", "CB", 2)
+        c["seats"] = [{"type": "tbd", "name": "Winner of 1-2"},
+                      {"type": "tbd", "name": "Winner of 3-4"}]
+        estado = estado_con({"1535": ([], [{"id": 1, "name": "Mat 1"}], {1: [c]})})
+
+        self.assertEqual(estado["matches"][0]["sides"], [])
+        self.assertEqual(estado["athletes"], [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

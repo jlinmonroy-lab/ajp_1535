@@ -1,0 +1,74 @@
+[
+  {
+    "id": 12625,
+    "name": "Mat 1",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:36:00+02:00",
+    "calculated_at": 1790319898
+  },
+  {
+    "id": 12626,
+    "name": "Mat 2",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:31:00+02:00",
+    "calculated_at": 1790319898
+  },
+  {
+    "id": 12627,
+    "name": "Mat 3",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:25:00+02:00",
+    "calculated_at": 1790319898
+  },
+  {
+    "id": 12628,
+    "name": "Mat 4",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:31:00+02:00",
+    "calculated_at": 1790319898
+  },
+  {
+    "id": 12629,
+    "name": "Mat 5",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:32:00+02:00",
+    "calculated_at": 1790319898
+  },
+  {
+    "id": 12630,
+    "name": "Mat 6",
+    "visible": 1,
+    "visible_account": 1,
+    "visible_search": 1,
+    "footer": "",
+    "scheduleBlocks": [],
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "estimated_end": "2026-09-27T12:26:00+02:00",
+    "calculated_at": 1790319898
+  }
+]

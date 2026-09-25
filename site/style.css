@@ -103,6 +103,24 @@ body {
   font-size: .75rem;
 }
 
+/* El torneo dura dos días; sin esto un combate del domingo a las 12:00 se
+   confunde con uno del sábado. */
+.dias { display: flex; gap: 6px; padding: 0 16px 8px; }
+.dias:empty { display: none; }
+.dia {
+  flex: 1;
+  padding: .5rem .4rem;
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+.dia.activo { background: var(--superficie-2); color: var(--texto); border-color: var(--acento); }
+
 main { padding: 0 16px; }
 .vista.oculta, .oculta { display: none; }
 

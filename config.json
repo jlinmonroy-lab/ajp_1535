@@ -21,7 +21,7 @@
   "output": "site/data.json",
   "streams": [],
   "publish": {
-    "enabled": false,
+    "enabled": true,
     "worktree": "C:/Users/gork-/ajp-publish",
     "branch": "gh-pages",
     "message": "datos del evento",

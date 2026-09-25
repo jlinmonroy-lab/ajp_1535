@@ -71,7 +71,14 @@ def leer_schedule(cfg, event_id, log=print):
     mats = []
     for d in dias:
         time.sleep(pausa)
-        mats.extend(_get(f"{base}/mats.json/{d['id']}", timeout))
+        # El JSON del tatami no dice a qué jornada pertenece, y aquí es el único
+        # sitio donde se sabe: el torneo dura dos días y los mismos seis tatamis
+        # físicos se reutilizan en cada uno con ids distintos.
+        for m in _get(f"{base}/mats.json/{d['id']}", timeout):
+            m["dayId"] = d.get("id")
+            m["dayName"] = d.get("name")
+            m["dayDate"] = d.get("date")
+            mats.append(m)
 
     # Un tatami oculto no se muestra en la web del evento; tampoco aquí.
     visibles = [m for m in mats if m.get("visible", 1)]

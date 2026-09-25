@@ -7,12 +7,15 @@
 
 const REFRESCO_MS = 30000;
 const CLAVE_SEGUIDOS = 'ajp:seguidos';
+const CLAVE_DIA = 'ajp:dia';
+const CANAL_AJP = 'https://youtube.com/channel/UC7m2_Wx33tfrMYYVMVqIOzg/videos';
 const MEDALLAS = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
 let datos = null;
 let etag = null;
 let porId = new Map();      // id de combate -> combate
 let vista = 'seguidos';
+let dia = null;             // jornada seleccionada ('2026-09-26')
 
 /* ---------- Almacenamiento local ----------
    Puede fallar (modo privado, cookies bloqueadas) y la app debe seguir
@@ -51,6 +54,45 @@ function hora(iso) {
     : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+/* ---------- Jornadas ----------
+   El torneo son dos días con los mismos horarios, así que hay que poder elegir
+   cuál se mira; por defecto, el de hoy. */
+function diasDelTorneo() {
+  return [...new Set((datos?.matches || []).map((m) => m.day).filter(Boolean))].sort();
+}
+
+function etiquetaDia(iso) {
+  const d = new Date(`${iso}T12:00:00`);
+  return isNaN(d) ? iso
+    : d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
+}
+
+function diaPorDefecto() {
+  const dias = diasDelTorneo();
+  if (!dias.length) return null;
+  let guardado = null;
+  try { guardado = localStorage.getItem(CLAVE_DIA); } catch { /* sin persistencia */ }
+  if (guardado && dias.includes(guardado)) return guardado;
+  const hoy = new Date().toISOString().slice(0, 10);
+  return dias.includes(hoy) ? hoy : dias[0];
+}
+
+function pintarDias() {
+  const caja = $('#dias');
+  const dias = diasDelTorneo();
+  // Con una sola jornada el selector sobra y solo quita sitio.
+  caja.innerHTML = dias.length > 1
+    ? dias.map((d) => `<button class="dia ${d === dia ? 'activo' : ''}" data-dia="${d}">
+        ${escapar(etiquetaDia(d))}</button>`).join('')
+    : '';
+}
+
+// Los combates de la jornada elegida. Las fichas de atleta enseñan todos, para
+// no esconder que alguien compite también el otro día.
+function deLaJornada(combates) {
+  return dia ? combates.filter((c) => c.day === dia) : combates;
+}
+
 function hace(iso) {
   const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
   if (s < 60) return `hace ${Math.floor(s)}s`;
@@ -70,6 +112,8 @@ async function cargar() {
     etag = resp.headers.get('ETag');
     datos = await resp.json();
     porId = new Map(datos.matches.map((m) => [m.id, m]));
+    if (!dia || !diasDelTorneo().includes(dia)) dia = diaPorDefecto();
+    pintarDias();
 
     const eventos = datos.events || [];
     if (eventos.length) {
@@ -132,12 +176,14 @@ function filaCombate(combate, athleteId) {
   const rival = rivalDe(combate, athleteId);
   const nombreRival = rival ? rival.name : 'Por determinar';
   const ronda = combate.round ? `${escapar(combate.round)} · ` : '';
+  const otroDia = combate.day && combate.day !== dia
+    ? `<span class="etiqueta">${escapar(etiquetaDia(combate.day).split(',')[0])}</span> ` : '';
   return `
     <div class="combate">
       <span class="hora">${hora(combate.estimatedStart)}</span>
       <span class="detalle-combate">
         <span class="rival">vs ${escapar(nombreRival)}</span><br>
-        <span class="sub">${etiquetaEvento(combate)} ${ronda}${escapar(combate.mat || '')}</span>
+        <span class="sub">${otroDia}${etiquetaEvento(combate)} ${ronda}${escapar(combate.mat || '')}</span>
       </span>
       ${etiquetaResultado(combate, athleteId)}
     </div>`;
@@ -194,7 +240,7 @@ function pintarSeguidos() {
   // Lo primero que quiere ver alguien en el pabellón: qué toca ahora y qué viene.
   const proximos = [];
   for (const a of mios) {
-    for (const c of combatesDe(a)) {
+    for (const c of deLaJornada(combatesDe(a))) {
       if (c.state !== 'finished') proximos.push({ atleta: a, combate: c });
     }
   }
@@ -244,29 +290,33 @@ function pintarBusqueda() {
 
 function pintarTatamis() {
   const caja = $('#vista-tatamis');
-  // Por clave evento:tatami, no por nombre: los dos eventos comparten pabellón
-  // y pueden tener un "Mat 1" cada uno.
-  const porMat = new Map(datos.mats.map((m) => [m.key, []]));
-  for (const c of datos.matches) {
-    if (porMat.has(c.matKey)) porMat.get(c.matKey).push(c);
+  // Se agrupa por NOMBRE de tatami, no por evento: en el pabellón hay seis
+  // tatamis físicos y los cuatro bloques (Gi/No-Gi × sábado/domingo) los
+  // reutilizan con ids distintos. Quien está delante del Mat 3 quiere ver qué
+  // toca ahí, sea del evento que sea.
+  const porMat = new Map();
+  for (const m of datos.mats) {
+    if (!porMat.has(m.name)) porMat.set(m.name, []);
+  }
+  for (const c of deLaJornada(datos.matches)) {
+    if (porMat.has(c.mat)) porMat.get(c.mat).push(c);
   }
 
-  const streams = new Map((datos.streams || [])
-    .map((s) => [s.matKey || `${s.eventId || ''}:${s.mat}`, s.url]));
+  const streams = new Map((datos.streams || []).map((s) => [s.mat, s.url]));
 
-  const tarjeta = (mat) => {
-    const combates = porMat.get(mat.key) || [];
+  const tarjeta = (nombre) => {
+    const combates = (porMat.get(nombre) || [])
+      .sort((a, b) => (a.estimatedStart || '').localeCompare(b.estimatedStart || ''));
     const enCurso = combates.filter((c) => c.state === 'running');
     const siguientes = combates.filter((c) => c.state !== 'finished' && c.state !== 'running');
     const mostrar = [...enCurso, ...siguientes].slice(0, 5);
-    const url = streams.get(mat.key) || streams.get(`${mat.eventId}:${mat.name}`)
-      || streams.get(mat.name);
+    const url = streams.get(nombre);
 
     return `
       <article class="tarjeta">
         <div class="tarjeta-cabecera">
           <span class="crece">
-            <span class="nombre">${escapar(mat.name)}</span><br>
+            <span class="nombre">${escapar(nombre)}</span><br>
             <span class="sub">${combates.length} combates · ${enCurso.length} en curso</span>
           </span>
         </div>
@@ -276,7 +326,7 @@ function pintarTatamis() {
               <span class="hora">${hora(c.estimatedStart)}</span>
               <span class="detalle-combate">
                 <span class="rival">${escapar(c.sides.map((s) => s.name).join(' vs ') || 'Por determinar')}</span><br>
-                <span class="sub">${escapar(c.category.raw || '')}</span>
+                <span class="sub">${etiquetaEvento(c)} ${escapar(c.category.raw || '')}</span>
               </span>
               ${c.state === 'running' ? '<span class="etiqueta vivo">EN CURSO</span>' : ''}
             </div>`).join('')
@@ -285,14 +335,13 @@ function pintarTatamis() {
       </article>`;
   };
 
-  // Un bloque por evento, para no mezclar tatamis de Gi y No-Gi.
-  caja.innerHTML = (datos.events || []).map((ev) => {
-    const suyos = datos.mats.filter((m) => m.eventId === ev.id);
-    if (!suyos.length) return '';
-    const titulo = (datos.events.length > 1)
-      ? `<h2 class="seccion-titulo">${escapar(ev.label || ev.id)}</h2>` : '';
-    return titulo + suyos.map(tarjeta).join('');
-  }).join('') || '<p class="vacio">Todavía no hay tatamis publicados.</p>';
+  const nombres = [...porMat.keys()].sort();
+  caja.innerHTML = (nombres.length
+    ? nombres.map(tarjeta).join('')
+    : '<p class="vacio">Todavía no hay tatamis publicados.</p>')
+    + `<p class="sub" style="text-align:center;margin-top:1rem">
+         <a class="enlace-stream" href="${CANAL_AJP}" target="_blank" rel="noopener">
+           Canal de YouTube de AJP ↗</a></p>`;
 }
 
 function pintar() {
@@ -348,6 +397,14 @@ document.querySelectorAll('.pestana').forEach((boton) => {
 // Delegación: las tarjetas se repintan enteras en cada ciclo, así que no sirve
 // enganchar escuchadores a cada botón.
 document.addEventListener('click', (ev) => {
+  const botonDia = ev.target.closest('[data-dia]');
+  if (botonDia) {
+    dia = botonDia.dataset.dia;
+    try { localStorage.setItem(CLAVE_DIA, dia); } catch { /* sin persistencia */ }
+    pintarDias();
+    pintar();
+    return;
+  }
   const seguir = ev.target.closest('[data-seguir]');
   if (seguir) {
     const id = seguir.dataset.seguir;

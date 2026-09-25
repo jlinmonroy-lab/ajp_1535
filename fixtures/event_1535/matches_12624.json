@@ -1,0 +1,876 @@
+[
+  {
+    "id": 1247829,
+    "bracket_id": 135558,
+    "name": "Eighth-finals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-1",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T16:40:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 146",
+        "country": "PT",
+        "event_registration_id": 900146,
+        "club": "Pt Brave Fight Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 84",
+        "country": "ES",
+        "event_registration_id": 900084,
+        "club": "Team Gil Catarino",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247837,
+    "bracket_id": 135558,
+    "name": "Quarterfinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 10,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-2",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T16:46:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 196",
+        "country": "ES",
+        "event_registration_id": 900196,
+        "club": "Arte Suave Espana",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 122",
+        "country": "PE",
+        "event_registration_id": 900122,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247836,
+    "bracket_id": 135558,
+    "name": "Quarterfinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 9,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-3",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T16:52:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 106",
+        "country": "IT",
+        "event_registration_id": 900106,
+        "club": "TEAM ITALIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-1",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247838,
+    "bracket_id": 135558,
+    "name": "Quarterfinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 11,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-4",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T16:58:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 179",
+        "country": "ES",
+        "event_registration_id": 900179,
+        "club": "Luis Pinheiro jiu-jitsu Brasileño",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 114",
+        "country": "ES",
+        "event_registration_id": 900114,
+        "club": "KALMMA FIGHT CLUB",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247839,
+    "bracket_id": 135558,
+    "name": "Quarterfinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 12,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-5",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 18",
+        "country": "VE",
+        "event_registration_id": 900018,
+        "club": "Bruno Y Betinho Madrid",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 180",
+        "country": "PE",
+        "event_registration_id": 900180,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247840,
+    "bracket_id": 135558,
+    "name": "Semifinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 13,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-6",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:10:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-3",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-2",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247841,
+    "bracket_id": 135558,
+    "name": "Semifinals",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 14,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-7",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:16:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-4",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-5",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247710,
+    "bracket_id": 135583,
+    "name": null,
+    "group": "Women's NO-GI / Blue / Amateur / 70KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176017
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-8",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:22:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 74",
+        "country": "AR",
+        "event_registration_id": 900074,
+        "club": "Jiujitsu tulum mexico",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 50",
+        "country": "CH",
+        "event_registration_id": 900050,
+        "club": "Ferrer BJJ",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247842,
+    "bracket_id": 135558,
+    "name": "Bronze match",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 4,
+    "state": "unseeded",
+    "match_nr": 15,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-9",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:28:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Loser from 6-6",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-7",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247711,
+    "bracket_id": 135583,
+    "name": "Bronze match",
+    "group": "Women's NO-GI / Blue / Amateur / 70KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176017
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-10",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:34:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 99",
+        "country": "ES",
+        "event_registration_id": 900099,
+        "club": "Lotus Bjj Espana",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-8",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247667,
+    "bracket_id": 135571,
+    "name": null,
+    "group": "Women's NO-GI / White / Amateur / 55KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176005
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-11",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:40:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 133",
+        "country": "ES",
+        "event_registration_id": 900133,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 134",
+        "country": "ES",
+        "event_registration_id": 900134,
+        "club": "SDC Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247843,
+    "bracket_id": 135558,
+    "name": "Final",
+    "group": "Men's NO-GI / Blue / Amateur / 69KG",
+    "round": 4,
+    "state": "unseeded",
+    "match_nr": 16,
+    "schedule_block_id": [
+      176063
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-12",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:46:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-6",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-7",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247712,
+    "bracket_id": 135583,
+    "name": "Final",
+    "group": "Women's NO-GI / Blue / Amateur / 70KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176017
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-13",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:52:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-8",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-10",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247668,
+    "bracket_id": 135571,
+    "name": "Bronze match",
+    "group": "Women's NO-GI / White / Amateur / 55KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176005
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-14",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T17:58:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 76",
+        "country": "VE",
+        "event_registration_id": 900076,
+        "club": "CFC Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-11",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247703,
+    "bracket_id": 135580,
+    "name": null,
+    "group": "Women's NO-GI / White / Amateur / 70KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176014
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-15",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 34",
+        "country": "ES",
+        "event_registration_id": 900034,
+        "club": "Factory Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 52",
+        "country": "ES",
+        "event_registration_id": 900052,
+        "club": "Luis Pinheiro jiu-jitsu Brasileño",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247714,
+    "bracket_id": 135584,
+    "name": "Quarterfinals",
+    "group": "Men's NO-GI / White / Master 1 / 77KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176018
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-16",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:10:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 190",
+        "country": "CU",
+        "event_registration_id": 900190,
+        "club": "SDC Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 132",
+        "country": "ES",
+        "event_registration_id": 900132,
+        "club": "Mathias Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247669,
+    "bracket_id": 135571,
+    "name": "Final",
+    "group": "Women's NO-GI / White / Amateur / 55KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176005
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-17",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:16:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-11",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-14",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247704,
+    "bracket_id": 135580,
+    "name": "Bronze match",
+    "group": "Women's NO-GI / White / Amateur / 70KG",
+    "round": 1,
+    "state": "unseeded",
+    "match_nr": 2,
+    "schedule_block_id": [
+      176014
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-18",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:22:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 123",
+        "country": "ES",
+        "event_registration_id": 900123,
+        "club": "Corpo e Mente International",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-15",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247717,
+    "bracket_id": 135584,
+    "name": "Semifinals",
+    "group": "Men's NO-GI / White / Master 1 / 77KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 5,
+    "schedule_block_id": [
+      176018
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-19",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:28:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 109",
+        "country": "IT",
+        "event_registration_id": 900109,
+        "club": "Flow",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-16",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247718,
+    "bracket_id": 135584,
+    "name": "Semifinals",
+    "group": "Men's NO-GI / White / Master 1 / 77KG",
+    "round": 2,
+    "state": "seeded",
+    "match_nr": 6,
+    "schedule_block_id": [
+      176018
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-20",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:34:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 63",
+        "country": "ES",
+        "event_registration_id": 900063,
+        "club": "Ali Dinar Jiu Jitsu",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 88",
+        "country": "UY",
+        "event_registration_id": 900088,
+        "club": "Six Blades Jiu-Jitsu",
+        "affiliation": "SIX BLADES JIU-JITSU INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247705,
+    "bracket_id": 135580,
+    "name": "Final",
+    "group": "Women's NO-GI / White / Amateur / 70KG",
+    "round": 2,
+    "state": "unseeded",
+    "match_nr": 3,
+    "schedule_block_id": [
+      176014
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-21",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:40:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-15",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-18",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247719,
+    "bracket_id": 135584,
+    "name": "Bronze match",
+    "group": "Men's NO-GI / White / Master 1 / 77KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 7,
+    "schedule_block_id": [
+      176018
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-22",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:46:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Loser from 6-19",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Loser from 6-20",
+        "isWinner": false
+      }
+    ]
+  },
+  {
+    "id": 1247720,
+    "bracket_id": 135584,
+    "name": "Final",
+    "group": "Men's NO-GI / White / Master 1 / 77KG",
+    "round": 3,
+    "state": "unseeded",
+    "match_nr": 8,
+    "schedule_block_id": [
+      176018
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-23",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-26T18:52:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "tbd",
+        "name": "Winner from 6-19",
+        "isWinner": false
+      },
+      {
+        "type": "tbd",
+        "name": "Winner from 6-20",
+        "isWinner": false
+      }
+    ]
+  }
+]

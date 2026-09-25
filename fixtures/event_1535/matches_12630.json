@@ -1,0 +1,272 @@
+[
+  {
+    "id": 1247730,
+    "bracket_id": 135592,
+    "name": "Final",
+    "group": "Boys NO-GI / Junior / Grey - Yellow / 34KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176026
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-1",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:00:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 3",
+        "country": "ES",
+        "event_registration_id": 900003,
+        "club": "Reus Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 24",
+        "country": "IT",
+        "event_registration_id": 900024,
+        "club": "Warriors Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247732,
+    "bracket_id": 135594,
+    "name": "Final",
+    "group": "Boys NO-GI / Junior / Yellow / 45KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176028
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-2",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:04:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 147",
+        "country": "LT",
+        "event_registration_id": 900147,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 148",
+        "country": "LT",
+        "event_registration_id": 900148,
+        "club": "Yamasaki Lithuania",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247739,
+    "bracket_id": 135598,
+    "name": "Final",
+    "group": "Boys NO-GI / Teen / White / 56KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176032
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-3",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:08:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 70",
+        "country": "ES",
+        "event_registration_id": 900070,
+        "club": "Luis Pinheiro jiu-jitsu Brasileño",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 22",
+        "country": "IT",
+        "event_registration_id": 900022,
+        "club": "Lavica project SICILIA",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247741,
+    "bracket_id": 135600,
+    "name": "Final",
+    "group": "Girls NO-GI / Teen / Grey - Yellow / 52KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176034
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-4",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:12:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 40",
+        "country": "ES",
+        "event_registration_id": 900040,
+        "club": "Rafael Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 183",
+        "country": "ES",
+        "event_registration_id": 900183,
+        "club": "Brasa Cta",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247759,
+    "bracket_id": 135611,
+    "name": "Final",
+    "group": "Youth Men's NO-GI / Blue / 60KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176045
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-5",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:16:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 2",
+        "country": "KZ",
+        "event_registration_id": 900002,
+        "club": "Renzo Gracie Academy Azerbaijan",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 174",
+        "country": "MX",
+        "event_registration_id": 900174,
+        "club": "Renzo Gracie Ny",
+        "affiliation": "RENZO GRACIE ACADEMY INTERNATIONAL",
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  },
+  {
+    "id": 1247775,
+    "bracket_id": 135617,
+    "name": "Final",
+    "group": "Youth Men's NO-GI / Blue / 66KG",
+    "round": 1,
+    "state": "seeded",
+    "match_nr": 1,
+    "schedule_block_id": [
+      176051
+    ],
+    "isTeamMatch": false,
+    "mat_match_nr": "6-6",
+    "mat_name": "Mat 6",
+    "estimated_start": "2026-09-27T12:21:00+02:00",
+    "winnerFromBracket": null,
+    "time_passed": null,
+    "wonBy": null,
+    "seats": [
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 112",
+        "country": "ES",
+        "event_registration_id": 900112,
+        "club": "Rafael Ribeiro Team",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      },
+      {
+        "type": "registration",
+        "image": null,
+        "name": "Atleta 110",
+        "country": "ES",
+        "event_registration_id": 900110,
+        "club": "PlayJitsu Academy",
+        "affiliation": null,
+        "approved": 1,
+        "isWinner": false,
+        "status": null
+      }
+    ]
+  }
+]

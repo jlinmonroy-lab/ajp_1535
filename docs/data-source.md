@@ -138,6 +138,36 @@ Un ciclo de refresco cuesta `1 + nº días + nº tatamis` peticiones (~11 para u
 - `research/probe_session.py`, `explore.py`, `explore_patchright.py`, `capture_fixtures.py` — pruebas
   anteriores, conservadas para poder auditar el recorrido.
 
+## Datos reales del torneo (capturado el 2026-09-25)
+
+Ambos eventos publicados, dos jornadas cada uno:
+
+| | No-Gi (1535) | Gi (1526) |
+| --- | --- | --- |
+| Sábado 26 | 16:40 – 19:10 | 10:00 – 17:24 |
+| Domingo 27 | desde 12:00 | desde 10:30 |
+| Combates | 179 | 643 |
+
+**822 combates, 717 atletas, de los que 134 compiten en los dos eventos** (de ahí que unificar por
+nombre + club no fuera un lujo).
+
+Diferencias respecto al evento 1257, que es contra el que se escribió el parser:
+
+- **Plazas `tbd`.** Un bracket sin empezar tiene plazas por determinar esperando al ganador de otra
+  ronda: 291 de los 822 combates no tienen todavía ningún atleta conocido y 126 tienen solo uno. El
+  parser ya las descarta (solo acepta `type == "registration"`) y la web muestra "Por determinar".
+- **`mat_name` sí viene** en este evento, al contrario que en el 1257. Se sigue usando el tatami del
+  endpoint, que es fiable en ambos casos.
+- **Seis tatamis físicos** ("Mat 1"…"Mat 6") reutilizados en las cuatro combinaciones evento×día con
+  ids distintos: 24 entradas para 6 tatamis reales.
+- Nivel **"Professional"** además de Amateur y Master, y cinturones combinados con guion
+  (`Grey - Yellow`). El parseo de categorías los aguanta.
+
+**Streams:** la ruta es `/en/event/<id>/livestream` (en singular; el plural da 404) y solo contiene
+el canal genérico de YouTube de AJP (`UC7m2_Wx33tfrMYYVMVqIOzg`), sin enlaces por tatami. El mapeo
+tatami → URL se configura a mano en `config.streams`, y como la configuración se relee en cada
+ciclo, se puede añadir con el scraper en marcha.
+
 ## Lo que queda abierto
 
 1. **El schedule del evento 1535 no está publicado.** Hasta que AJP lo publique (normalmente días

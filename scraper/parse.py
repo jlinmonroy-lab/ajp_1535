@@ -49,6 +49,17 @@ def parse_categoria(group):
             "ageGroup": edad, "weight": peso, "gi": gi}
 
 
+def jornada(iso):
+    """La fecha local del combate, 'YYYY-MM-DD'.
+
+    El torneo dura dos días y la web solo enseña la hora, así que sin esto un
+    combate del domingo a las 12:00 sería indistinguible de uno del sábado. Se
+    corta el ISO en seco en vez de convertir zonas: el origen ya da la hora con
+    el desfase del propio evento, que es el que ve quien está en el pabellón.
+    """
+    return (iso or "")[:10] or None
+
+
 def normalizar(texto):
     """Minúsculas y sin acentos, para comparar nombres y clubes.
 
@@ -95,6 +106,8 @@ def parse_combate(crudo, mat, evento):
         "matMatchNr": crudo.get("mat_match_nr") or None,
         "category": parse_categoria(crudo.get("group")),
         "estimatedStart": crudo.get("estimated_start"),
+        "day": jornada(crudo.get("estimated_start")) or mat.get("dayDate", "")[:10] or None,
+        "dayName": mat.get("dayName"),
         "timePassed": crudo.get("time_passed"),
         "state": crudo.get("state"),
         "wonBy": crudo.get("wonBy"),
@@ -283,6 +296,8 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
                 "name": m.get("name"),
                 "eventId": event_id,
                 "eventLabel": evento.get("label"),
+                "day": (m.get("dayDate") or "")[:10] or None,
+                "dayName": m.get("dayName"),
                 "estimatedStart": m.get("estimated_start"),
                 "estimatedEnd": m.get("estimated_end"),
             })
