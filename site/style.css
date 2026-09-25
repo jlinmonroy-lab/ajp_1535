@@ -246,6 +246,21 @@ main { padding: 0 16px; }
   letter-spacing: .06em;
   color: var(--texto-tenue);
 }
+/* Enlaces a la llave en ajptour.com. Van al final de la ficha porque son un
+   salto fuera de la aplicación, no algo que se consulte de un vistazo. */
+.llaves { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+.llave {
+  display: inline-block;
+  padding: .35rem .7rem;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  color: var(--acento);
+  font-size: .78rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.llave:active { background: var(--superficie-2); }
+
 .enlace-stream {
   display: inline-block;
   margin-top: .4rem;

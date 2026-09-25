@@ -82,7 +82,19 @@ def clave_atleta(lado):
     return f"{normalizar(lado.get('name'))}|{normalizar(lado.get('club'))}"
 
 
-def parse_combate(crudo, mat, evento):
+def url_bracket(base_url, lang, event_id, bracket_id):
+    """Enlace a la llave en ajptour.com.
+
+    El `bracketId` del modelo lleva el evento delante ("1535-135577") para que
+    dos eventos no se pisen; Smoothcomp solo quiere el número de después.
+    """
+    if not bracket_id:
+        return None
+    numero = str(bracket_id).split("-")[-1]
+    return f"{base_url.rstrip('/')}/{lang}/event/{event_id}/bracket/{numero}"
+
+
+def parse_combate(crudo, mat, evento, base_url="https://ajptour.com", lang="en"):
     """Un combate del origen, con su tatami y el evento al que pertenece.
 
     En el tenant de AJP el combate no trae el nombre del tatami: se conoce
@@ -97,6 +109,7 @@ def parse_combate(crudo, mat, evento):
         "eventLabel": evento.get("label"),
         "bracketId": (f"{evento['id']}-{crudo['bracket_id']}"
                       if crudo.get("bracket_id") else None),
+        "bracketUrl": url_bracket(base_url, lang, evento["id"], crudo.get("bracket_id")),
         "matId": mat["id"],
         "matKey": f"{evento['id']}:{mat['id']}",
         "mat": mat.get("name"),
@@ -235,6 +248,7 @@ def construir_atletas(combates):
                     "country": lado["country"],
                     "image": lado["image"],
                     "categories": [],
+                    "brackets": [],
                     "matchIds": [],
                     "medals": medallas.get(clave, []),
                     "bestMedal": mejor_medalla(medallas.get(clave, [])),
@@ -245,6 +259,15 @@ def construir_atletas(combates):
                                  ("categories", c["category"].get("raw"))):
                 if valor and valor not in atleta[lista]:
                     atleta[lista].append(valor)
+            # Un cuadro por categoría: quien compite en Gi y No-Gi tiene dos.
+            if c.get("bracketUrl") and all(
+                    b["id"] != c["bracketId"] for b in atleta["brackets"]):
+                atleta["brackets"].append({
+                    "id": c["bracketId"],
+                    "category": c["category"].get("raw"),
+                    "eventLabel": c.get("eventLabel"),
+                    "url": c["bracketUrl"],
+                })
             # La foto puede faltar en una inscripción y estar en la otra.
             if not atleta["image"] and lado["image"]:
                 atleta["image"] = lado["image"]
@@ -261,7 +284,8 @@ def clave_orden(combate):
 
 
 def construir_estado(*, eventos, datos_por_evento, fetched_at,
-                     streams=None, grupo=None, stale=False, stale_since=None):
+                     streams=None, grupo=None, stale=False, stale_since=None,
+                     base_url="https://ajptour.com", lang="en"):
     """Arma el data.json combinando todos los eventos configurados.
 
     `eventos` es la lista de {id, label, name} y `datos_por_evento` un
@@ -306,7 +330,7 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
         for mat_id, crudos in combates_por_mat.items():
             mat = mats_por_id.get(mat_id, {"id": mat_id, "name": None})
             for crudo in crudos:
-                combate = parse_combate(crudo, mat, evento)
+                combate = parse_combate(crudo, mat, evento, base_url, lang)
                 vistos.setdefault(combate["id"], combate)
 
     combates = sorted(vistos.values(), key=clave_orden)

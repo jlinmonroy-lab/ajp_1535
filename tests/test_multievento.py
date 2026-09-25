@@ -247,5 +247,50 @@ class TestGrupoCompartido(unittest.TestCase):
         # La entrada se conserva: la lista no debe vaciarse sola.
         self.assertEqual(len(estado["group"]["athletes"]), 1)
 
+class TestEnlaceALaLlave(unittest.TestCase):
+    """El enlace al cuadro en ajptour.com.
+
+    El `bracketId` interno lleva el evento delante ("1535-135577") para que dos
+    eventos no se pisen, pero Smoothcomp solo entiende el número: si se colara
+    el prefijo, el enlace llevaría a un 404.
+    """
+
+    def setUp(self):
+        nogi = combate(1, "Ana", "Club", 111, "Rival", "C1", 222, bracket=135577)
+        gi = combate(2, "Ana", "Club", 999, "Otra", "C2", 333, bracket=135538)
+        self.estado = construir_estado(
+            eventos=EVENTOS,
+            datos_por_evento={
+                "1535": ([], [{"id": 1, "name": "Mat 1"}], {1: [nogi]}),
+                "1526": ([], [{"id": 1, "name": "Mat 1"}], {1: [gi]}),
+            },
+            fetched_at="2026-09-26T09:00:00Z",
+            base_url="https://ajptour.com", lang="en")
+
+    def test_la_url_no_arrastra_el_prefijo_del_evento(self):
+        combate_nogi = next(c for c in self.estado["matches"] if c["eventId"] == "1535")
+        self.assertEqual(combate_nogi["bracketId"], "1535-135577")
+        self.assertEqual(combate_nogi["bracketUrl"],
+                         "https://ajptour.com/en/event/1535/bracket/135577")
+
+    def test_un_cuadro_por_categoria(self):
+        ana = next(a for a in self.estado["athletes"] if a["name"] == "Ana")
+        self.assertEqual(len(ana["brackets"]), 2, "compite en Gi y No-Gi")
+        self.assertCountEqual(
+            [b["url"] for b in ana["brackets"]],
+            ["https://ajptour.com/en/event/1535/bracket/135577",
+             "https://ajptour.com/en/event/1526/bracket/135538"])
+        self.assertCountEqual([b["eventLabel"] for b in ana["brackets"]], ["No-Gi", "Gi"])
+
+    def test_respeta_el_idioma_configurado(self):
+        estado = construir_estado(
+            eventos=EVENTOS[:1],
+            datos_por_evento={"1535": ([], [{"id": 1, "name": "Mat 1"}],
+                                       {1: [combate(1, "A", "C", 1, "B", "D", 2)]})},
+            fetched_at="x", base_url="https://ajptour.com/", lang="es")
+        self.assertTrue(estado["matches"][0]["bracketUrl"].startswith(
+            "https://ajptour.com/es/event/1535/bracket/"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

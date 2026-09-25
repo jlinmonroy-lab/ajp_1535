@@ -199,6 +199,8 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
       : '<p class="sub">Sin combates en el schedule todavía.</p>';
   }
 
+  const llaves = conCombates ? enlacesLlave(atleta) : '';
+
   return `
     <article class="tarjeta">
       <div class="tarjeta-cabecera">
@@ -214,6 +216,7 @@ function tarjetaAtleta(atleta, { conCombates = false } = {}) {
             data-todos="${escapar(atleta.id)}" data-nombre="${escapar(atleta.name)}">
             ${enGrupo(atleta) ? '✓ Lo ve todo el grupo' : 'Seguir para todos'}</button>` : ''}
       ${combates}
+      ${llaves}
     </article>`;
 }
 
@@ -239,6 +242,20 @@ function revisarPendientes() {
       avisar('El cambio no se ha publicado. ¿Está corriendo el scraper?', true);
     }
   }
+}
+
+// Enlace a la llave en ajptour.com. Con más de un cuadro (Gi y No-Gi) se
+// distingue por categoría, que si no no se sabe cuál es cuál.
+function enlacesLlave(atleta, { conCategoria = false } = {}) {
+  const cuadros = atleta.brackets || [];
+  if (!cuadros.length) return '';
+  return `<div class="llaves">` + cuadros.map((b) => {
+    const etiqueta = (conCategoria || cuadros.length > 1) && b.category
+      ? `${b.eventLabel ? escapar(b.eventLabel) + ' · ' : ''}${escapar(b.category)}`
+      : 'Ver llave';
+    return `<a class="llave" href="${escapar(b.url)}" target="_blank" rel="noopener"
+              title="Ver la llave en ajptour.com">⤢ ${etiqueta}</a>`;
+  }).join('') + `</div>`;
 }
 
 function pintarSeguidos() {
@@ -424,6 +441,7 @@ function abrirDetalle(athleteId) {
     <p class="sub">${escapar(atleta.club || '—')}${atleta.country ? ' · ' + escapar(atleta.country) : ''}</p>
     ${eventos}
     ${medallas}
+    ${enlacesLlave(atleta, { conCategoria: true })}
     <h3 class="seccion-titulo">Combates</h3>
     ${combatesDe(atleta).map((c) => filaCombate(c, atleta.id)).join('') || '<p class="sub">Sin combates.</p>'}`;
   $('#detalle').classList.remove('oculta');
