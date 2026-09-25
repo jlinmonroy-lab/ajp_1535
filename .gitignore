@@ -30,3 +30,6 @@ site/data.json
 
 # Simulación del torneo (copia aislada, nunca se publica)
 tmp-demo/
+
+# Registro del día del evento
+registro/

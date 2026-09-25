@@ -39,14 +39,23 @@ python -m unittest discover -s tests
 python research/smoke_site.py            # recorre el frontend y captura pantallas
 ```
 
-## Durante el torneo
-
-Dos procesos en el portátil:
+## El día del torneo
 
 ```sh
-python -m scraper.main      # lee AJP y publica cada 75s
-python -m scraper.panel     # panel local, solo en este equipo
+python arrancar_evento.py
 ```
+
+Deja esa ventana abierta y ya está. El lanzador:
+
+- **impide que Windows suspenda el equipo** mientras esté abierto (sin tocar el plan de energía:
+  al cerrarlo, todo vuelve a su sitio);
+- **relanza el scraper si se cae**, apuntando cada incidencia en `registro/evento.log`;
+- levanta también el panel local.
+
+No puede cubrir un corte de luz, un reinicio por actualizaciones de Windows ni una caída del wifi,
+así que conviene dejar el equipo enchufado y posponer las actualizaciones antes de salir.
+
+Si prefieres arrancarlo a mano, `python -m scraper.main` hace lo mismo sin supervisión.
 
 El panel sirve la web en <http://127.0.0.1:8765> y **ahí** aparece el botón
 **«Seguir para todos»** en cada atleta. Al pulsarlo se añade a la lista del grupo, que viaja en el
