@@ -40,6 +40,9 @@ CONFIG = RAIZ / "config.json"
 SITIO = RAIZ / "site"
 DATOS = RAIZ / "data"
 LIMITE_CUERPO = 64 * 1024     # más que de sobra para un atleta
+# Un cuerpo que pasa del límite se descarta, hasta este tope, antes de contestar 400:
+# cerrar con datos sin leer hace que el sistema aborte la conexión y el cliente no ve el motivo.
+MAX_DRENAJE = 1024 * 1024
 PUERTO_POR_DEFECTO = 8765
 # Código de salida de "no he podido arrancar" (puerto ocupado, config ilegible).
 # Distinto de 1, que es lo que da Python al caerse con una excepción: el lanzador
@@ -131,6 +134,10 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
                   "zona": {"nombre": zona.get("nombre")} if isinstance(zona, dict) else None}
 
     class Handler(SimpleHTTPRequestHandler):
+        # Sin tiempo máximo, un cliente que declara un cuerpo y no lo manda dejaría
+        # un hilo esperando para siempre.
+        timeout = 30
+
         def log_message(self, *args):
             pass  # el ruido que interesa es el del almacén, no el de cada GET
 
@@ -257,21 +264,27 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
         # ---- POST ----
 
         def _post(self):
-            m = RUTA_GRUPO.match(urllib.parse.unquote(urllib.parse.urlsplit(self.path).path))
-            if not m:
-                return self._error(404, "ruta desconocida")
-
-            # El cuerpo se lee siempre, aunque la petición vaya a rechazarse: cerrar
-            # la conexión con datos sin leer hace que el sistema la aborte y el
-            # cliente se quede sin ver el motivo del rechazo.
+            # El cuerpo se lee siempre, aunque la petición vaya a rechazarse (también
+            # si la ruta no existe): cerrar la conexión con datos sin leer hace que el
+            # sistema la aborte y el cliente se quede sin ver el motivo del rechazo.
             try:
                 largo = int(self.headers.get("Content-Length") or 0)
             except ValueError:
                 largo = 0
             if largo > LIMITE_CUERPO:
+                restante = min(largo, MAX_DRENAJE)
+                while restante > 0:
+                    trozo = self.rfile.read(min(restante, 64 * 1024))
+                    if not trozo:
+                        break
+                    restante -= len(trozo)
                 self.close_connection = True
                 return self._error(400, "cuerpo ausente o demasiado grande")
             cuerpo = self.rfile.read(largo) if largo > 0 else b""
+
+            m = RUTA_GRUPO.match(urllib.parse.unquote(urllib.parse.urlsplit(self.path).path))
+            if not m:
+                return self._error(404, "ruta desconocida")
 
             if not es_panel_local(self):
                 return self._error(403, "solo se puede cambiar desde el equipo del servidor")
