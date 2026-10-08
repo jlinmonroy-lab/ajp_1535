@@ -89,11 +89,12 @@ resultados son inventados.
 
 ## Logo y colores del equipo
 
-- **Logo**: sustituye `site/img/logo.svg` (el actual es un «FC» provisional). Mejor en SVG. Si es
-  PNG, que sea cuadrado (128×128 o 256×256), con fondo transparente y de menos de 30 KB: guárdalo
-  como `site/img/logo.png` y cambia `logo.svg` por `logo.png` en `site/index.html`.
-- **Colores**: edita `--equipo` (color principal) y `--equipo-texto` (texto encima: blanco si el
-  color es oscuro, `#10151c` si es claro) al principio de `site/style.css`.
+- **Logo**: `site/img/logo.png`. Es el logo de FC Team con los colores invertidos (el original es
+  negro sobre blanco), para que se funda con el fondo negro. Para cambiarlo, sustituye ese fichero:
+  cuadrado o casi, de unos 256 px y pocas decenas de KB.
+- **Colores**: la web es siempre negra con letras blancas. El color de botones y pestaña activa es
+  `--equipo` (ahora blanco), y `--equipo-texto` el del texto encima (ahora negro); los dos están al
+  principio de `site/style.css`.
 - Todo lo que haya en `site/img/` se publica junto a la web en el siguiente ciclo del scraper. El
   repo es público, así que cualquier imagen que pongas ahí será visible.
 

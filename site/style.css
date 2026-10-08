@@ -4,16 +4,17 @@
   /* Colores del equipo: cambia solo estos dos.
      --equipo es el color principal (botones, pestaña activa, línea de la cabecera);
      --equipo-texto, el del texto encima de él: blanco si --equipo es oscuro,
-     casi negro (#10151c) si es claro, como amarillo o blanco. */
-  --equipo: #3f8cff;
-  --equipo-texto: #fff;
+     negro si es claro, como ahora. Blanco y negro, como el logo. */
+  --equipo: #fff;
+  --equipo-texto: #000;
 
-  --fondo: #0e1116;
-  --superficie: #171c24;
-  --superficie-2: #1f2631;
-  --borde: #2b3442;
-  --texto: #f2f5f9;
-  --texto-tenue: #9aa7b8;
+  /* Siempre negro, también en móviles con el modo claro activado. */
+  --fondo: #000;
+  --superficie: #111;
+  --superficie-2: #1c1c1c;
+  --borde: #2e2e2e;
+  --texto: #fff;
+  --texto-tenue: #b3b3b3;
   --acento: var(--equipo);
   --vivo: #ff4d4f;
   --ok: #2ecc71;
@@ -21,17 +22,6 @@
   --plata: #c8d0da;
   --bronce: #cd7f32;
   --radio: 12px;
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --fondo: #f4f6fa;
-    --superficie: #ffffff;
-    --superficie-2: #eef1f6;
-    --borde: #d6dce6;
-    --texto: #10151c;
-    --texto-tenue: #5b6878;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -50,12 +40,12 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--superficie);
+  background: var(--fondo);
   border-bottom: 2px solid var(--equipo);
   padding: max(env(safe-area-inset-top), .7rem) 16px .6rem;
 }
 .cabecera-fila { display: flex; align-items: center; gap: .5rem; }
-.logo { width: 32px; height: 32px; flex: none; object-fit: contain; border-radius: 6px; }
+.logo { width: 40px; height: 40px; flex: none; object-fit: contain; }
 .cabecera h1 {
   margin: 0;
   font-size: 1rem;
