@@ -17,6 +17,9 @@ RONDA_BRONCE = "bronze match"
 # seeded, unseeded) significa que aún puede cambiar.
 ESTADO_TERMINADO = "finished"
 
+# Datos del evento que vienen del buscador y se reenvían tal cual al frontend.
+METADATOS_EVENTO = ("baseUrl", "startdate", "enddate", "city", "country")
+
 
 def parse_categoria(group):
     """Desmenuza la categoría de AJP: 'Men's GI / Brown / Master 1 / 62KG'.
@@ -288,8 +291,9 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
                      base_url="https://ajptour.com", lang="en"):
     """Arma el data.json combinando todos los eventos configurados.
 
-    `eventos` es la lista de {id, label, name} y `datos_por_evento` un
-    {event_id: (dias, mats, combates_por_mat)} con las respuestas crudas. Un
+    `eventos` es la lista de {id, label, name, baseUrl?} y `datos_por_evento` un
+    {event_id: (dias, mats, combates_por_mat)} con las respuestas crudas. Si el
+    evento trae `baseUrl` (su subdominio), manda sobre el `base_url` general. Un
     evento sin datos (todavía sin schedule publicado) simplemente no aporta
     nada, sin romper el resto.
 
@@ -311,6 +315,9 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
             "name": evento.get("name"),
             "days": [{"id": d.get("id"), "name": d.get("name"), "date": d.get("date")}
                      for d in dias],
+            # Lo que el buscador sabe del evento: solo si se conoce, para que el
+            # data.json de siempre (eventos de la config) no cambie de forma.
+            **{k: evento[k] for k in METADATOS_EVENTO if evento.get(k)},
         })
 
         for m in mats:
@@ -330,31 +337,17 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
         for mat_id, crudos in combates_por_mat.items():
             mat = mats_por_id.get(mat_id, {"id": mat_id, "name": None})
             for crudo in crudos:
-                combate = parse_combate(crudo, mat, evento, base_url, lang)
+                # Cada evento puede vivir en un subdominio distinto del organizador.
+                combate = parse_combate(crudo, mat, evento,
+                                        evento.get("baseUrl") or base_url, lang)
                 vistos.setdefault(combate["id"], combate)
 
     combates = sorted(vistos.values(), key=clave_orden)
     atletas = construir_atletas(combates)
 
-    # La lista que ve todo el grupo sin tener que seguir a nadie. Se marca aquí
-    # para que el frontend no tenga que cruzar listas en cada repintado.
-    grupo = grupo or {}
-    del_grupo = {a.get("id") for a in (grupo.get("atletas") or []) if a.get("id")}
-    # Los apuntados a mano sin club ("nombre|") casan solo por nombre: el club
-    # tal como lo escribe Smoothcomp ("Fusión BJJ - España.") no se adivina.
-    solo_nombre = {i[:-1] for i in del_grupo if i.endswith("|")}
-    for atleta in atletas:
-        nombre = atleta["id"].split("|", 1)[0]
-        atleta["inGroup"] = atleta["id"] in del_grupo or nombre in solo_nombre
-
-    return {
+    estado = {
         "events": resumen_eventos,
-        "group": {
-            "name": grupo.get("nombre") or None,
-            # Se conservan tal cual, incluidos los que no compiten (alguien que
-            # al final no se inscribió): así la lista no se pierde sola.
-            "athletes": grupo.get("atletas") or [],
-        },
+        "group": {},
         "fetchedAt": fetched_at,
         "stale": stale,
         "staleSince": stale_since,
@@ -363,3 +356,30 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
         "matches": combates,
         "athletes": atletas,
     }
+    return aplicar_grupo(estado, grupo)
+
+
+def aplicar_grupo(estado, grupo):
+    """Anota en el estado la lista que ve todo el grupo sin tener que seguir a nadie.
+
+    Se marca aquí para que el frontend no tenga que cruzar listas en cada
+    repintado. Modifica `estado` y lo devuelve. Se puede volver a llamar sobre un
+    estado ya construido, que es lo que permite cambiar el grupo sin releer nada
+    de Smoothcomp.
+    """
+    grupo = grupo or {}
+    del_grupo = {a.get("id") for a in (grupo.get("atletas") or []) if a.get("id")}
+    # Los apuntados a mano sin club ("nombre|") casan solo por nombre: el club
+    # tal como lo escribe Smoothcomp ("Fusión BJJ - España.") no se adivina.
+    solo_nombre = {i[:-1] for i in del_grupo if i.endswith("|")}
+    for atleta in estado["athletes"]:
+        nombre = atleta["id"].split("|", 1)[0]
+        atleta["inGroup"] = atleta["id"] in del_grupo or nombre in solo_nombre
+
+    estado["group"] = {
+        "name": grupo.get("nombre") or None,
+        # Se conservan tal cual, incluidos los que no compiten (alguien que
+        # al final no se inscribió): así la lista no se pierde sola.
+        "athletes": grupo.get("atletas") or [],
+    }
+    return estado

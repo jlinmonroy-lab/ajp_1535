@@ -21,7 +21,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 
-from scraper.parse import construir_estado  # noqa: E402
+from scraper.parse import aplicar_grupo, construir_estado  # noqa: E402
 
 EVENTOS = [
     {"id": "1535", "label": "No-Gi", "name": "AJP NO-GI MADRID"},
@@ -304,6 +304,74 @@ class TestEnlaceALaLlave(unittest.TestCase):
             fetched_at="x", base_url="https://ajptour.com/", lang="es")
         self.assertTrue(estado["matches"][0]["bracketUrl"].startswith(
             "https://ajptour.com/es/event/1535/bracket/"))
+
+
+class TestBaseUrlPorEvento(unittest.TestCase):
+    """Con el buscador, cada evento vive en el subdominio de su organizador."""
+
+    def setUp(self):
+        eventos = [
+            {"id": "26416", "label": None, "name": "KIMURA CUP",
+             "baseUrl": "https://kimuracup.smoothcomp.com",
+             "startdate": "2026-02-01", "city": "Madrid", "country": "ES"},
+            {"id": "33588", "label": None, "name": "MADRID BJJ CUP"},   # sin baseUrl
+        ]
+        datos = {i: ([], [{"id": 1, "name": "Mat 1"}],
+                     {1: [combate(1, "A", "CA", 1, "B", "CB", 2)]})
+                 for i in ("26416", "33588")}
+        self.estado = construir_estado(
+            eventos=eventos, datos_por_evento=datos, fetched_at="x",
+            base_url="https://smoothcomp.com")
+
+    def test_cada_llave_apunta_al_host_de_su_evento(self):
+        urls = {c["eventId"]: c["bracketUrl"] for c in self.estado["matches"]}
+        self.assertEqual(urls["26416"],
+                         "https://kimuracup.smoothcomp.com/en/event/26416/bracket/1")
+        self.assertEqual(urls["33588"],
+                         "https://smoothcomp.com/en/event/33588/bracket/1",
+                         "sin baseUrl propia se usa la general")
+
+    def test_los_datos_del_buscador_llegan_al_resumen_del_evento(self):
+        resumen = next(e for e in self.estado["events"] if e["id"] == "26416")
+        self.assertEqual(resumen["baseUrl"], "https://kimuracup.smoothcomp.com")
+        self.assertEqual(resumen["startdate"], "2026-02-01")
+        self.assertEqual(resumen["city"], "Madrid")
+
+    def test_el_resumen_no_trae_claves_vacias(self):
+        # El data.json de los eventos de la config no debe cambiar de forma.
+        resumen = next(e for e in self.estado["events"] if e["id"] == "33588")
+        self.assertEqual(sorted(resumen), ["days", "id", "label", "name"])
+
+
+class TestAplicarGrupo(unittest.TestCase):
+    """El grupo se puede cambiar sobre un estado ya construido, sin releer nada."""
+
+    def setUp(self):
+        a = combate(1, "Ana Pérez", "Gracie Madrid", 111, "Otro", "Club B", 222)
+        self.estado = construir_estado(
+            eventos=EVENTOS[:1],
+            datos_por_evento={"1535": ([], [{"id": 1, "name": "Mat 1"}], {1: [a]})},
+            fetched_at="x")
+
+    def marcados(self):
+        return sorted(a["name"] for a in self.estado["athletes"] if a["inGroup"])
+
+    def test_marca_y_desmarca_al_cambiar_el_grupo(self):
+        aplicar_grupo(self.estado, {"nombre": "Equipo", "atletas": [
+            {"id": "ana perez|gracie madrid", "name": "Ana Pérez"}]})
+        self.assertEqual(self.marcados(), ["Ana Pérez"])
+        self.assertEqual(self.estado["group"]["name"], "Equipo")
+
+        aplicar_grupo(self.estado, {"nombre": "Equipo", "atletas": [
+            {"id": "otro|club b", "name": "Otro"}]})
+        self.assertEqual(self.marcados(), ["Otro"], "Ana ya no está en el grupo")
+
+        aplicar_grupo(self.estado, None)
+        self.assertEqual(self.marcados(), [])
+        self.assertEqual(self.estado["group"]["athletes"], [])
+
+    def test_devuelve_el_mismo_estado(self):
+        self.assertIs(aplicar_grupo(self.estado, None), self.estado)
 
 
 if __name__ == "__main__":
