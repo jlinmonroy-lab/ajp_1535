@@ -176,3 +176,78 @@ ciclo, se puede añadir con el scraper en marcha.
 3. **Estado en vivo**: el 1257 está terminado, así que todos sus combates están `finished`. El
    comportamiento de `running` y `time_passed` durante un evento en curso no se ha observado en AJP
    (sí en el evento `29650` de smoothcomp.com, que mostraba `running`, `seeded` y `unseeded`).
+
+
+---
+
+# Buscar eventos y leer cualquier evento de smoothcomp.com (2026-10-08)
+
+Lo anterior se escribió contra `ajptour.com` y un evento concreto. Esto es lo verificado al
+generalizarlo a **todos** los eventos de smoothcomp.com, con peticiones reales y de solo lectura.
+
+## La lista de eventos
+
+No hay API: la lista viene como JSON incrustado en el HTML.
+
+| URL | Qué da |
+| --- | --- |
+| `/{lang}/events/upcoming` | `var events = [ … ];` con **todos** los próximos y los que están en marcha (~1700, 1,25 MB). No pagina |
+| `/{lang}/events/past?page=N` | 40 por página; `page` funciona |
+| `…?search=madrid` | filtro de texto **en el servidor**, en ambas |
+| `…?countries=ES`, `?cg=1` | por país y por grupo de deporte; sin usar de momento |
+
+Cada evento: `id`, `title`, `url` (con el **subdominio del organizador**: `spainbjjtour.`,
+`kimuracup.`…), `startdate`, `enddate`, `location_city`, `location_country`, `eventEnded`,
+`cover_image`. Se extrae con `json.JSONDecoder().raw_decode` desde el `[`, no con una regex: hay
+corchetes anidados.
+
+Las ligas y circuitos aparecen como eventos de meses o de un año entero (`startdate` en el pasado),
+por eso los próximos se ordenan dejando esos al final.
+
+## Un evento suelto
+
+| Ruta | Resultado |
+| --- | --- |
+| `smoothcomp.com/en/event/{id}/…` | **302 al subdominio del organizador**; el cliente debe seguir la redirección y recordar el host final |
+| `…/schedule/new/matcategories.json` de un id inexistente | **404** (HTML) |
+| `…/schedule/new/matcategories.json` sin publicar | **403** (de la aplicación), distinto del 403 de Cloudflare |
+| `…/getCmsData` | `eventData.title` (sin Cloudflare). Las fechas vienen como texto sin año (`"01 Feb"`): no se usan |
+
+## Cloudflare, por ruta
+
+Las **páginas HTML** de evento (`/event/{id}`, `/results`, `/schedule`, `/profile/{id}`) dan 403 con
+reto a `curl`. Pasan sin problema la **lista de eventos** y todos los `.json`/XHR. Como la lista es
+HTML, es lo primero que se rompería si Cloudflare endureciera: por eso la web admite abrir un evento
+pegando su número o enlace, sin pasar por el buscador.
+
+## CORS
+
+Smoothcomp contesta `Access-Control-Allow-Origin: <el Origin que reciba>` con
+`Allow-Credentials: true`, y el preflight devuelve 204. Es decir, un navegador podría leerlo
+directamente. No se usa (ver `architecture.md`, Fase 2): es una cabecera no documentada y desde una
+wifi compartida generaría ráfagas de peticiones desde una sola IP.
+
+## Cuadros y medallas en otros organizadores
+
+Probado con eventos pasados de tres organizadores:
+
+| Evento | Combates | Observaciones |
+| --- | --- | --- |
+| Kimura Cup Madrid (26416) | 712 | 189 cuadros; solo **34** con `Bronze match`: el resto, doble bronce (semifinalistas). Antes de contarlo así salían 34 bronces; ahora 165 |
+| ADCC Perth Cup (33969) | 107 | categorías `Men / Beginner / Adults / -65 kg`; mezcla de eliminatorias y rondas `Match 1/3` |
+| Grappling Industries Washington (25733) | 912 | categorías de tres partes (`Absolute No Gi - All Levels / Male / Adult`): se enseñan en crudo; muchos cuadros `Match 1/3` |
+
+Los cuadros «todos contra todos» no tienen `Final`, así que no generan medallas. Ninguno de los tres
+rompió el parser.
+
+## Otras notas
+
+- **`ajptour.com` no está en esta lista:** es otra instalación con sus propios ids, que colisionan con
+  los de smoothcomp.com (el 1535 de AJP no es el 1535 de smoothcomp.com).
+- **No hay buscador de atletas** sin iniciar sesión (`/search/users` da 401). Los atletas salen de los
+  combates.
+- **`robots.txt`:** `Crawl-delay: 10` y `Disallow: /scoreboard`. Se respeta con la caché de 10 min de
+  la lista y la pausa entre lecturas.
+- **Límite de ritmo:** una ráfaga de ~150 peticiones rápidas dio un 429 en una ruta ajena (`/club/find`).
+  Con una petición cada 2 s no ha pasado en ninguna de las lecturas completas de arriba (de 12 a 39 s).
+- **Términos de uso:** no mencionan el scraping, solo el «consumo excesivo de recursos». Zona gris.

@@ -127,3 +127,124 @@ enteran.
 4. Repetir la captura contra el evento 1535 cuando publiquen su schedule, y comprobar el
    comportamiento de los estados `running`/`seeded`, que no se ha podido observar en un evento AJP.
 5. Streams por tatami: sin fuente automatizable; se configuran a mano en `config.json`.
+
+
+---
+
+# Fase 2 — Multi-evento bajo demanda
+
+Estado: **implementada**. Sustituye a la Opción A como forma normal de uso; la Opción A queda como
+modo «instantánea estática» (`scraper.main` + `publish.py`).
+
+## Por qué cambia la arquitectura
+
+La Opción A sirve un fichero estático con **un** evento, que alguien eligió de antemano en
+`config.json`. Poder buscar cualquier evento de smoothcomp.com rompe esa premisa: ya no se sabe qué
+hay que leer hasta que alguien lo pide. Hace falta algo que lea bajo demanda.
+
+## Decisión: servidor con caché compartida, no solo navegador
+
+Smoothcomp contesta con `Access-Control-Allow-Origin` igual al `Origin` que recibe (comprobado), así
+que un navegador *podría* leerlo directamente y seguir en GitHub Pages. Se descartó:
+
+| | Servidor con caché (elegida) | Solo navegador |
+| --- | --- | --- |
+| Peticiones a Smoothcomp con 20 móviles | las de **un** cliente por evento y ciclo | las de 20: ~22 peticiones × 20 cada 75 s |
+| En la wifi de un pabellón | una IP, un ritmo controlado | **una sola IP pública para todos** → 429 (se observó uno a ~150 peticiones rápidas) |
+| `parse.py`, las medallas y sus pruebas | se reutilizan | hay que portarlos a JavaScript |
+| Depende de | nada especial | una cabecera CORS que no está documentada |
+| Coste | hay que tener un servidor encendido | ninguno |
+
+El coste del servidor se asume: el equipo que hacía de scraper el día del torneo ya estaba
+encendido de todas formas.
+
+Segunda decisión: **biblioteca estándar** (`ThreadingHTTPServer`) en vez de FastAPI, para mantener el
+«requiere solo Python 3, sin dependencias». Lo que FastAPI daría gratis (gzip, ETag, rutas) son unas
+~100 líneas.
+
+## Piezas
+
+```
+móvil ──► scraper/servidor.py ──► Buscador ──────────► smoothcomp.com/…/events/{upcoming|past}
+          (web + API JSON)   └─► Almacén ──hilos──► smoothcomp.com/…/schedule/new/…
+                                    ▲
+                                    └─ fetch.RITMO: una petición a la vez, con pausa
+```
+
+| Módulo | Responsabilidad |
+| --- | --- |
+| `fetch.py` | cliente HTTP; **todo** el tráfico pasa por `RITMO`; distingue 403 «no publicado», 404 «no existe» y reto de Cloudflare |
+| `eventos.py` | `Buscador`: lista de eventos con caché (10 min), copia vieja si Smoothcomp falla, y memoria de a qué subdominio pertenece cada evento |
+| `almacen.py` | `Almacen`: estado ya convertido, serializado y comprimido por evento; refresco bajo demanda |
+| `parse.py` | sin cambios de fondo: puro, sin red |
+| `grupos.py` | lista del grupo por evento, en `data/grupos.json` |
+| `servidor.py` | rutas, gzip/ETag, y la guarda del panel local |
+
+## Cómo se atiende una petición
+
+La petición **nunca** lee Smoothcomp. Pide al almacén, que contesta con lo que tiene:
+
+1. **Evento nuevo:** se crea la entrada, se encola su lectura y se contesta `202 cargando`. La web
+   enseña «Leyendo el schedule…» y vuelve a preguntar a los 3 s.
+2. **Entrada fresca** (menos de `refreshSeconds`): se sirve tal cual; si el cliente trae el `ETag`, `304`.
+3. **Entrada caducada:** se sirve igual y **se encola un refresco** detrás (*stale-while-revalidate*).
+   Nadie espera. Como quien abre un evento que nadie miraba recibiría datos viejos hasta su siguiente
+   sondeo, la web vuelve a preguntar a los 5 s si lo recibido es más viejo que un ciclo.
+4. **Nadie lo mira** durante `inactividadMinutos`: se olvida. No hay ningún bucle por evento, así que el
+   tráfico hacia Smoothcomp es proporcional a lo que se **está** mirando, no a lo que se ha mirado.
+
+Cada lectura la hacen unos hilos (`workers`) que sacan de una cola sin duplicados. Da igual cuántos
+hilos haya: `RITMO` deja pasar una petición a la vez, con `requestPauseSeconds` de pausa.
+
+### Estados de un evento
+
+| Situación | Qué pasa |
+| --- | --- |
+| Schedule publicado | `200` con el estado; `events[].published = true` |
+| Aún sin publicar (403 de la aplicación) | `200` sin combates y `published = false`; la web lo explica |
+| El id no existe (404) | `404`; no se vuelve a preguntar en 5 min |
+| Smoothcomp falla, sin copia | `502`, reintento a los 15 s |
+| Smoothcomp falla, con copia | se sigue sirviendo; tras `staleAfterFailures` fallos seguidos, `stale = true` |
+| Reto de Cloudflare | se cuenta como fallo («nos bloquean»), **no** como «no publicado» |
+
+### Acotado
+
+Un servidor abierto a internet con «cualquier id» invita a sondear. Por eso: ids solo con dígitos (van
+dentro de la URL que se pide), como mucho 3 eventos a la vez, `maxEventosEnCache` entradas (se echa la
+menos reciente), como mucho 10 lecturas en cola (más es `503`), y el host al que se pide sale de la
+lista de Smoothcomp y solo se acepta si es `smoothcomp.com` o un subdominio por https.
+
+## El panel del grupo con un túnel por medio
+
+Escribir la lista del grupo solo se permite desde el equipo del servidor. El panel antiguo lo
+resolvía escuchando solo en `127.0.0.1`, pero un túnel (cloudflared, ngrok) **conecta desde
+`127.0.0.1`**: con solo mirar la IP, cualquiera con el enlace público podría cambiar la lista. Se
+exige a la vez:
+
+1. IP de origen en loopback;
+2. `Host` local (`localhost`, `127.0.0.1`, `::1`);
+3. ninguna cabecera de proxy (`X-Forwarded-For`, `Forwarded`, `CF-Connecting-IP`…);
+4. si hay `Origin`, que sea el propio servidor, y `Content-Type: application/json`. Sin esto, una
+   página cualquiera abierta en el navegador del operador podría hacer un `POST` a `127.0.0.1`
+   (CSRF); un formulario no puede mandar JSON sin que el navegador pida antes un `OPTIONS`, que no
+   se contesta.
+
+Además, en Windows `http.server` abre el puerto con `SO_REUSEADDR`, que allí deja que **dos procesos
+compartan puerto sin error**: el segundo servidor «arrancaba» y nadie sabía cuál contestaba. Se
+desactiva en Windows, y el lanzador distingue «no pude arrancar» (código 3) de una caída (que
+relanza).
+
+## Qué se descartó
+
+- **Un hilo con bucle por evento**, como el scraper antiguo: cuesta tráfico por cada evento visto aunque
+  nadie lo mire ya.
+- **WebSockets / eventos del servidor:** Smoothcomp no ofrece push; sería polling por dentro igual.
+- **Redis u otra caché externa:** un proceso, memoria, ~1 MB por evento; no hace falta.
+
+## Pendiente
+
+1. Probar con un torneo en directo de verdad. El estado `running` real solo se ha visto de pasada
+   (un combate que quedó colgado en el Kimura Cup, ya terminado) y en el origen simulado: no se
+   ha seguido un torneo entero mientras se jugaba.
+2. Cuadros «todos contra todos» (`Match 1/3`…): no generan medallas.
+3. Un sondeo `matches.json?upcoming=1` más barato para el «en vivo»: en las pruebas devolvía lo mismo.
