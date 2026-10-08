@@ -119,6 +119,12 @@ def main():
     args = p.parse_args()
 
     cfg = cargar_config(args)
+    if not cfg.get("events"):
+        print("Este modo (instantánea estática) necesita un evento: usa --event ID o\n"
+              "la clave 'events' de config.json.\n"
+              "Para seguir cualquier evento de Smoothcomp desde la web, lo normal es:\n"
+              "    python -m scraper.servidor")
+        return 2
     destino = RAIZ / cfg.get("output", "site/data.json")
 
     # El panel viaja con el scraper: son las dos mitades de lo mismo y tenerlos

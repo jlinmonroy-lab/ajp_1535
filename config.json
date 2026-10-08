@@ -1,29 +1,28 @@
 {
-  "events": [
-    {
-      "id": "33588",
-      "label": null,
-      "name": "FIJJD MADRID BJJ CUP GI & NO-GI 2026"
-    }
-  ],
-  "venue": "Arganda del Rey, Madrid · 17 oct 2026",
-  "baseUrl": "https://spainbjjtour.smoothcomp.com",
+  "baseUrl": "https://smoothcomp.com",
   "lang": "en",
   "refreshSeconds": 75,
   "requestPauseSeconds": 2.0,
   "timeoutSeconds": 30,
   "staleAfterFailures": 3,
+  "branding": {
+    "teamName": "FC Team",
+    "logo": "img/logo.png"
+  },
+  "servidor": {
+    "puerto": 8765,
+    "listaEventosTtlSeconds": 600,
+    "inactividadMinutos": 30,
+    "maxEventosEnCache": 20,
+    "workers": 2
+  },
   "output": "site/data.json",
   "streams": [],
   "publish": {
-    "enabled": true,
-    "worktree": "C:/Users/gork-/ajp-publish",
+    "enabled": false,
+    "worktree": "",
     "branch": "gh-pages",
     "message": "datos del evento",
     "maxMinutesSinPublish": 5
-  },
-  "grupo": {
-    "nombre": "Nuestro equipo",
-    "atletas": []
   }
 }

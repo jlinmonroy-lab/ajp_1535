@@ -17,6 +17,18 @@ Endpoints (los mismos que documenta docs/data-source.md):
     /en/event/<id>/schedule/new/mats.json/<dayId>
     /en/event/<id>/schedule/new/mat/<matId>/matches.json
 
+Para el servidor multi-evento (scraper/servidor.py) sirve además lo que usa el
+buscador, con los eventos servidos más los de --sin-schedule en el catálogo:
+
+    /en/events/upcoming?search=&page=     (y /past) -> HTML con `var events = [...]`
+    /en/event/<id>/getCmsData             -> el título del evento
+
+Un evento de --sin-schedule existe pero responde 403 (schedule sin publicar), como
+el 33588 de verdad. Con --estricto, un id que no existe responde 404, que es lo
+que hace Smoothcomp; sin él se mantiene el 403 de siempre, del que depende
+research/rehearsal.py. Con --relleno N hay N eventos pasados más, para probar
+la paginación.
+
 Control en caliente, para que el ensayo pueda tumbar y levantar el origen sin
 matar el proceso:
 
@@ -27,6 +39,7 @@ matar el proceso:
     /control/estado        -> resumen de en qué punto va el torneo
 
 Uso:  python research/mock_origen.py [--eventos 1535,1526] [--simular-vivo]
+              [--sin-schedule 33588] [--estricto] [--relleno 55]
 """
 import argparse
 import json
@@ -34,6 +47,7 @@ import random
 import re
 import sys
 import threading
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -42,6 +56,9 @@ RAIZ = Path(__file__).resolve().parent.parent
 RUTA_DIAS = re.compile(r"^/en/event/(\d+)/schedule/new/matcategories\.json$")
 RUTA_MATS = re.compile(r"^/en/event/(\d+)/schedule/new/mats\.json/(\d+)$")
 RUTA_COMBATES = re.compile(r"^/en/event/(\d+)/schedule/new/mat/(\d+)/matches\.json$")
+RUTA_LISTA = re.compile(r"^/(?:en|es)/events/(upcoming|past)$")
+RUTA_CMS = re.compile(r"^/(?:en|es)/event/(\d+)/getCmsData$")
+POR_PAGINA_PASADOS = 40   # como Smoothcomp
 
 # Cuántos combates avanzan de estado en cada lectura del schedule.
 ARRANCAN_POR_LECTURA = 3
@@ -140,13 +157,48 @@ class Evento:
 class Origen:
     """Todos los eventos servidos, más el control de fallos y congelación."""
 
-    def __init__(self, ids, fixture, simular_vivo):
+    def __init__(self, ids, fixture, simular_vivo, sin_schedule=(), estricto=False,
+                 relleno=0, puerto=8899):
         self.candado = threading.Lock()
         self.fallar = False
         self.congelado = False
         self.lecturas = 0
+        self.estricto = estricto
         self.eventos = {str(e): Evento(e, fixture, i, simular_vivo)
                         for i, e in enumerate(ids)}
+        self.sin_schedule = [str(e) for e in sin_schedule]
+        self.catalogo = self._catalogo(puerto, relleno)
+
+    def existe(self, event_id):
+        return event_id in self.eventos or event_id in self.sin_schedule
+
+    def _catalogo(self, puerto, relleno):
+        """Los eventos que el buscador conoce: los próximos y los pasados."""
+        def evento(event_id, titulo, fecha, pasado=False):
+            return {"id": int(event_id), "title": titulo,
+                    "url": f"http://127.0.0.1:{puerto}/en/event/{event_id}",
+                    "startdate": fecha, "enddate": fecha,
+                    "location_city": "Arganda del Rey", "location_country": "ES",
+                    "eventEnded": pasado, "cover_image": None}
+
+        proximos = [evento(e, f"Evento simulado {e}", "2026-10-17")
+                    for e in [*self.eventos, *self.sin_schedule]]
+        pasados = [evento(900000 + i, f"Evento pasado {i + 1}", "2025-05-10", True)
+                   for i in range(relleno)]
+        return {"upcoming": proximos, "past": pasados}
+
+    def lista(self, cuando, consulta):
+        """La página de Smoothcomp con `var events = [...]`, filtrada y paginada."""
+        params = urllib.parse.parse_qs(consulta)
+        buscado = (params.get("search") or [""])[0].lower()
+        pagina = int((params.get("page") or ["1"])[0])
+        eventos = [e for e in self.catalogo[cuando]
+                   if buscado in e["title"].lower() or buscado in str(e["id"])]
+        if cuando == "past":    # 40 por página; `upcoming` viene entero
+            inicio = (pagina - 1) * POR_PAGINA_PASADOS
+            eventos = eventos[inicio:inicio + POR_PAGINA_PASADOS]
+        return ("<html><head><script>\n  var events = "
+                f"{json.dumps(eventos, ensure_ascii=False)};\n  </script></head><body></body></html>")
 
     def resumen(self):
         return {"lecturas": self.lecturas, "fallando": self.fallar,
@@ -169,7 +221,7 @@ def crear_handler(origen, simular_vivo):
             self.wfile.write(datos)
 
         def do_GET(self):
-            ruta = self.path
+            ruta, _, consulta = self.path.partition("?")
 
             if ruta.startswith("/control/"):
                 with origen.candado:
@@ -190,9 +242,20 @@ def crear_handler(origen, simular_vivo):
                     # antes de que el scraper se dé por vencido y marque stale.
                     return self._responder(503, {"error": "origen caído (simulado)"})
 
+                if m := RUTA_LISTA.match(ruta):
+                    return self._responder(200, origen.lista(m.group(1), consulta), "text/html")
+
+                if m := RUTA_CMS.match(ruta):
+                    if origen.estricto and not origen.existe(m.group(1)):
+                        return self._responder(404, "404 - not found", "text/html")
+                    return self._responder(
+                        200, {"eventData": {"title": f"Evento simulado {m.group(1)}"}})
+
                 if m := RUTA_DIAS.match(ruta):
                     evento = origen.eventos.get(m.group(1))
                     if evento is None:
+                        if origen.estricto and not origen.existe(m.group(1)):
+                            return self._responder(404, "404 - not found", "text/html")
                         # Igual que AJP con un evento sin schedule publicado.
                         return self._responder(403, {"error": "not allowed"})
                     origen.lecturas += 1
@@ -231,10 +294,18 @@ def main():
                    help="carpeta de fixtures de la que salen los datos")
     p.add_argument("--simular-vivo", action="store_true",
                    help="el torneo avanza: seeded -> running -> finished")
+    p.add_argument("--sin-schedule", default="",
+                   help="ids que existen en el buscador pero aún no han publicado (403)")
+    p.add_argument("--estricto", action="store_true",
+                   help="un id que no existe responde 404, como Smoothcomp")
+    p.add_argument("--relleno", type=int, default=0,
+                   help="eventos pasados de relleno, para probar la paginación")
     args = p.parse_args()
 
     ids = [e.strip() for e in args.eventos.split(",") if e.strip()]
-    origen = Origen(ids, args.fixture, args.simular_vivo)
+    sin = [e.strip() for e in args.sin_schedule.split(",") if e.strip()]
+    origen = Origen(ids, args.fixture, args.simular_vivo, sin_schedule=sin,
+                    estricto=args.estricto, relleno=args.relleno, puerto=args.puerto)
     servidor = HTTPServer(("127.0.0.1", args.puerto),
                           crear_handler(origen, args.simular_vivo))
 
@@ -242,6 +313,8 @@ def main():
     for e in origen.eventos.values():
         print(f"  evento {e.id}: {len(e.mats)} tatamis, "
               f"{sum(len(v) for v in e.combates.values())} combates")
+    for e in origen.sin_schedule:
+        print(f"  evento {e}: sin schedule publicado (403)")
     if args.simular_vivo:
         print("Modo en vivo: cada lectura del schedule avanza el torneo.")
     print("Control: /control/fallar · /control/funcionar · /control/estado")
