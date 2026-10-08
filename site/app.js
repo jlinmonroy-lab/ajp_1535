@@ -252,13 +252,20 @@ function enlacesLlave(atleta, { conCategoria = false } = {}) {
 }
 
 function pintarSeguidos() {
-  const caja = $('#vista-seguidos');
+  const caja = $('#lista-seguidos');
   const mios = datos.athletes.filter(esMio);
-  $('#contador-seguidos').textContent = mios.length || '';
+  const sinCombates = grupoActual().filter((e) => !atletaDeEntrada(e));
+  $('#contador-seguidos').textContent = (mios.length + sinCombates.length) || '';
+
+  // En el panel la lista del grupo se gestiona aparte, con su botón de quitar.
+  const gestion = ESdPANEL ? listaGrupoPanel() : '';
+  const esperando = ESdPANEL ? '' : sinCombates.map(tarjetaSinCombates).join('');
 
   if (!mios.length) {
-    caja.innerHTML = `<p class="vacio">Todavía no hay atletas en la lista.<br>
-      Usa <strong>Buscar</strong> para añadir a quien quieras seguir.</p>`;
+    caja.innerHTML = gestion + (esperando
+      ? '<h2 class="seccion-titulo">Mis atletas</h2>' + esperando
+      : `<p class="vacio">Todavía no hay atletas en la lista.<br>
+      Usa <strong>Buscar</strong> para añadir a quien quieras seguir.</p>`);
     return;
   }
 
@@ -289,8 +296,8 @@ function pintarSeguidos() {
   }
 
   html += '<h2 class="seccion-titulo">Mis atletas</h2>';
-  html += mios.map((a) => tarjetaAtleta(a, { conCombates: true })).join('');
-  caja.innerHTML = html;
+  html += mios.map((a) => tarjetaAtleta(a, { conCombates: true })).join('') + esperando;
+  caja.innerHTML = gestion + html;
 }
 
 function pintarBusqueda() {
@@ -375,6 +382,102 @@ function pintar() {
 }
 
 /* ---------- Lista del grupo (solo desde el panel) ---------- */
+
+// Lo que devuelve el panel tras cada cambio; manda sobre el data.json, que
+// tarda un ciclo del scraper en enterarse.
+let grupoPanel = null;
+
+function grupoActual() {
+  return (ESdPANEL && grupoPanel) ? grupoPanel.atletas : ((datos.group || {}).athletes || []);
+}
+
+// El atleta de los datos que corresponde a una entrada del grupo. Mismo
+// criterio que el scraper: id exacto, o solo el nombre si se apuntó sin club.
+function atletaDeEntrada(entrada) {
+  const id = entrada.id || '';
+  const soloNombre = id.endsWith('|') ? id.slice(0, -1) : null;
+  return datos.athletes.find((a) =>
+    a.id === id || (soloNombre !== null && a.id.split('|')[0] === soloNombre));
+}
+
+// Apuntado al grupo pero aún sin combates: antes de que se publique el schedule
+// es lo normal, y así todos ven ya quién va.
+function tarjetaSinCombates(entrada) {
+  return `
+    <article class="tarjeta">
+      <div class="tarjeta-cabecera">
+        <span class="foto"></span>
+        <span class="crece">
+          <span class="nombre">${escapar(entrada.name)}</span><br>
+          <span class="sub"><span class="etiqueta grupo">grupo</span> ${escapar(entrada.club || '—')}</span>
+        </span>
+      </div>
+      <p class="sub">Sin combates en el schedule todavía.</p>
+    </article>`;
+}
+
+function listaGrupoPanel() {
+  const lista = grupoActual();
+  const filas = lista.map((e) => {
+    const casa = atletaDeEntrada(e);
+    return `
+      <div class="combate">
+        <span class="detalle-combate">
+          <span class="nombre">${escapar(e.name)}</span><br>
+          <span class="sub">${escapar(e.club || (casa && casa.club) || 'sin club')}
+            ${casa ? '' : ' · <span class="etiqueta">sin combates todavía</span>'}</span>
+        </span>
+        <button class="seguir" data-quitar="${escapar(e.id)}"
+                data-nombre="${escapar(e.name)}">Quitar</button>
+      </div>`;
+  }).join('');
+  return `<h2 class="seccion-titulo">Lista del grupo (${lista.length})</h2>
+    <article class="tarjeta">${filas || '<p class="sub">Nadie todavía.</p>'}</article>`;
+}
+
+async function enviarGrupo(cuerpo) {
+  const resp = await fetch('/api/grupo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+  });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  grupoPanel = await resp.json();
+  return grupoPanel;
+}
+
+async function altaManual(ev) {
+  ev.preventDefault();
+  const form = ev.target;
+  const name = form.nombre.value.trim();
+  const club = form.club.value.trim();
+  if (!name) return;
+  form.querySelector('button').disabled = true;
+  try {
+    await enviarGrupo({ name, club, accion: 'añadir' });
+    form.reset();
+    pintar();
+    avisar(`${name} añadido. En un par de minutos lo verá todo el grupo.`);
+  } catch (e) {
+    avisar(`No se pudo guardar (${e.message}). ¿Está el panel arrancado?`, true);
+  } finally {
+    form.querySelector('button').disabled = false;
+    form.nombre.focus();
+  }
+}
+
+async function quitarDelGrupo(boton) {
+  boton.disabled = true;
+  try {
+    await enviarGrupo({ id: boton.dataset.quitar, name: boton.dataset.nombre, accion: 'quitar' });
+    pintar();
+    avisar(`${boton.dataset.nombre} quitado de la lista del grupo.`);
+  } catch (e) {
+    boton.disabled = false;
+    avisar(`No se pudo guardar (${e.message}). ¿Está el panel arrancado?`, true);
+  }
+}
+
 async function marcarParaTodos(boton) {
   const id = boton.dataset.todos;
   const atleta = datos.athletes.find((a) => a.id === id);
@@ -383,12 +486,7 @@ async function marcarParaTodos(boton) {
   boton.disabled = true;
   boton.textContent = 'Guardando…';
   try {
-    const resp = await fetch('/api/grupo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, name: boton.dataset.nombre, accion }),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    await enviarGrupo({ id, name: boton.dataset.nombre, accion });
 
     // Se recuerda hasta que el data.json publicado lo confirme, para que el
     // refresco periódico no lo desmarque a los pocos segundos.
@@ -459,6 +557,8 @@ document.querySelectorAll('.pestana').forEach((boton) => {
 document.addEventListener('click', (ev) => {
   const paraTodos = ev.target.closest('[data-todos]');
   if (paraTodos) return marcarParaTodos(paraTodos);
+  const quitar = ev.target.closest('[data-quitar]');
+  if (quitar) return quitarDelGrupo(quitar);
 
   const seguir = ev.target.closest('[data-seguir]');
   if (seguir) {
@@ -478,6 +578,14 @@ $('#detalle').addEventListener('click', (ev) => {
 });
 $('#busqueda').addEventListener('input', pintarBusqueda);
 $('#recargar').addEventListener('click', () => { etag = null; cargar(); });
+
+if (ESdPANEL) {
+  $('#alta-grupo').classList.remove('oculta');
+  $('#alta-grupo').addEventListener('submit', altaManual);
+  fetch('/api/grupo').then((r) => (r.ok ? r.json() : null))
+    .then((g) => { if (g) { grupoPanel = g; pintar(); } })
+    .catch(() => { /* sin panel: se usa la lista del data.json */ });
+}
 
 /* ---------- Arranque ---------- */
 cargar();

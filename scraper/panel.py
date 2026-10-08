@@ -12,6 +12,7 @@ alimenta la web sigue.
 
   GET  /api/grupo   -> la lista actual
   POST /api/grupo   -> {"id", "name", "accion": "añadir"|"quitar"}
+                       o, para un alta a mano, {"name", "club"} sin id
 
 Escucha **solo en 127.0.0.1**: en la wifi de un pabellón, abrirlo a la red
 dejaría que cualquiera cambiara la lista de todos.
@@ -29,6 +30,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 
+from scraper.parse import clave_atleta  # noqa: E402
 from scraper.publish import escribir_json  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
@@ -46,14 +48,22 @@ def grupo_de(cfg):
             "atletas": grupo.get("atletas") or []}
 
 
-def actualizar_grupo(atleta_id, nombre, accion):
+def actualizar_grupo(atleta_id, nombre, accion, club=None):
     """Añade o quita un atleta de la lista compartida. Devuelve la lista nueva."""
     cfg = leer_config()
     grupo = grupo_de(cfg)
-    atletas = [a for a in grupo["atletas"] if a.get("id") != atleta_id]
+    # Quitar desde la ficha manda el id completo ("nombre|club"), pero el atleta
+    # puede estar en el grupo por un alta a mano sin club ("nombre|").
+    sin_club = atleta_id.split("|", 1)[0] + "|"
+    atletas = [a for a in grupo["atletas"]
+               if a.get("id") != atleta_id
+               and not (accion == "quitar" and a.get("id") == sin_club)]
 
     if accion == "añadir":
-        atletas.append({"id": atleta_id, "name": nombre})
+        entrada = {"id": atleta_id, "name": nombre}
+        if club:
+            entrada["club"] = club
+        atletas.append(entrada)
         atletas.sort(key=lambda a: (a.get("name") or "").lower())
 
     cfg["grupo"] = {"nombre": grupo["nombre"], "atletas": atletas}
@@ -102,18 +112,25 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(400, {"error": "JSON inválido"})
 
         atleta_id = (peticion.get("id") or "").strip()
+        nombre = (peticion.get("name") or "").strip()
+        club = (peticion.get("club") or "").strip() or None
         accion = peticion.get("accion") or "añadir"
+        if not atleta_id and nombre:
+            # Alta a mano, antes de que el schedule traiga a nadie: la misma
+            # identidad que calculará el scraper, para que case al publicarse.
+            # Sin club queda "nombre|", que casa con ese nombre en cualquier club.
+            atleta_id = clave_atleta({"name": nombre, "club": club})
         if not atleta_id:
-            return self._json(400, {"error": "falta el id del atleta"})
+            return self._json(400, {"error": "falta el id o el nombre del atleta"})
         if accion not in ("añadir", "quitar"):
             return self._json(400, {"error": "acción desconocida"})
 
         try:
-            grupo = actualizar_grupo(atleta_id, peticion.get("name") or atleta_id, accion)
+            grupo = actualizar_grupo(atleta_id, nombre or atleta_id, accion, club)
         except (OSError, ValueError) as e:
             return self._json(500, {"error": f"no se pudo guardar: {e}"})
 
-        print(f"[grupo] {accion}: {peticion.get('name') or atleta_id} "
+        print(f"[grupo] {accion}: {nombre or atleta_id} "
               f"({len(grupo['atletas'])} en la lista)", flush=True)
         return self._json(200, grupo)
 

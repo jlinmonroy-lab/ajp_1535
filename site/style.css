@@ -149,6 +149,22 @@ main { padding: 0 16px; }
 }
 #busqueda:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
 
+/* Alta a mano en el panel local */
+.alta-grupo .seccion-titulo { margin-top: 0; }
+.alta-grupo input {
+  width: 100%;
+  padding: .6rem .8rem;
+  margin-bottom: .5rem;
+  background: var(--superficie-2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+}
+.alta-grupo input:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+.alta-grupo button { width: 100%; padding: .6rem; }
+.alta-grupo .sub { margin: .5rem 0 0; }
+
 /* ---------- Tarjetas ---------- */
 .tarjeta {
   background: var(--superficie);

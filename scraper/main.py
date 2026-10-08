@@ -98,6 +98,23 @@ def un_ciclo(cfg, estado_previo):
     return estado
 
 
+def estado_vacio(cfg):
+    """El evento anunciado, sin combates, para cuando aún no hay schedule.
+
+    Sin esto, antes de que el organizador publique nada la web se quedaría con
+    los datos del torneo anterior, y la lista del grupo que se va apuntando en
+    el panel no llegaría a nadie.
+    """
+    return construir_estado(
+        eventos=cfg.get("events") or [], datos_por_evento={},
+        fetched_at=ahora_iso(),
+        streams=cfg.get("streams") or [],
+        grupo=cfg.get("grupo"),
+        base_url=cfg["baseUrl"],
+        lang=cfg.get("lang", "en"),
+    )
+
+
 def marcar_stale(estado, desde):
     """Reutiliza el último estado bueno, avisando de que ya no está fresco."""
     copia = dict(estado)
@@ -151,8 +168,8 @@ def main():
             log(f"  fallo {fallos}/{limite_fallos}: {e}")
 
             if ultimo_bueno is None:
-                log("  aún no hay ningún estado bueno que publicar")
-                estado = None
+                log("  aún no hay schedule: se publica el evento sin combates")
+                estado = estado_vacio(cfg)
             elif fallos >= limite_fallos:
                 # Se conserva el último estado bueno, pero marcado: mejor que la
                 # web avise de que los datos están viejos a que mienta.

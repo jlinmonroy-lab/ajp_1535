@@ -247,6 +247,20 @@ class TestGrupoCompartido(unittest.TestCase):
         # La entrada se conserva: la lista no debe vaciarse sola.
         self.assertEqual(len(estado["group"]["athletes"]), 1)
 
+    def test_apuntado_sin_club_casa_por_nombre(self):
+        # Alta a mano en el panel antes del schedule: el club exacto no se sabe.
+        estado = self._estado({"nombre": "Equipo",
+                               "atletas": [{"id": "ana perez|", "name": "Ana Perez"}]})
+        ana = next(a for a in estado["athletes"] if a["name"] == "Ana Pérez")
+        otro = next(a for a in estado["athletes"] if a["name"] == "Otro")
+        self.assertTrue(ana["inGroup"])
+        self.assertFalse(otro["inGroup"])
+
+    def test_apuntado_con_otro_club_no_casa(self):
+        estado = self._estado({"nombre": "Equipo",
+                               "atletas": [{"id": "ana perez|otro club", "name": "Ana"}]})
+        self.assertFalse(any(a["inGroup"] for a in estado["athletes"]))
+
 class TestEnlaceALaLlave(unittest.TestCase):
     """El enlace al cuadro en ajptour.com.
 

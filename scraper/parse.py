@@ -340,8 +340,12 @@ def construir_estado(*, eventos, datos_por_evento, fetched_at,
     # para que el frontend no tenga que cruzar listas en cada repintado.
     grupo = grupo or {}
     del_grupo = {a.get("id") for a in (grupo.get("atletas") or []) if a.get("id")}
+    # Los apuntados a mano sin club ("nombre|") casan solo por nombre: el club
+    # tal como lo escribe Smoothcomp ("Fusión BJJ - España.") no se adivina.
+    solo_nombre = {i[:-1] for i in del_grupo if i.endswith("|")}
     for atleta in atletas:
-        atleta["inGroup"] = atleta["id"] in del_grupo
+        nombre = atleta["id"].split("|", 1)[0]
+        atleta["inGroup"] = atleta["id"] in del_grupo or nombre in solo_nombre
 
     return {
         "events": resumen_eventos,
