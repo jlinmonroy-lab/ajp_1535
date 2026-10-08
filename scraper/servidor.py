@@ -143,6 +143,9 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
 
         def end_headers(self):
             self.send_header("X-Content-Type-Options", "nosniff")
+            # Con la web abierta a internet, ningún buscador debe indexarla: nombres de
+            # atletas, a veces menores. Complementa el <meta> y el robots.txt de site/.
+            self.send_header("X-Robots-Tag", "noindex, nofollow")
             # Sin esto el navegador cachearía el JS y no vería una versión nueva.
             if "Cache-Control" not in self._cabeceras_enviadas:
                 self.send_header("Cache-Control", "no-cache")

@@ -163,6 +163,28 @@ class TestConfigYEstaticos(Entorno):
         self.assertNotIn("access-control-allow-origin", r.headers)
         self.assertEqual(self.pedir("OPTIONS", "/api/events/33588/grupo").status, 501)
 
+    def test_ninguna_respuesta_se_deja_indexar(self):
+        # Con la web abierta a internet: la web, la API, los errores y los 304.
+        self.cargar()
+        etag = self.pedir("GET", "/api/events/33588/data").headers["etag"]
+        respuestas = [
+            self.pedir("GET", "/"),                                  # estático
+            self.pedir("GET", "/app.js"),
+            self.pedir("GET", "/no-existe.js"),                      # 404 del estático
+            self.pedir("GET", "/api/config"),                        # API
+            self.pedir("GET", "/api/nada"),                          # 404 de la API
+            self.pedir("GET", "/api/events/abc/data"),               # 400
+            self.pedir("GET", "/api/events/33588/data"),             # 200 con datos
+            self.pedir("GET", "/api/events/33588/data",
+                       cabeceras={"If-None-Match": etag}),           # 304
+            self.pedir("POST", "/api/events/33588/grupo", {"name": "A"},
+                       {"X-Forwarded-For": "203.0.113.9"}),          # 403
+        ]
+        self.assertEqual([r.status for r in respuestas],
+                         [200, 200, 404, 200, 404, 400, 200, 304, 403])
+        for r in respuestas:
+            self.assertEqual(r.headers.get("x-robots-tag"), "noindex, nofollow", r.status)
+
 
 class TestBusqueda(Entorno):
     def test_pasa_los_parametros_al_buscador(self):
