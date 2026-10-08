@@ -797,6 +797,7 @@ async function arrancar() {
     return;
   }
 
+  Inicio.configurar(marca.zona);   // antes de enrutar: la primera búsqueda ya sale acotada
   window.addEventListener('hashchange', enrutar);
   enrutar();
 }

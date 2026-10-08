@@ -251,3 +251,28 @@ rompió el parser.
 - **Límite de ritmo:** una ráfaga de ~150 peticiones rápidas dio un 429 en una ruta ajena (`/club/find`).
   Con una petición cada 2 s no ha pasado en ninguna de las lecturas completas de arriba (de 12 a 39 s).
 - **Términos de uso:** no mencionan el scraping, solo el «consumo excesivo de recursos». Zona gris.
+
+
+## Filtrar por lugar (2026-10-08)
+
+Se usa para acotar el buscador a una zona (`zona` en `config.json`, por defecto «Madrid, España»).
+Comprobado con peticiones reales:
+
+| Prueba | Resultado |
+| --- | --- |
+| `upcoming?countries=ES` | filtra **en el servidor**: 30 eventos (84 KB) frente a ~1700 sin filtrar |
+| `upcoming?search=arganda`, `torrejon`, `alcala`, `getafe` | **0 resultados**, aunque el evento exista: `search` mira **solo el título**, no la ciudad |
+| `search='bjj madrid'`, `'madrid bjj'`, `'madrid cup'` | 1, 1 y 0: es una **frase exacta** sobre el título; no combina palabras |
+| `past?countries=ES&search=madrid` | 16 eventos, todos de la zona (Madrid, Alcalá, Arganda, Paracuellos, San Fernando de Henares) |
+
+Los eventos traen `location_lat` y `location_long` como texto (`"40.3012"`). Con ellas, los 4 próximos de
+Madrid de hoy quedan a 0, 7, 20 y 25 km del centro; Guadalajara, a 52 km.
+
+Consecuencias, que son lo que hace `Buscador.buscar(zona=True)`:
+
+- Como `search` no mira la ciudad ni combina palabras, **no sirve para acotar por sitio**. Los próximos se
+  piden por país, una vez y sin texto, y se filtran aquí por texto o por radio. Así se encuentran también
+  los de la zona cuyo título no dice «Madrid», y cualquier búsqueda posterior sale de la misma caché.
+- Los pasados se paginan de 40 en 40 en origen y no se puede filtrar por coordenadas sin recorrerlos todos.
+  Se pide el texto de la zona y lo que el usuario escriba se filtra aquí: un pasado de la zona sin
+  «Madrid» en el título no sale.

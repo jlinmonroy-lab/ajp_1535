@@ -173,27 +173,57 @@ class Origen:
         return event_id in self.eventos or event_id in self.sin_schedule
 
     def _catalogo(self, puerto, relleno):
-        """Los eventos que el buscador conoce: los próximos y los pasados."""
-        def evento(event_id, titulo, fecha, pasado=False):
+        """Los eventos que el buscador conoce: los próximos y los pasados.
+
+        Los servidos están en Arganda del Rey (Madrid). Además hay unos "ajenos"
+        fijos para probar el filtro de zona: uno en Alcalá de Henares que no dice
+        Madrid en el título (solo el radio lo encuentra), otros en Barcelona y
+        Lisboa, y un "Madrid Open" de Texas, que dice Madrid pero no es de España.
+        """
+        def evento(event_id, titulo, fecha, pasado=False, ciudad="Arganda del Rey",
+                   pais="ES", lat="40.3012", lon="-3.4402"):
             return {"id": int(event_id), "title": titulo,
                     "url": f"http://127.0.0.1:{puerto}/en/event/{event_id}",
                     "startdate": fecha, "enddate": fecha,
-                    "location_city": "Arganda del Rey", "location_country": "ES",
+                    "location_city": ciudad, "location_country": pais,
+                    "location_lat": lat, "location_long": lon,
                     "eventEnded": pasado, "cover_image": None}
 
         proximos = [evento(e, f"Evento simulado {e}", "2026-10-17")
                     for e in [*self.eventos, *self.sin_schedule]]
-        pasados = [evento(900000 + i, f"Evento pasado {i + 1}", "2025-05-10", True)
-                   for i in range(relleno)]
+        proximos += [
+            evento(800001, "Open Alcala simulado", "2026-10-25",
+                   ciudad="Alcala de Henares", lat="40.4818", lon="-3.3635"),
+            evento(800002, "Evento simulado Barcelona", "2026-11-07",
+                   ciudad="Barcelona", lat="41.3874", lon="2.1686"),
+            evento(800003, "Evento simulado Lisboa", "2026-11-14",
+                   ciudad="Lisboa", pais="PT", lat="38.7223", lon="-9.1393"),
+            evento(800004, "Madrid Open (Texas)", "2026-12-05",
+                   ciudad="Madrid, TX", pais="US", lat="31.0", lon="-100.0"),
+        ]
+        # Dos de cada tres, de Madrid y con "Madrid" en el título; el resto, de Barcelona.
+        pasados = [
+            evento(900000 + i, f"Evento pasado {i + 1}", "2025-05-10", True,
+                   ciudad="Barcelona", lat="41.3874", lon="2.1686")
+            if i % 3 == 0 else
+            evento(900000 + i, f"Madrid Cup pasado {i + 1}", "2025-05-10", True,
+                   ciudad="Madrid", lat="40.4168", lon="-3.7038")
+            for i in range(relleno)]
         return {"upcoming": proximos, "past": pasados}
 
     def lista(self, cuando, consulta):
-        """La página de Smoothcomp con `var events = [...]`, filtrada y paginada."""
+        """La página de Smoothcomp con `var events = [...]`, filtrada y paginada.
+
+        Como el Smoothcomp de verdad, `search` es una frase sobre el título (no mira
+        la ciudad) y `countries` filtra por país en el servidor.
+        """
         params = urllib.parse.parse_qs(consulta)
         buscado = (params.get("search") or [""])[0].lower()
+        pais = (params.get("countries") or [""])[0].upper()
         pagina = int((params.get("page") or ["1"])[0])
         eventos = [e for e in self.catalogo[cuando]
-                   if buscado in e["title"].lower() or buscado in str(e["id"])]
+                   if buscado in e["title"].lower()
+                   and (not pais or e["location_country"] == pais)]
         if cuando == "past":    # 40 por página; `upcoming` viene entero
             inicio = (pagina - 1) * POR_PAGINA_PASADOS
             eventos = eventos[inicio:inicio + POR_PAGINA_PASADOS]

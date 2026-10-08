@@ -50,6 +50,12 @@
       <button type="button" class="filtro" data-cuando="past" aria-pressed="false">Pasados</button>
       <button type="button" class="filtro" data-cuando="all" aria-pressed="false">Todos</button>
     </div>
+    <!-- La zona por defecto de config.json (p. ej. «Madrid, España»). La rellena
+         y la enseña buscador.js solo si el servidor tiene una configurada. -->
+    <div class="zona-fila">
+      <button id="zona" type="button" class="zona-chip oculta" aria-pressed="false"
+              title="Quitar o poner el filtro de lugar"></button>
+    </div>
     <div id="recientes"></div>
     <div id="resultados-eventos" aria-live="polite"></div>
     <button id="mas-eventos" type="button" class="cargar-mas oculta">Cargar más</button>

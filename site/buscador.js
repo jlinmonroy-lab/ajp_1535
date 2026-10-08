@@ -17,6 +17,10 @@ const Inicio = (() => {
     cargando: false, error: null,
     ticket: 0,        // descarta respuestas de búsquedas que ya no son la última
     iniciado: false,
+    // La zona por defecto de config.json ("Madrid, España"). `zona` es su nombre, o
+    // null si no hay; `zonaActiva`, si el chip está encendido. Empieza encendido en
+    // cada visita: no se recuerda que alguien lo apagara.
+    zona: null, zonaActiva: false,
   };
   let temporizador = null;
 
@@ -92,9 +96,19 @@ const Inicio = (() => {
     upcoming: 'Próximos eventos', past: 'Eventos pasados', all: 'Eventos',
   };
 
+  // El chip de la zona: encendido filtra, apagado se queda a la vista para volver a encenderlo.
+  function pintarChip() {
+    const chip = $('#zona');
+    chip.classList.toggle('oculta', !est.zona);
+    chip.classList.toggle('activo', est.zonaActiva);
+    chip.setAttribute('aria-pressed', String(est.zonaActiva));
+    chip.textContent = est.zona ? `📍 ${est.zona}${est.zonaActiva ? ' ✕' : ''}` : '';
+  }
+
   function pintar() {
     const id = idDeEvento(est.q);
     const guardados = recientes();
+    const lugar = est.zonaActiva ? ` en ${est.zona}` : '';
 
     $('#recientes').innerHTML = (!est.q && guardados.length)
       ? `<h2 class="seccion-titulo">Recientes</h2>${guardados.map(tarjetaEvento).join('')}`
@@ -104,7 +118,8 @@ const Inicio = (() => {
     const hayResultados = est.eventos.length > 0;
 
     if (hayResultados) {
-      html += `<h2 class="seccion-titulo">${est.q ? 'Resultados' : TITULO_RESULTADOS[est.cuando]}</h2>`;
+      html += `<h2 class="seccion-titulo">${
+        est.q ? 'Resultados' : TITULO_RESULTADOS[est.cuando]}${escapar(lugar)}</h2>`;
       if (est.vieja) {
         html += '<p class="sub">Smoothcomp no responde ahora: se muestran resultados guardados.</p>';
       }
@@ -117,10 +132,15 @@ const Inicio = (() => {
     } else if (est.cargando && !hayResultados) {
       html += '<p class="vacio">Buscando…</p>';
     } else if (!est.cargando && !hayResultados && !id) {
+      // Con la zona encendida, lo que no sale puede estar fuera de ella: se ofrece salir.
+      const salir = est.zonaActiva
+        ? `<br><button type="button" class="seguir" data-sin-zona>Buscar en todo el mundo</button>`
+        : '';
       html += est.q
-        ? `<p class="vacio">Ningún evento coincide con «${escapar(est.q)}».${
-            est.cuando === 'upcoming' ? '<br>Prueba también en <strong>Pasados</strong>.' : ''}</p>`
-        : '<p class="vacio">No hay eventos que mostrar.</p>';
+        ? `<p class="vacio">Ningún evento${escapar(lugar)} coincide con «${escapar(est.q)}».${
+            est.cuando === 'upcoming' ? '<br>Prueba también en <strong>Pasados</strong>.' : ''}${salir}</p>`
+        : `<p class="vacio">No hay ${est.cuando === 'upcoming' ? 'próximos ' : ''}eventos${
+            escapar(lugar)}.${salir}</p>`;
     }
 
     $('#resultados-eventos').innerHTML = html;
@@ -147,6 +167,7 @@ const Inicio = (() => {
     pintar();
 
     const params = new URLSearchParams({ q: est.q, when: est.cuando, page: String(est.pagina) });
+    if (est.zonaActiva) params.set('zona', '1');
     try {
       const resp = await fetch(`api/events/search?${params}`, { cache: 'no-store' });
       if (!resp.ok) throw new Error(await mensajeDeError(resp));
@@ -201,9 +222,25 @@ const Inicio = (() => {
     });
 
     $('#mas-eventos').addEventListener('click', () => buscar(false));
+    $('#zona').addEventListener('click', () => cambiarZona(!est.zonaActiva));
     $('#resultados-eventos').addEventListener('click', (ev) => {
       if (ev.target.closest('[data-reintentar]')) buscar(est.pagina <= 1);
+      if (ev.target.closest('[data-sin-zona]')) cambiarZona(false);
     });
+  }
+
+  function cambiarZona(activa) {
+    est.zonaActiva = activa && !!est.zona;
+    pintarChip();
+    clearTimeout(temporizador);
+    buscar(true);
+  }
+
+  // Lo llama app.js con la zona de /api/config (o null) antes de enseñar el inicio.
+  function configurar(zona) {
+    est.zona = zona && zona.nombre ? String(zona.nombre) : null;
+    est.zonaActiva = !!est.zona;
+    pintarChip();
   }
 
   // Se llama cada vez que se vuelve a la pantalla de inicio.
@@ -213,5 +250,5 @@ const Inicio = (() => {
     else pintar();    // los "Recientes" pueden haber cambiado
   }
 
-  return { mostrar, recordar };
+  return { mostrar, recordar, configurar };
 })();

@@ -201,6 +201,24 @@ body[data-evento="inexistente"] #alta-grupo { display: none; }
 }
 .filtro.activo { background: var(--acento); color: var(--equipo-texto); border-color: var(--acento); }
 
+/* El filtro de lugar por defecto (p. ej. «Madrid, España»): encendido es un chip
+   con el color del equipo, apagado se queda discontinuo y a la vista para volver
+   a encenderlo. */
+.zona-fila { margin-bottom: .6rem; }
+.zona-chip {
+  padding: .4rem .8rem;
+  background: transparent;
+  color: var(--texto-tenue);
+  border: 1px dashed var(--borde);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.zona-chip.activo { border-style: solid; border-color: var(--acento); color: var(--acento); }
+/* Explícito: `.oculta` y `.zona-chip` empatan en especificidad y ya nos mordió antes. */
+.zona-chip.oculta { display: none; }
+
 /* Cada resultado es un enlace a #/evento/ID. Los títulos largos pueden envolver:
    el nombre del evento es justo lo que hay que leer para elegir. */
 a.evento {

@@ -15,8 +15,11 @@ Requiere solo Python 3 (sin dependencias; `patchright` únicamente para los scri
 python -m scraper.servidor        # y abrir http://127.0.0.1:8765
 ```
 
-1. **Busca el evento** por nombre, ciudad u organizador (`Próximos`, `Pasados` o `Todos`), o pega
-   el enlace o el número de un evento de Smoothcomp.
+1. **Busca el evento.** Al abrir salen solo los **próximos eventos en Madrid, España** (el chip
+   «📍 Madrid, España ✕»); tócalo para quitarlo y buscar en todo el mundo. Se busca por nombre, ciudad u
+   organizador (`Próximos`, `Pasados` o `Todos`), o se pega el enlace o el número de un evento de Smoothcomp.
+   Con el chip puesto, lo que escribas se busca dentro de Madrid; si no hay nada, un botón ofrece
+   «Buscar en todo el mundo».
 2. **Ábrelo.** La primera vez el servidor lee su schedule de Smoothcomp: unos 30-60 segundos en
    un evento grande, porque se respeta una pausa entre peticiones. Luego se refresca solo cada ~75 s
    mientras alguien lo esté mirando.
@@ -77,9 +80,29 @@ Todo en `config.json`:
 | `requestPauseSeconds` | pausa mínima entre dos peticiones a Smoothcomp, de quien sean (2) |
 | `staleAfterFailures` | fallos seguidos tras los que la web avisa de que los datos están viejos (3) |
 | `branding` | `teamName` y `logo` de la cabecera |
+| `zona` | el sitio al que se acota el buscador por defecto (ver abajo); `null` para desactivarlo |
 | `servidor` | `puerto`, `listaEventosTtlSeconds` (caché del buscador, 600), `inactividadMinutos` (30), `maxEventosEnCache` (20), `workers` (2) |
 
 Las opciones de línea de comandos del servidor: `--host`, `--puerto`, `--config`, `--origen`.
+
+### La zona por defecto
+
+```json
+"zona": { "nombre": "Madrid, España", "pais": "ES", "texto": "madrid",
+          "centro": [40.4168, -3.7038], "radioKm": 50 }
+```
+
+Un evento es de la zona si es del `pais` **y**, o bien dice el `texto` en el título o la ciudad, o bien
+sus coordenadas (las del organizador en Smoothcomp) caen a menos de `radioKm` de `centro`. Las dos vías
+se complementan: el radio encuentra el torneo de Alcalá cuyo título no dice «Madrid», y el texto vale
+aunque el organizador no pusiera coordenadas. Hace falta `texto` o `centro` con `radioKm`; para otro sitio
+basta cambiar estos valores, sin tocar código. Con `"zona": null` no hay chip y el buscador es global.
+
+Cómo se aplica, porque Smoothcomp solo filtra bien por país: **próximos** se pide la lista del país una
+vez y se filtra aquí (el texto que escribas también), así que cambiar de búsqueda no hace más peticiones.
+**Pasados** se pide con el `texto` de la zona (`past?countries=ES&search=madrid`), así que un evento pasado
+de la zona sin «Madrid» en el título no sale. El chip arranca encendido en cada visita; no se recuerda que
+alguien lo apagara.
 
 ## Logo y colores del equipo
 
@@ -97,7 +120,8 @@ python -m unittest discover -s tests     # no tocan la red
 ```
 
 Para ver la web funcionando **sin mandar tráfico a Smoothcomp**, hay un origen simulado con búsqueda,
-eventos sin publicar y un torneo que avanza (`seeded` → `running` → `finished`):
+eventos sin publicar, eventos de otros sitios (Barcelona, Lisboa, un «Madrid Open» de Texas y un torneo
+en Alcalá que no dice Madrid, para probar la zona) y un torneo que avanza (`seeded` → `running` → `finished`):
 
 ```sh
 python research/mock_origen.py --eventos 1535,1526 --simular-vivo --sin-schedule 33588 --estricto --relleno 55
@@ -144,7 +168,7 @@ AJP, pon `baseUrl` a `https://ajptour.com`.
 | Ruta | Qué hace |
 | --- | --- |
 | `scraper/servidor.py` | servidor: web, API y guarda del panel local |
-| `scraper/eventos.py` | buscador de eventos (lista de Smoothcomp, con caché) |
+| `scraper/eventos.py` | buscador de eventos (lista de Smoothcomp, con caché) y la zona por defecto |
 | `scraper/almacen.py` | caché compartida por evento y hilos que leen Smoothcomp |
 | `scraper/fetch.py` | cliente de Smoothcomp: ritmo global, reintentos, códigos de error |
 | `scraper/parse.py` | normaliza al modelo; atletas y medallas; **puro, sin red** |
