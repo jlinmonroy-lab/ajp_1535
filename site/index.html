@@ -7,21 +7,27 @@
 <!-- Muestra nombres reales de atletas: accesible con el enlace, pero
      fuera de los buscadores. Ver tambien robots.txt. -->
 <meta name="robots" content="noindex, nofollow">
-<title>FC Team | Competidores</title>
+<title>Eventos de Smoothcomp</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<!-- data-modo: "inicio" (buscador de eventos) o "evento" (tablero de uno).
+     Lo cambia app.js según la URL (#/ o #/evento/ID); el CSS esconde lo que
+     sobra con .solo-inicio y .solo-evento. -->
+<body data-modo="inicio">
 
 <header class="cabecera">
   <div class="cabecera-fila">
-    <img class="logo" src="img/logo.png" alt="FC Team" width="40" height="40" onerror="this.remove()">
-    <h1 id="nombre-evento">FC Team | Competidores</h1>
-    <button id="recargar" class="icono" title="Actualizar ahora" aria-label="Actualizar ahora">&#8635;</button>
+    <button id="volver" class="icono solo-evento" title="Volver a los eventos" aria-label="Volver a los eventos">&#8249;</button>
+    <img class="logo" src="img/logo.png" alt="" width="40" height="40" onerror="this.remove()">
+    <h1 id="titulo">Eventos de Smoothcomp</h1>
+    <a id="enlace-smoothcomp" class="icono solo-evento oculta" target="_blank" rel="noopener"
+       title="Ver el evento en Smoothcomp" aria-label="Ver el evento en Smoothcomp">&#8599;</a>
+    <button id="recargar" class="icono solo-evento" title="Actualizar ahora" aria-label="Actualizar ahora">&#8635;</button>
   </div>
-  <p id="estado" class="estado" role="status" aria-live="polite">Cargando…</p>
+  <p id="estado" class="estado solo-evento" role="status" aria-live="polite">Cargando…</p>
 </header>
 
-<nav class="pestanas" role="tablist">
+<nav class="pestanas solo-evento" role="tablist">
   <button class="pestana activa" data-vista="seguidos" role="tab" aria-selected="true">
     Mis atletas <span id="contador-seguidos" class="chip"></span>
   </button>
@@ -32,7 +38,25 @@
 <div id="aviso" class="aviso oculta" role="status" aria-live="polite"></div>
 
 <main>
-  <section id="vista-seguidos" class="vista">
+  <!-- ===== Inicio: buscar un evento ===== -->
+  <section id="pantalla-inicio" class="solo-inicio">
+    <form id="form-eventos" role="search" autocomplete="off">
+      <input id="busqueda-eventos" type="search" inputmode="search" maxlength="80"
+             placeholder="Nombre, ciudad u organizador…" aria-label="Buscar evento en Smoothcomp">
+    </form>
+    <p class="sub nota-busqueda">También puedes pegar el enlace o el número de un evento.</p>
+    <div class="filtros" role="group" aria-label="Cuándo">
+      <button type="button" class="filtro activo" data-cuando="upcoming" aria-pressed="true">Próximos</button>
+      <button type="button" class="filtro" data-cuando="past" aria-pressed="false">Pasados</button>
+      <button type="button" class="filtro" data-cuando="all" aria-pressed="false">Todos</button>
+    </div>
+    <div id="recientes"></div>
+    <div id="resultados-eventos" aria-live="polite"></div>
+    <button id="mas-eventos" type="button" class="cargar-mas oculta">Cargar más</button>
+  </section>
+
+  <!-- ===== Evento ===== -->
+  <section id="vista-seguidos" class="vista solo-evento">
     <!-- Solo en el panel local. Fuera de #lista-seguidos para que el repintado
          de cada refresco no borre lo que se está escribiendo. -->
     <form id="alta-grupo" class="tarjeta alta-grupo oculta" autocomplete="off">
@@ -46,13 +70,13 @@
     <div id="lista-seguidos"></div>
   </section>
 
-  <section id="vista-buscar" class="vista oculta">
+  <section id="vista-buscar" class="vista oculta solo-evento">
     <input id="busqueda" type="search" inputmode="search" autocomplete="off"
            placeholder="Nombre, club o categoría…" aria-label="Buscar atleta">
     <div id="resultados"></div>
   </section>
 
-  <section id="vista-tatamis" class="vista oculta"></section>
+  <section id="vista-tatamis" class="vista oculta solo-evento"></section>
 </main>
 
 <div id="detalle" class="detalle oculta" role="dialog" aria-modal="true" aria-labelledby="detalle-nombre">
@@ -65,6 +89,8 @@
   </div>
 </div>
 
+<script src="util.js"></script>
+<script src="buscador.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

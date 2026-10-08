@@ -134,8 +134,27 @@ body {
 main { padding: 0 16px; }
 .vista.oculta, .oculta { display: none; }
 
+/* Dos pantallas en una página: el inicio (buscar evento) y el evento. Lo que
+   sobra en cada una se esconde por modo; ver data-modo en index.html. */
+body[data-modo="inicio"] .solo-evento { display: none; }
+body[data-modo="evento"] .solo-inicio { display: none; }
+
+/* Enlace con aspecto de botón redondo (el de ir a Smoothcomp). */
+a.icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--texto);
+  text-decoration: none;
+}
+a.icono.oculta { display: none; }
+
+/* Un evento que no existe: ni pestañas ni formulario del grupo. */
+body[data-evento="inexistente"] .pestanas,
+body[data-evento="inexistente"] #alta-grupo { display: none; }
+
 /* ---------- Buscador ---------- */
-#busqueda {
+#busqueda, #busqueda-eventos {
   width: 100%;
   padding: .8rem 1rem;
   margin: .2rem 0 .8rem;
@@ -145,7 +164,7 @@ main { padding: 0 16px; }
   border-radius: var(--radio);
   font-size: 1rem;
 }
-#busqueda:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+#busqueda:focus, #busqueda-eventos:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
 
 /* Alta a mano en el panel local */
 .alta-grupo .seccion-titulo { margin-top: 0; }
@@ -162,6 +181,61 @@ main { padding: 0 16px; }
 .alta-grupo input:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
 .alta-grupo button { width: 100%; padding: .6rem; }
 .alta-grupo .sub { margin: .5rem 0 0; }
+
+/* ---------- Inicio: buscar un evento ---------- */
+#form-eventos { margin: 0; }
+#busqueda-eventos { margin-top: .9rem; margin-bottom: .5rem; }
+.nota-busqueda { margin: 0 0 .8rem; }
+
+.filtros { display: flex; gap: 6px; margin-bottom: .4rem; }
+.filtro {
+  flex: 1;
+  padding: .55rem .4rem;
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filtro.activo { background: var(--acento); color: var(--equipo-texto); border-color: var(--acento); }
+
+/* Cada resultado es un enlace a #/evento/ID. Los títulos largos pueden envolver:
+   el nombre del evento es justo lo que hay que leer para elegir. */
+a.evento {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  color: inherit;
+  text-decoration: none;
+}
+a.evento:active { background: var(--superficie-2); }
+a.evento .nombre { white-space: normal; }
+a.evento .sub { white-space: normal; }
+.abrir-id { border-color: var(--acento); }
+
+.cargar-mas {
+  display: block;
+  width: 100%;
+  margin: .4rem 0 1rem;
+  padding: .8rem;
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cargar-mas:disabled { opacity: .6; cursor: default; }
+/* Debe ganar a `.cargar-mas`, declarada antes con la misma especificidad que
+   `.oculta`: sin esto el botón se ve aunque no haya más páginas. */
+.cargar-mas.oculta { display: none; }
+
+.vacio.error { color: var(--vivo); }
+.vacio .seguir { margin-top: .8rem; }
+.aviso-evento { border-color: var(--oro); line-height: 1.5; }
 
 /* ---------- Tarjetas ---------- */
 .tarjeta {
@@ -310,5 +384,5 @@ main { padding: 0 16px; }
 @media (min-width: 640px) {
   .detalle { align-items: center; justify-content: center; }
   .detalle-caja { max-width: 560px; border-radius: 18px; }
-  main, .cabecera, .pestanas { max-width: 720px; margin-inline: auto; }
+  main, .cabecera, .pestanas, .aviso { max-width: 720px; margin-inline: auto; }
 }

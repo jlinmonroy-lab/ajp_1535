@@ -35,7 +35,7 @@ from scraper.publish import escribir_json  # noqa: E402
 
 SITIO = RAIZ / "site"
 DEMO = RAIZ / "tmp-demo"
-ESTATICOS = ("index.html", "app.js", "style.css", ".nojekyll")
+ESTATICOS = ("index.html", "util.js", "buscador.js", "app.js", "style.css", ".nojekyll")
 
 RESULTADOS = ("points", "submission", "decision", "points", "submission", "disqualification")
 

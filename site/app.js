@@ -1,62 +1,66 @@
-/* Frontend del seguimiento en directo del torneo.
+/* Frontend del seguimiento de un evento de Smoothcomp.
  *
- * Sin dependencias ni build: descarga data.json, lo guarda en memoria y pinta.
- * El polling usa ETag, así que un ciclo sin cambios no descarga nada.
+ * Sin dependencias ni build. Dos pantallas, según la URL:
+ *   #/                 buscador de eventos (buscador.js)
+ *   #/evento/33588     tablero de ese evento (este fichero)
+ * Descarga /api/events/<ids>/data, lo guarda en memoria y pinta. El polling usa
+ * ETag, así que un ciclo sin cambios no descarga nada.
+ *
+ * Si no hay servidor (la web servida como ficheros estáticos, p. ej. en GitHub
+ * Pages) cae al modo de siempre: un único evento y un data.json publicado.
  */
 'use strict';
 
 const REFRESCO_MS = 30000;
-// Propia de este torneo: la web vive en la misma URL que la del AJP y, si no,
-// los móviles arrastrarían a quienes siguieron allí.
+const ESPERA_CARGANDO_MS = 3000;     // mientras el servidor lee un evento por primera vez
+const ESPERA_REINTENTO_MS = 10000;   // tras un error del servidor o de Smoothcomp
+// El servidor contesta con lo que tiene y refresca detrás. Si lo recibido es más
+// viejo que un ciclo de refresco (75 s) con margen, quien abre un evento que
+// nadie miraba vería datos viejos hasta el siguiente sondeo: se vuelve a
+// preguntar enseguida, unas pocas veces.
+const EDAD_SOSPECHOSA_MS = 100 * 1000;
+const ESPERA_REVALIDAR_MS = 5000;
+const MAX_REVALIDACIONES = 3;
+// La clave no incluye el evento: el id de atleta es nombre + club, así que quien
+// sigues vale en cualquier evento en el que aparezca.
 const CLAVE_SEGUIDOS = 'sbjj:seguidos';
 
-// El botón "Seguir para todos" escribe en la configuración del scraper, y eso
-// solo puede hacerse desde el portátil donde corre. En la web pública ni se
-// enseña: sería una opción que nadie podría usar.
+// El botón "Seguir para todos" escribe la lista del grupo en el servidor, y eso
+// solo se permite desde el equipo donde corre. En la web pública ni se enseña:
+// sería una opción que nadie podría usar.
 const ESdPANEL = ['localhost', '127.0.0.1'].includes(location.hostname);
 
-// Lo pulsado en el panel tarda un ciclo en volver dentro del data.json. Hasta
+// Lo pulsado en el panel tarda un ciclo en volver dentro de los datos. Hasta
 // que vuelva se recuerda aquí; si no, el refresco de cada 30s lo desmarcaría y
 // parecería que el botón no funciona.
 const pendientesGrupo = new Map();   // athleteId -> { alta, momento }
 const ESPERA_CONFIRMACION_MS = 3 * 60 * 1000;
 const MEDALLAS = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 
+let marca = { teamName: 'FC Team', logo: 'img/logo.png' };
+let modoEstatico = false;   // sin servidor: se lee data.json y hay un solo evento
+let eventoIds = null;       // evento abierto ("33588" o "1535,1526"); null en el inicio
+let generacion = 0;         // cada apertura/cierre/recarga la sube e invalida lo que estuviera en vuelo
+let temporizadorCarga = null;
+let temporizadorEstado = null;
+let recordado = false;      // ¿ya está este evento en "Recientes"?
+let revalidaciones = 0;     // sondeos rápidos seguidos por datos viejos
+
 let datos = null;
 let etag = null;
 let porId = new Map();      // id de combate -> combate
 let vista = 'seguidos';
 
-/* ---------- Almacenamiento local ----------
-   Puede fallar (modo privado, cookies bloqueadas) y la app debe seguir
-   funcionando sin ello, así que todo acceso va envuelto. */
+/* ---------- Seguidos (locales a este navegador) ---------- */
 function leerSeguidos() {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(CLAVE_SEGUIDOS)) || []);
-  } catch {
-    return new Set();
-  }
+  return new Set(leerLocal(CLAVE_SEGUIDOS, []));
 }
 function guardarSeguidos(conjunto) {
-  try {
-    localStorage.setItem(CLAVE_SEGUIDOS, JSON.stringify([...conjunto]));
-  } catch { /* sin persistencia, pero la sesión sigue */ }
+  guardarLocal(CLAVE_SEGUIDOS, [...conjunto]);
 }
 let seguidos = leerSeguidos();
 
 /* ---------- Utilidades ---------- */
-const $ = (sel) => document.querySelector(sel);
-
-// Buscar "muñoz" debe encontrar "Muñoz", y "jose" debe encontrar "José".
-const normalizar = (texto) => (texto || '')
-  .toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-
-function escapar(texto) {
-  const d = document.createElement('div');
-  d.textContent = texto == null ? '' : String(texto);
-  return d.innerHTML;
-}
-
 function hora(iso) {
   if (!iso) return '--:--';
   const d = new Date(iso);
@@ -80,29 +84,149 @@ function hace(iso) {
   return `hace ${Math.floor(s / 3600)} h`;
 }
 
-/* ---------- Carga ---------- */
-async function cargar() {
-  try {
-    const cabeceras = etag ? { 'If-None-Match': etag } : {};
-    const resp = await fetch('data.json', { cache: 'no-store', headers: cabeceras });
+/* ---------- Direcciones ---------- */
+// Relativas a propósito: la web funciona igual si cuelga de una subcarpeta.
+const urlDatos = () => (modoEstatico ? 'data.json' : `api/events/${eventoIds}/data`);
+const urlGrupo = () => (modoEstatico ? '/api/grupo' : `api/events/${eventoIds}/grupo`);
 
-    if (resp.status === 304) { pintarEstado(); return; }
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-    etag = resp.headers.get('ETag');
-    datos = await resp.json();
-    porId = new Map(datos.matches.map((m) => [m.id, m]));
-    revisarPendientes();
-    // El título es fijo (index.html): no se sustituye por el nombre del evento.
-    pintar();
-  } catch (e) {
-    const estado = $('#estado');
-    estado.textContent = `Sin conexión con los datos (${e.message})`;
-    estado.classList.add('vieja');
+class ErrorApi extends Error {
+  constructor(estado, mensaje) {
+    super(mensaje);
+    this.estado = estado;
   }
 }
 
-// Tres ciclos del scraper. Pasado eso, o se ha parado o ha dejado de publicar.
+/* ---------- Cabecera ---------- */
+function ponerTitulo(nombre) {
+  $('#titulo').textContent = nombre || marca.teamName;
+  document.title = nombre ? `${nombre} · ${marca.teamName}` : `Eventos · ${marca.teamName}`;
+}
+
+function nombreEvento() {
+  return datos.events.map((e) => e.name || `Evento ${e.id}`).join(' + ');
+}
+
+function encabezadoEvento() {
+  ponerTitulo(nombreEvento());
+  // Un solo evento: enlace a su página en Smoothcomp.
+  const enlace = $('#enlace-smoothcomp');
+  const e = datos.events.length === 1 ? datos.events[0] : null;
+  const candidata = e && (e.url || (e.baseUrl ? `${e.baseUrl}/es/event/${e.id}` : null));
+  const url = /^https:\/\//i.test(candidata || '') ? candidata : null;   // nunca javascript:
+  enlace.classList.toggle('oculta', !url);
+  if (url) enlace.href = url;
+}
+
+function sinSchedule() {
+  return !!datos && datos.events.length > 0 && datos.events.every((e) => e.published === false);
+}
+
+function avisoSinSchedule() {
+  if (!sinSchedule()) return '';
+  return `
+    <div class="tarjeta aviso-evento">
+      <strong>El schedule aún no está publicado.</strong><br>
+      <span class="sub">El organizador todavía no ha publicado los cuadros ni los horarios,
+      así que no hay atletas ni combates que enseñar. Esta pantalla lo vuelve a comprobar sola.</span>
+    </div>`;
+}
+
+/* ---------- Carga ---------- */
+// Cuenta de lo que pasa en cada ciclo: devuelve cuánto esperar hasta el siguiente,
+// o null si no hay nada más que esperar (evento inexistente, o ya se cambió de pantalla).
+async function cargar() {
+  const miGeneracion = generacion;
+  const cuerpoVacio = (html) => {
+    if (datos) return;
+    $('#lista-seguidos').innerHTML = html;
+    $('#resultados').innerHTML = html;
+    $('#vista-tatamis').innerHTML = html;
+  };
+
+  try {
+    const cabeceras = etag ? { 'If-None-Match': etag } : {};
+    const resp = await fetch(urlDatos(), { cache: 'no-store', headers: cabeceras });
+    if (miGeneracion !== generacion) return null;
+
+    if (resp.status === 304) { pintarEstado(); return esperaTrasDatos(); }
+
+    if (resp.status === 202) {
+      // El servidor está leyendo el evento de Smoothcomp por primera vez.
+      const info = await resp.json();
+      if (miGeneracion !== generacion) return null;
+      const conocido = (info.events || []).find((e) => e.title);
+      if (conocido && !datos) ponerTitulo(conocido.title);
+      $('#estado').textContent = 'Leyendo el schedule de Smoothcomp… puede tardar hasta un minuto';
+      $('#estado').classList.remove('vieja');
+      cuerpoVacio('<p class="vacio">Leyendo el schedule de Smoothcomp…<br>' +
+        '<span class="sub">Los eventos grandes tardan un poco la primera vez.</span></p>');
+      return ESPERA_CARGANDO_MS;
+    }
+
+    if (!resp.ok) throw new ErrorApi(resp.status, await mensajeDeError(resp));
+
+    etag = resp.headers.get('ETag');
+    const nuevos = await resp.json();
+    if (miGeneracion !== generacion) return null;
+    datos = nuevos;
+    porId = new Map(datos.matches.map((m) => [m.id, m]));
+    revisarPendientes();
+    encabezadoEvento();
+    if (!recordado && !modoEstatico) {
+      recordado = true;
+      const e = datos.events[0] || {};
+      Inicio.recordar({ ...e, id: eventoIds, title: nombreEvento() });
+    }
+    pintar();
+    return esperaTrasDatos();
+  } catch (e) {
+    if (miGeneracion !== generacion) return null;
+    const estado = $('#estado');
+    estado.classList.add('vieja');
+
+    if (e instanceof ErrorApi && e.estado === 404) {
+      document.body.dataset.evento = 'inexistente';
+      estado.textContent = 'Ese evento no existe';
+      cuerpoVacio(`<p class="vacio">${escapar(e.message)}<br>
+        <a href="#/" class="llave">‹ Volver a los eventos</a></p>`);
+      return null;
+    }
+    estado.textContent = e instanceof ErrorApi
+      ? `No se pudo leer el evento (${e.message})`
+      : `Sin conexión con los datos (${e.message})`;
+    cuerpoVacio(`<p class="vacio">${escapar(estado.textContent)}<br>
+      <span class="sub">Se reintenta solo.</span></p>`);
+    return ESPERA_REINTENTO_MS;
+  }
+}
+
+// Cuánto esperar tras recibir datos válidos.
+function esperaTrasDatos() {
+  const viejos = !modoEstatico && datos && !datos.stale
+    && Date.now() - new Date(datos.fetchedAt) > EDAD_SOSPECHOSA_MS;
+  if (viejos && revalidaciones < MAX_REVALIDACIONES) {
+    revalidaciones += 1;
+    return ESPERA_REVALIDAR_MS;
+  }
+  revalidaciones = 0;
+  return REFRESCO_MS;
+}
+
+async function ciclo() {
+  const miGeneracion = generacion;
+  const espera = await cargar();
+  if (espera == null || miGeneracion !== generacion) return;
+  temporizadorCarga = setTimeout(ciclo, espera);
+}
+
+function reiniciarCiclo() {
+  generacion += 1;
+  clearTimeout(temporizadorCarga);
+  etag = null;
+  ciclo();
+}
+
+// Tres ciclos del servidor. Pasado eso, o se ha parado o ha dejado de refrescar.
 const LIMITE_SIN_REFRESCO_MS = 4 * 60 * 1000;
 
 function pintarEstado() {
@@ -111,16 +235,19 @@ function pintarEstado() {
   const total = `${datos.matches.length} combates · ${datos.athletes.length} atletas`;
   const antiguedad = Date.now() - new Date(datos.fetchedAt);
 
-  if (datos.stale) {
-    // El scraper vive pero el origen le falla: él mismo lo marcó.
+  if (sinSchedule()) {
+    estado.textContent = 'Schedule sin publicar · se vuelve a comprobar solo';
+    estado.classList.remove('vieja');
+  } else if (datos.stale) {
+    // El servidor vive pero Smoothcomp le falla: él mismo lo marcó.
     estado.textContent = `⚠ Datos sin actualizar desde ${hora(datos.staleSince)} · ${total}`;
     estado.classList.add('vieja');
   } else if (antiguedad > LIMITE_SIN_REFRESCO_MS) {
     // Nadie está generando datos. Es distinto de `stale`, que lo pone el propio
-    // scraper: aquí puede que ni esté corriendo, y callarse haría creer que todo
+    // servidor: aquí puede que ni esté corriendo, y callarse haría creer que todo
     // va bien mientras la web enseña una foto vieja.
     estado.textContent = `⚠ Sin actualizarse desde ${hace(datos.fetchedAt)}`
-      + (ESdPANEL ? ' — ¿está corriendo el scraper?' : '') + ` · ${total}`;
+      + (ESdPANEL && modoEstatico ? ' — ¿está corriendo el scraper?' : '') + ` · ${total}`;
     estado.classList.add('vieja');
   } else {
     estado.textContent = `Actualizado ${hace(datos.fetchedAt)} · ${total}`;
@@ -134,7 +261,7 @@ function combatesDe(atleta) {
 }
 
 // Se compara por athleteId, no por inscripción: la misma persona tiene un
-// event_registration_id distinto en cada uno de los dos eventos.
+// event_registration_id distinto en cada uno de los eventos en los que compite.
 function rivalDe(combate, athleteId) {
   return combate.sides.find((s) => s.athleteId !== athleteId) || null;
 }
@@ -222,9 +349,9 @@ function esMio(atleta) {
   return enGrupo(atleta) || seguidos.has(atleta.id);
 }
 
-// Deja de recordar lo pendiente en cuanto el data.json publicado lo confirma, y
-// avisa si pasa demasiado tiempo sin que llegue: marcar algo que nadie va a ver
-// sería peor que decir que no se ha publicado.
+// Deja de recordar lo pendiente en cuanto los datos lo confirman, y avisa si
+// pasa demasiado tiempo sin que llegue: marcar algo que nadie va a ver sería
+// peor que decir que no se ha publicado.
 function revisarPendientes() {
   for (const [id, pendiente] of [...pendientesGrupo]) {
     const atleta = datos.athletes.find((a) => a.id === id);
@@ -232,7 +359,9 @@ function revisarPendientes() {
       pendientesGrupo.delete(id);
     } else if (Date.now() - pendiente.momento > ESPERA_CONFIRMACION_MS) {
       pendientesGrupo.delete(id);
-      avisar('El cambio no se ha publicado. ¿Está corriendo el scraper?', true);
+      avisar(modoEstatico
+        ? 'El cambio no se ha publicado. ¿Está corriendo el scraper?'
+        : 'El cambio no ha llegado a los datos. Recarga la página.', true);
     }
   }
 }
@@ -260,12 +389,13 @@ function pintarSeguidos() {
   // En el panel la lista del grupo se gestiona aparte, con su botón de quitar.
   const gestion = ESdPANEL ? listaGrupoPanel() : '';
   const esperando = ESdPANEL ? '' : sinCombates.map(tarjetaSinCombates).join('');
+  const aviso = avisoSinSchedule();
 
   if (!mios.length) {
-    caja.innerHTML = gestion + (esperando
+    caja.innerHTML = gestion + aviso + (esperando
       ? '<h2 class="seccion-titulo">Mis atletas</h2>' + esperando
-      : `<p class="vacio">Todavía no hay atletas en la lista.<br>
-      Usa <strong>Buscar</strong> para añadir a quien quieras seguir.</p>`);
+      : (aviso ? '' : `<p class="vacio">Todavía no hay atletas en la lista.<br>
+      Usa <strong>Buscar</strong> para añadir a quien quieras seguir.</p>`));
     return;
   }
 
@@ -278,7 +408,7 @@ function pintarSeguidos() {
   }
   proximos.sort((x, y) => (x.combate.estimatedStart || '').localeCompare(y.combate.estimatedStart || ''));
 
-  let html = '';
+  let html = aviso;
   if (proximos.length) {
     html += '<h2 class="seccion-titulo">Próximos combates</h2>';
     html += proximos.slice(0, 8).map(({ atleta, combate }) => `
@@ -305,7 +435,7 @@ function pintarBusqueda() {
   const caja = $('#resultados');
 
   if (consulta.length < 2) {
-    caja.innerHTML = '<p class="vacio">Escribe al menos dos letras.</p>';
+    caja.innerHTML = avisoSinSchedule() || '<p class="vacio">Escribe al menos dos letras.</p>';
     return;
   }
 
@@ -317,13 +447,13 @@ function pintarBusqueda() {
   caja.innerHTML = encontrados.length
     ? `<p class="sub">${encontrados.length} resultado(s)</p>` +
       encontrados.slice(0, 60).map((a) => tarjetaAtleta(a)).join('')
-    : '<p class="vacio">Ningún atleta coincide.</p>';
+    : (avisoSinSchedule() || '<p class="vacio">Ningún atleta coincide.</p>');
 }
 
 function pintarTatamis() {
   const caja = $('#vista-tatamis');
-  // Se agrupa por NOMBRE de tatami, no por evento: en el pabellón hay seis
-  // tatamis físicos y los cuatro bloques (Gi/No-Gi × sábado/domingo) los
+  // Se agrupa por NOMBRE de tatami, no por evento: en un pabellón hay unos
+  // pocos tatamis físicos y los bloques (Gi/No-Gi × sábado/domingo) los
   // reutilizan con ids distintos. Quien está delante del Mat 3 quiere ver qué
   // toca ahí, sea del evento que sea.
   const porMat = new Map();
@@ -370,7 +500,7 @@ function pintarTatamis() {
   const nombres = [...porMat.keys()].sort();
   caja.innerHTML = (nombres.length
     ? nombres.map(tarjeta).join('')
-    : '<p class="vacio">Todavía no hay tatamis publicados.</p>');
+    : (avisoSinSchedule() || '<p class="vacio">Todavía no hay tatamis publicados.</p>'));
 }
 
 function pintar() {
@@ -383,8 +513,8 @@ function pintar() {
 
 /* ---------- Lista del grupo (solo desde el panel) ---------- */
 
-// Lo que devuelve el panel tras cada cambio; manda sobre el data.json, que
-// tarda un ciclo del scraper en enterarse.
+// Lo que devuelve el servidor tras cada cambio; manda sobre los datos, que
+// pueden tardar un poco en enterarse.
 let grupoPanel = null;
 
 function grupoActual() {
@@ -392,7 +522,7 @@ function grupoActual() {
 }
 
 // El atleta de los datos que corresponde a una entrada del grupo. Mismo
-// criterio que el scraper: id exacto, o solo el nombre si se apuntó sin club.
+// criterio que el servidor: id exacto, o solo el nombre si se apuntó sin club.
 function atletaDeEntrada(entrada) {
   const id = entrada.id || '';
   const soloNombre = id.endsWith('|') ? id.slice(0, -1) : null;
@@ -436,15 +566,19 @@ function listaGrupoPanel() {
 }
 
 async function enviarGrupo(cuerpo) {
-  const resp = await fetch('/api/grupo', {
+  const resp = await fetch(urlGrupo(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cuerpo),
   });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  if (!resp.ok) throw new Error(await mensajeDeError(resp));
   grupoPanel = await resp.json();
   return grupoPanel;
 }
+
+const AVISO_GRUPO_ALTA = () => (modoEstatico
+  ? 'En un par de minutos lo verá todo el grupo.'
+  : 'Ya lo ve todo el grupo.');
 
 async function altaManual(ev) {
   ev.preventDefault();
@@ -457,7 +591,7 @@ async function altaManual(ev) {
     await enviarGrupo({ name, club, accion: 'añadir' });
     form.reset();
     pintar();
-    avisar(`${name} añadido. En un par de minutos lo verá todo el grupo.`);
+    avisar(`${name} añadido. ${AVISO_GRUPO_ALTA()}`);
   } catch (e) {
     avisar(`No se pudo guardar (${e.message}). ¿Está el panel arrancado?`, true);
   } finally {
@@ -488,12 +622,12 @@ async function marcarParaTodos(boton) {
   try {
     await enviarGrupo({ id, name: boton.dataset.nombre, accion });
 
-    // Se recuerda hasta que el data.json publicado lo confirme, para que el
-    // refresco periódico no lo desmarque a los pocos segundos.
+    // Se recuerda hasta que los datos lo confirmen, para que el refresco
+    // periódico no lo desmarque a los pocos segundos.
     pendientesGrupo.set(id, { alta: accion === 'añadir', momento: Date.now() });
     pintar();
     avisar(accion === 'añadir'
-      ? 'Añadido. En un par de minutos lo verá todo el grupo.'
+      ? `Añadido. ${AVISO_GRUPO_ALTA()}`
       : 'Quitado de la lista del grupo.');
   } catch (e) {
     boton.disabled = false;
@@ -519,8 +653,8 @@ function abrirDetalle(athleteId) {
     ? `<p class="sub">${atleta.medals.map((m) =>
         `${MEDALLAS[m.medal]} ${escapar(m.category || '')}`).join('<br>')}</p>`
     : '';
-  // Si compite en los dos eventos conviene que se vea: sus combates de Gi y
-  // No-Gi aparecen mezclados en una sola lista ordenada por hora.
+  // Si compite en varios eventos conviene que se vea: sus combates salen
+  // mezclados en una sola lista ordenada por hora.
   const enEventos = (atleta.events || [])
     .map((id) => (datos.events.find((e) => e.id === id) || {}).label || id);
   const eventos = enEventos.length > 1
@@ -535,18 +669,78 @@ function abrirDetalle(athleteId) {
   $('#detalle').classList.remove('oculta');
 }
 
+/* ---------- Abrir y cerrar un evento ---------- */
+function seleccionarVista(nombre) {
+  vista = nombre;
+  document.querySelectorAll('.pestana').forEach((b) => {
+    const activa = b.dataset.vista === nombre;
+    b.classList.toggle('activa', activa);
+    b.setAttribute('aria-selected', String(activa));
+  });
+  document.querySelectorAll('.vista').forEach((v) => v.classList.add('oculta'));
+  $(`#vista-${nombre}`).classList.remove('oculta');
+}
+
+function abrirEvento(ids) {
+  cerrarEvento();
+  eventoIds = ids;
+  document.body.dataset.modo = 'evento';
+  delete document.body.dataset.evento;
+  seleccionarVista('seguidos');
+  $('#busqueda').value = '';
+  $('#estado').textContent = 'Cargando…';
+  $('#estado').classList.remove('vieja');
+  $('#lista-seguidos').innerHTML = '<p class="vacio">Cargando…</p>';
+  $('#resultados').innerHTML = '';
+  $('#vista-tatamis').innerHTML = '';
+  ponerTitulo(null);
+  window.scrollTo(0, 0);
+
+  const miGeneracion = generacion;
+  if (ESdPANEL) {
+    $('#alta-grupo').classList.remove('oculta');
+    fetch(urlGrupo(), { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null))
+      .then((g) => { if (g && miGeneracion === generacion) { grupoPanel = g; pintar(); } })
+      .catch(() => { /* sin panel: se usa la lista de los datos */ });
+  }
+
+  temporizadorEstado = setInterval(pintarEstado, 10000);   // el "hace X" envejece solo
+  ciclo();
+}
+
+function cerrarEvento() {
+  generacion += 1;
+  clearTimeout(temporizadorCarga);
+  clearInterval(temporizadorEstado);
+  eventoIds = null;
+  datos = null;
+  etag = null;
+  porId = new Map();
+  grupoPanel = null;
+  recordado = false;
+  revalidaciones = 0;
+  pendientesGrupo.clear();
+  $('#detalle').classList.add('oculta');
+  $('#enlace-smoothcomp').classList.add('oculta');
+}
+
+/* ---------- Enrutado ---------- */
+function enrutar() {
+  const m = location.hash.match(/^#\/evento\/([\d,]+)$/);
+  if (m) {
+    if (m[1] !== eventoIds) abrirEvento(m[1]);
+    return;
+  }
+  cerrarEvento();
+  document.body.dataset.modo = 'inicio';
+  ponerTitulo(null);
+  Inicio.mostrar();
+}
+
 /* ---------- Eventos ---------- */
 document.querySelectorAll('.pestana').forEach((boton) => {
   boton.addEventListener('click', () => {
-    document.querySelectorAll('.pestana').forEach((b) => {
-      b.classList.remove('activa');
-      b.setAttribute('aria-selected', 'false');
-    });
-    boton.classList.add('activa');
-    boton.setAttribute('aria-selected', 'true');
-    vista = boton.dataset.vista;
-    document.querySelectorAll('.vista').forEach((v) => v.classList.add('oculta'));
-    $(`#vista-${vista}`).classList.remove('oculta');
+    seleccionarVista(boton.dataset.vista);
     pintar();
     if (vista === 'buscar') $('#busqueda').focus();
   });
@@ -577,18 +771,34 @@ $('#detalle').addEventListener('click', (ev) => {
   if (ev.target.id === 'detalle') $('#detalle').classList.add('oculta');
 });
 $('#busqueda').addEventListener('input', pintarBusqueda);
-$('#recargar').addEventListener('click', () => { etag = null; cargar(); });
+$('#recargar').addEventListener('click', reiniciarCiclo);
+$('#volver').addEventListener('click', () => { location.hash = '#/'; });
 
 if (ESdPANEL) {
-  $('#alta-grupo').classList.remove('oculta');
   $('#alta-grupo').addEventListener('submit', altaManual);
-  fetch('/api/grupo').then((r) => (r.ok ? r.json() : null))
-    .then((g) => { if (g) { grupoPanel = g; pintar(); } })
-    .catch(() => { /* sin panel: se usa la lista del data.json */ });
 }
 
 /* ---------- Arranque ---------- */
-cargar();
-setInterval(cargar, REFRESCO_MS);
-// El "hace X" envejece aunque no lleguen datos nuevos.
-setInterval(pintarEstado, 10000);
+async function arrancar() {
+  try {
+    const resp = await fetch('api/config', { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    marca = { ...marca, ...(await resp.json()) };
+    const logo = document.querySelector('.logo');
+    if (logo && marca.logo && !logo.src.endsWith(marca.logo)) logo.src = marca.logo;
+  } catch {
+    modoEstatico = true;     // sin servidor: un solo evento, leído de data.json
+  }
+
+  if (modoEstatico) {
+    document.body.dataset.modo = 'evento';
+    $('#volver').classList.add('oculta');
+    abrirEvento(null);
+    return;
+  }
+
+  window.addEventListener('hashchange', enrutar);
+  enrutar();
+}
+
+arrancar();

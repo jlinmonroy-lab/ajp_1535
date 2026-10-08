@@ -21,7 +21,8 @@ import time
 from pathlib import Path
 
 # Ficheros del sitio que acompañan al data.json en la rama publicada.
-ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
+ESTATICOS = ("index.html", "util.js", "buscador.js", "app.js", "style.css", "robots.txt",
+             ".nojekyll")
 CARPETA_IMAGENES = "img"
 
 # Campos que cambian en cada ciclo aunque no haya pasado nada en el tatami.
