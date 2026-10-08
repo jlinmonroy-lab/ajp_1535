@@ -33,3 +33,6 @@ tmp-demo/
 
 # Registro del día del evento
 registro/
+
+# Listas de grupo del servidor: nombres de personas, no van al repo (es público)
+data/
