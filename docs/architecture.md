@@ -248,3 +248,28 @@ relanza).
    ha seguido un torneo entero mientras se jugaba.
 2. Cuadros «todos contra todos» (`Match 1/3`…): no generan medallas.
 3. Un sondeo `matches.json?upcoming=1` más barato para el «en vivo»: en las pruebas devolvía lo mismo.
+
+
+## Publicación para móviles con datos (Tailscale Funnel)
+
+Los móviles con datos propios no están en la wifi del equipo: necesitan una dirección pública con HTTPS.
+Se usa **Tailscale Funnel**, que ya estaba instalado y activo: dirección fija, sin instalar nada y sin tocar
+el cortafuegos. Se descartó `--host 0.0.0.0` (solo vale en la misma wifi), cloudflared (hay que instalarlo y
+la dirección cambia en cada arranque) y un hosting (el panel del grupo solo funciona desde el equipo del
+servidor, y habría que rediseñarlo con una clave de administración).
+
+- **El servidor sigue escuchando solo en `127.0.0.1`.** Funnel conecta desde el propio equipo, así que
+  no se abre ningún puerto a la red.
+- **Puerto 8443.** El 443 de este Funnel lo usa otro servicio del equipo, que no se toca; Funnel admite
+  443, 8443 y 10000. La web usa rutas relativas, así que funciona igual en cualquier puerto.
+- **La guarda del panel sigue valiendo detrás de Funnel.** Funnel conecta desde `127.0.0.1`, pero reenvía
+  el `Host` público (`…ts.net:8443`) y añade cabeceras de proxy; `es_panel_local` exige un `Host` local y
+  ninguna cabecera de proxy, así que el `POST` al grupo da 403 por la dirección pública (comprobado con la
+  dirección real). Es la razón de que esa comprobación no se pueda relajar «porque ya viene de localhost».
+- **Enlace abierto.** Es una decisión asumida: cualquiera que lo encuentre puede usar el equipo para
+  consultar Smoothcomp (ritmo global y topes de cola lo acotan) y leer la lista del grupo. Lo siguiente, si
+  hiciera falta, es una clave en el enlace (cookie tras la primera visita), con el panel local exento.
+- **Datos móviles.** Con la pestaña oculta no se sondea (`document.hidden`), y al volver a verse se pregunta
+  enseguida con el ETag. Sin esto, un móvil en el bolsillo habría seguido gastando datos cada 30 s.
+
+`scraper/publico.py` lee `tailscale funnel status` para que el lanzador diga el enlace; nunca cambia el túnel.

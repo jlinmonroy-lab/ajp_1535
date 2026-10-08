@@ -46,16 +46,52 @@ Deja esa ventana abierta y ya está. El lanzador:
 No puede cubrir un corte de luz, un reinicio por actualizaciones de Windows ni una caída del wifi,
 así que conviene dejar el equipo enchufado y posponer las actualizaciones antes de salir.
 
-### Que entren los móviles
+### Para todo el equipo, con datos móviles
 
-El servidor, por defecto, solo escucha en este equipo. Dos formas de abrirlo:
+Un móvil con datos propios necesita una dirección pública con HTTPS. Se usa **Tailscale Funnel**,
+que ya viene con Tailscale: no hay que instalar nada, no se toca el cortafuegos y la dirección es
+fija. El servidor sigue escuchando solo en este equipo (`127.0.0.1`): el túnel conecta desde dentro.
 
-- **Misma wifi:** `python arrancar_evento.py --host 0.0.0.0` y los móviles entran por
-  `http://IP-DE-ESTE-EQUIPO:8765` (el cortafuegos de Windows tiene que permitirlo).
-- **Desde cualquier sitio:** un túnel gratuito (cloudflared, ngrok…) apuntando a `localhost:8765`.
+**Una sola vez** (el mapeo se conserva aunque se reinicie el equipo):
+
+```sh
+tailscale funnel --bg --https=8443 8765
+```
+
+El enlace para el equipo, con el servidor en marcha, es:
+
+> **https://czc52571qd.tail6a0155.ts.net:8443/**
+
+(El nombre `czc52571qd.tail6a0155.ts.net` es el de este equipo; el tuyo sale en `tailscale funnel status`.)
+`python arrancar_evento.py` escribe el enlace al arrancar leyendo el estado del túnel, o el comando de
+arriba si todavía no está puesto. Pásalo tal cual por el grupo; en el móvil se puede añadir a la pantalla
+de inicio.
+
+A tener en cuenta:
+
+- **Puerto 8443, no 443.** En este equipo el 443 de Funnel ya lo usa otro servicio
+  (`127.0.0.1:5678`), y Funnel solo admite 443, 8443 y 10000. Por eso la dirección lleva `:8443`.
+- **Para quitarlo al acabar:** `tailscale funnel --https=8443 off`. Solo quita este puerto.
+  **No uses `tailscale funnel reset`**: borra todos los mapeos, también el del 443.
+- **El mapeo sigue activo aunque el servidor esté parado:** quien entre verá un error hasta que se
+  vuelva a arrancar.
+- **El PC debe seguir encendido, con internet y con el servidor en marcha.** El lanzador evita la
+  suspensión; un corte de luz no.
+- **El enlace es abierto, no pide clave.** La web lleva `noindex` (meta, `robots.txt` y cabecera
+  `X-Robots-Tag`), pero el nombre del equipo consta en los registros públicos de certificados y se puede
+  encontrar. Quien lo abra puede usar este PC para consultar Smoothcomp, con los topes de siempre (una
+  petición cada 2 s, 10 lecturas en cola), y **leer la lista del grupo**, que es lo que ven los móviles.
+  Cambiarla, no: el `POST` se rechaza con 403 porque el `Host` no es local. Si hiciera falta cerrarlo
+  más, lo siguiente sería una clave en el enlace.
+- **Datos móviles:** la web pesa unos 75 KB la primera vez (después el navegador la reutiliza) y un
+  evento de ~450 combates son unos 40 KB por actualización, del orden de 2 MB por hora con la pantalla
+  encendida. Con la pantalla apagada o la pestaña en segundo plano no se sondea nada.
 
 Da igual cuántos móviles entren: el servidor lee cada evento **una sola vez por ciclo** y todos
 comparten la copia, así que no se multiplican las peticiones a Smoothcomp.
+
+Si solo van a estar en la misma wifi no hace falta túnel: `python arrancar_evento.py --host 0.0.0.0`
+y entran por `http://IP-DE-ESTE-EQUIPO:8765` (el cortafuegos de Windows tiene que permitirlo).
 
 ### Seguir para todos
 
