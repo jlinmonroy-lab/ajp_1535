@@ -43,6 +43,7 @@ let eventoIds = null;       // evento abierto ("33588" o "1535,1526"); null en e
 let generacion = 0;         // cada apertura/cierre/recarga la sube e invalida lo que estuviera en vuelo
 let temporizadorCarga = null;
 let temporizadorEstado = null;
+let sondeoPendiente = false;   // tocaba sondear pero la pestaña estaba oculta
 let recordado = false;      // ¿ya está este evento en "Recientes"?
 let revalidaciones = 0;     // sondeos rápidos seguidos por datos viejos
 
@@ -216,12 +217,25 @@ async function ciclo() {
   const miGeneracion = generacion;
   const espera = await cargar();
   if (espera == null || miGeneracion !== generacion) return;
-  temporizadorCarga = setTimeout(ciclo, espera);
+  temporizadorCarga = setTimeout(sondear, espera);
+}
+
+// Toca volver a preguntar. Un móvil en el bolsillo no necesita datos nuevos, y con
+// datos móviles cada sondeo cuesta: con la pestaña oculta no se sondea, y al volver
+// a verse se pregunta enseguida (ver `visibilitychange`).
+function sondear() {
+  if (document.hidden) {
+    sondeoPendiente = true;
+    return;
+  }
+  sondeoPendiente = false;
+  ciclo();
 }
 
 function reiniciarCiclo() {
   generacion += 1;
   clearTimeout(temporizadorCarga);
+  sondeoPendiente = false;
   etag = null;
   ciclo();
 }
@@ -704,7 +718,8 @@ function abrirEvento(ids) {
       .catch(() => { /* sin panel: se usa la lista de los datos */ });
   }
 
-  temporizadorEstado = setInterval(pintarEstado, 10000);   // el "hace X" envejece solo
+  // El "hace X" envejece solo; oculta no hay nada que repintar.
+  temporizadorEstado = setInterval(() => { if (!document.hidden) pintarEstado(); }, 10000);
   ciclo();
 }
 
@@ -719,6 +734,7 @@ function cerrarEvento() {
   grupoPanel = null;
   recordado = false;
   revalidaciones = 0;
+  sondeoPendiente = false;
   pendientesGrupo.clear();
   $('#detalle').classList.add('oculta');
   $('#enlace-smoothcomp').classList.add('oculta');
@@ -764,6 +780,18 @@ document.addEventListener('click', (ev) => {
   }
   const abrir = ev.target.closest('[data-atleta]');
   if (abrir) abrirDetalle(abrir.dataset.atleta);
+});
+
+// Al volver a ver la pestaña: si se dejó de sondear mientras estaba oculta, se pregunta
+// ya (con el ETag, así que si no hay cambios no se descarga nada), y el "hace X" se pone al día.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (sondeoPendiente) {
+    sondeoPendiente = false;
+    clearTimeout(temporizadorCarga);
+    ciclo();
+  }
+  pintarEstado();
 });
 
 $('#cerrar-detalle').addEventListener('click', () => $('#detalle').classList.add('oculta'));
