@@ -10,22 +10,20 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 
+from scraper.estado import ahora_iso, marcar_stale  # noqa: E402
+from scraper.estado import estado_vacio as _estado_vacio  # noqa: E402
 from scraper.fetch import ErrorOrigen, leer_schedule  # noqa: E402
 from scraper.parse import construir_estado  # noqa: E402
 from scraper.panel import arrancar_en_hilo  # noqa: E402
 from scraper.publish import escribir_json, publicar  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
-
-
-def ahora_iso():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def log(mensaje):
@@ -105,22 +103,9 @@ def estado_vacio(cfg):
     los datos del torneo anterior, y la lista del grupo que se va apuntando en
     el panel no llegaría a nadie.
     """
-    return construir_estado(
-        eventos=cfg.get("events") or [], datos_por_evento={},
-        fetched_at=ahora_iso(),
-        streams=cfg.get("streams") or [],
-        grupo=cfg.get("grupo"),
-        base_url=cfg["baseUrl"],
-        lang=cfg.get("lang", "en"),
-    )
-
-
-def marcar_stale(estado, desde):
-    """Reutiliza el último estado bueno, avisando de que ya no está fresco."""
-    copia = dict(estado)
-    copia["stale"] = True
-    copia["staleSince"] = desde
-    return copia
+    return _estado_vacio(
+        cfg.get("events") or [], streams=cfg.get("streams") or [],
+        grupo=cfg.get("grupo"), base_url=cfg["baseUrl"], lang=cfg.get("lang", "en"))
 
 
 def main():

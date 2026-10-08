@@ -18,7 +18,7 @@ RONDA_BRONCE = "bronze match"
 ESTADO_TERMINADO = "finished"
 
 # Datos del evento que vienen del buscador y se reenvían tal cual al frontend.
-METADATOS_EVENTO = ("baseUrl", "startdate", "enddate", "city", "country")
+METADATOS_EVENTO = ("url", "baseUrl", "startdate", "enddate", "city", "country")
 
 
 def parse_categoria(group):
