@@ -12,6 +12,7 @@ from collections import OrderedDict
 # Nombres de ronda que deciden las medallas. Son los que usa AJP en su schedule.
 RONDA_FINAL = "final"
 RONDA_BRONCE = "bronze match"
+RONDA_SEMIFINAL = "semifinals"
 
 # Un combate cuenta como terminado solo en este estado; el resto (running,
 # seeded, unseeded) significa que aún puede cambiar.
@@ -156,6 +157,11 @@ def derivar_medallas(combates):
     el bronce es bronce. Un bracket pequeño puede no tener combate llamado
     "Final"; en ese caso, si solo tiene un combate, ese hace de final.
 
+    Muchos organizadores no juegan combate por el bronce y dan doble bronce, como
+    IBJJF: en el Kimura Cup solo 34 de 189 cuadros tenían "Bronze match". En un
+    cuadro sin él, los que pierden la semifinal son bronce. Solo entonces, para no
+    tocar lo que ya funciona con AJP.
+
     Un atleta puede competir en varias categorías (Gi y No-Gi, adultos y master)
     y ganar una medalla en cada una, así que devuelve una lista por atleta,
     indexada por su identidad unificada entre eventos:
@@ -199,6 +205,13 @@ def derivar_medallas(combates):
         for final in finales:
             for lado in final["sides"]:
                 anotar(lado, final, "gold" if lado["isWinner"] else "silver")
+
+        # Sin combate por el bronce, doble bronce para los perdedores de semifinales.
+        if finales and not any(_es_ronda(c, RONDA_BRONCE) for c in combates_bracket):
+            for semi in (c for c in terminados if _es_ronda(c, RONDA_SEMIFINAL)):
+                for lado in semi["sides"]:
+                    if not lado["isWinner"]:
+                        anotar(lado, semi, "bronze")
 
         # El bronce se lo lleva quien gana el "Bronze match"... salvo en los
         # brackets de tres, que Smoothcomp resuelve como un todos-contra-todos y

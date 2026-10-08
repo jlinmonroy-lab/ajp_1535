@@ -306,6 +306,58 @@ class TestEnlaceALaLlave(unittest.TestCase):
             "https://ajptour.com/es/event/1535/bracket/"))
 
 
+class TestDobleBronce(unittest.TestCase):
+    """Sin combate por el bronce, los dos que pierden la semifinal son bronce.
+
+    Es lo habitual fuera de AJP: en el Kimura Cup solo 34 de 189 cuadros jugaban
+    "Bronze match", y sin esta regla casi nadie tenía bronce.
+    """
+
+    def medallas(self, combates):
+        estado = estado_con({"1535": ([], [{"id": 1, "name": "Mat 1"}], {1: combates})})
+        return {a["name"]: [m["medal"] for m in a["medals"]] for a in estado["athletes"]}
+
+    @staticmethod
+    def semis_y_final(final="finished", bronce=None):
+        c = [
+            combate(1, "Ana", "CA", 1, "Bea", "CB", 2, bracket=5, ronda="Semifinals"),
+            combate(2, "Cleo", "CC", 3, "Dora", "CD", 4, bracket=5, ronda="Semifinals"),
+            combate(3, "Ana", "CA", 1, "Cleo", "CC", 3, bracket=5, ronda="Final",
+                    estado=final),
+        ]
+        if bronce:
+            c.append(bronce)
+        return c
+
+    def test_cuadro_sin_combate_por_el_bronce_da_doble_bronce(self):
+        m = self.medallas(self.semis_y_final())
+        self.assertEqual(m, {"Ana": ["gold"], "Cleo": ["silver"],
+                             "Bea": ["bronze"], "Dora": ["bronze"]})
+
+    def test_con_combate_por_el_bronce_manda_ese_combate(self):
+        # Como en AJP: solo el ganador del combate por el bronce.
+        bronce = combate(4, "Bea", "CB", 2, "Dora", "CD", 4, bracket=5,
+                         ronda="Bronze match", gana_a=True)
+        m = self.medallas(self.semis_y_final(bronce=bronce))
+        self.assertEqual(m, {"Ana": ["gold"], "Cleo": ["silver"],
+                             "Bea": ["bronze"], "Dora": []})
+
+    def test_hasta_que_no_acaba_la_final_no_hay_bronces(self):
+        m = self.medallas(self.semis_y_final(final="seeded"))
+        self.assertEqual(m, {"Ana": [], "Bea": [], "Cleo": [], "Dora": []})
+
+    def test_cuadro_de_tres_el_que_pierde_la_unica_semifinal_es_bronce(self):
+        c = [combate(1, "Bea", "CB", 2, "Cleo", "CC", 3, bracket=6, ronda="Semifinals",
+                     gana_a=False),
+             combate(2, "Ana", "CA", 1, "Cleo", "CC", 3, bracket=6, ronda="Final")]
+        m = self.medallas(c)
+        self.assertEqual(m, {"Ana": ["gold"], "Cleo": ["silver"], "Bea": ["bronze"]})
+
+    def test_un_cuadro_sin_semifinales_no_inventa_bronces(self):
+        m = self.medallas([combate(1, "Ana", "CA", 1, "Bea", "CB", 2, bracket=7)])
+        self.assertEqual(m, {"Ana": ["gold"], "Bea": ["silver"]})
+
+
 class TestBaseUrlPorEvento(unittest.TestCase):
     """Con el buscador, cada evento vive en el subdominio de su organizador."""
 
