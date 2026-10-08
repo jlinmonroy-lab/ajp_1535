@@ -87,6 +87,16 @@ recorrido completo.
 No toca `site/data.json` ni publica nada, y la copia lleva un banner rojo de SIMULACIÓN. Los
 resultados son inventados.
 
+## Logo y colores del equipo
+
+- **Logo**: sustituye `site/img/logo.svg` (el actual es un «FC» provisional). Mejor en SVG. Si es
+  PNG, que sea cuadrado (128×128 o 256×256), con fondo transparente y de menos de 30 KB: guárdalo
+  como `site/img/logo.png` y cambia `logo.svg` por `logo.png` en `site/index.html`.
+- **Colores**: edita `--equipo` (color principal) y `--equipo-texto` (texto encima: blanco si el
+  color es oscuro, `#10151c` si es claro) al principio de `site/style.css`.
+- Todo lo que haya en `site/img/` se publica junto a la web en el siguiente ciclo del scraper. El
+  repo es público, así que cualquier imagen que pongas ahí será visible.
+
 ## Configuración
 
 Todo en `config.json`: `events`, `baseUrl` (el tenant de Smoothcomp), ritmo de refresco, pausa entre peticiones, umbral de `stale`,

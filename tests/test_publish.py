@@ -22,7 +22,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
 
-from scraper.publish import escribir_json, hay_que_publicar  # noqa: E402
+from scraper.publish import escribir_json, hay_que_publicar, sincronizar_estaticos  # noqa: E402
 
 ESTADO = {
     "event": {"id": "1", "name": "Prueba"},
@@ -162,6 +162,26 @@ class TestConfigRecargable(unittest.TestCase):
         self.ruta.write_text("{roto", encoding="utf-8")
         with self.assertRaises(ValueError):
             cargar_config(self.args)
+
+class TestImagenesDelSitio(unittest.TestCase):
+    """El logo y demás imágenes viajan a gh-pages junto al HTML."""
+
+    def test_copia_img_y_solo_lo_que_cambia(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            origen, worktree = Path(tmp) / "site", Path(tmp) / "pub"
+            (origen / "img" / "atletas").mkdir(parents=True)
+            worktree.mkdir()
+            (origen / "img" / "logo.svg").write_text("<svg/>", encoding="utf-8")
+            (origen / "img" / "atletas" / "a.png").write_bytes(b"png")
+
+            self.assertEqual(sincronizar_estaticos(origen, worktree, lambda _: None), 2)
+            self.assertEqual((worktree / "img" / "atletas" / "a.png").read_bytes(), b"png")
+            # Sin cambios no hay nada que copiar, y por tanto nada que publicar.
+            self.assertEqual(sincronizar_estaticos(origen, worktree, lambda _: None), 0)
+
+            (origen / "img" / "logo.svg").write_text("<svg></svg>", encoding="utf-8")
+            self.assertEqual(sincronizar_estaticos(origen, worktree, lambda _: None), 1)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

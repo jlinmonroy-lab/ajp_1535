@@ -22,6 +22,7 @@ from pathlib import Path
 
 # Ficheros del sitio que acompañan al data.json en la rama publicada.
 ESTATICOS = ("index.html", "app.js", "style.css", "robots.txt", ".nojekyll")
+CARPETA_IMAGENES = "img"
 
 # Campos que cambian en cada ciclo aunque no haya pasado nada en el tatami.
 # Compararlos haría que "no hay cambios" no ahorrase nunca un push.
@@ -100,6 +101,17 @@ def sincronizar_estaticos(origen: Path, worktree: Path, log) -> int:
         destino = worktree / nombre
         if destino.exists() and destino.read_bytes() == fuente.read_bytes():
             continue
+        shutil.copy2(fuente, destino)
+        copiados += 1
+    # Logo y demás imágenes del equipo: la carpeta entera, con subcarpetas.
+    carpeta = origen / CARPETA_IMAGENES
+    for fuente in (sorted(carpeta.rglob("*")) if carpeta.is_dir() else []):
+        if not fuente.is_file():
+            continue
+        destino = worktree / fuente.relative_to(origen)
+        if destino.exists() and destino.read_bytes() == fuente.read_bytes():
+            continue
+        destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(fuente, destino)
         copiados += 1
     if copiados:
