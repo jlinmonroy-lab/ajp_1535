@@ -57,7 +57,10 @@ const Inicio = (() => {
   function chipDelEvento(e) {
     const fin = e.enddate || e.startdate;
     if (e.ended || (fin && fin < hoy())) return '<span class="etiqueta">Finalizado</span>';
-    if (e.startdate && e.startdate <= hoy()) return '<span class="etiqueta vivo">Hoy</span>';
+    if (e.startdate && e.startdate <= hoy()) {
+      // Las ligas y circuitos duran meses: "Hoy" solo si de verdad empieza hoy.
+      return `<span class="etiqueta vivo">${e.startdate === hoy() ? 'Hoy' : 'En curso'}</span>`;
+    }
     return '';
   }
 

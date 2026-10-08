@@ -150,7 +150,8 @@ class PruebaBuscador(unittest.TestCase):
         self.falso = Falso(respuestas)
         self.reloj = Reloj()
         return Buscador(CFG, pedir_html=self.falso.pedir_html,
-                        pedir_json=self.falso.pedir_json, reloj=self.reloj)
+                        pedir_json=self.falso.pedir_json, reloj=self.reloj,
+                        hoy=lambda: "2026-10-08")
 
 
 class TestBuscar(PruebaBuscador):
@@ -177,6 +178,19 @@ class TestBuscar(PruebaBuscador):
         b = self.buscador({f"{self.BASE}/upcoming": crudos})
         self.assertEqual([e["id"] for e in b.buscar("", "upcoming")["events"]],
                          ["1", "2", "3"])
+
+    def test_lo_que_ya_esta_en_marcha_va_despues_de_lo_que_no_ha_empezado(self):
+        # Una liga de todo el año no debe tapar los torneos de la semana que viene.
+        crudos = [
+            evento_crudo(1, "2026-01-01", enddate="2026-12-31"),   # liga anual, ya empezada
+            evento_crudo(2, "2026-10-20"),
+            evento_crudo(3, "2026-10-08"),                         # empieza hoy: no ha empezado
+            evento_crudo(4, "2026-06-01", enddate="2026-11-01"),   # en marcha, acaba antes
+            evento_crudo(5, "2027-03-03"),
+        ]
+        b = self.buscador({f"{self.BASE}/upcoming": crudos})
+        self.assertEqual([e["id"] for e in b.buscar("", "upcoming")["events"]],
+                         ["3", "2", "5", "4", "1"])
 
     def test_proximos_se_paginan_en_el_servidor(self):
         crudos = [evento_crudo(i, f"2026-11-{(i % 28) + 1:02d}") for i in range(1, 96)]

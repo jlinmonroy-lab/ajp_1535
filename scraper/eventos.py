@@ -20,6 +20,7 @@ import threading
 import time
 import urllib.parse
 from collections import OrderedDict
+from datetime import date
 
 from scraper import fetch
 from scraper.fetch import ErrorOrigen
@@ -103,8 +104,10 @@ def limpiar_consulta(q):
 class Buscador:
     """Busca eventos, cacheando, y recuerda los que ha visto."""
 
-    def __init__(self, cfg, pedir_html=None, pedir_json=None, reloj=time.monotonic):
+    def __init__(self, cfg, pedir_html=None, pedir_json=None, reloj=time.monotonic,
+                 hoy=None):
         self.cfg = cfg
+        self._hoy = hoy or (lambda: date.today().isoformat())
         self.ttl = (cfg.get("servidor") or {}).get("listaEventosTtlSeconds", 600)
         # Inyectables: las pruebas no tocan la red.
         self._pedir_html = pedir_html or fetch.pedir_html
@@ -133,9 +136,23 @@ class Buscador:
                                    self.cfg.get("timeoutSeconds", 30))
         eventos = [e for e in map(normalizar_evento, extraer_eventos(html)) if e]
         if cuando == "upcoming":
-            # Los próximos, del más cercano al más lejano.
-            eventos.sort(key=lambda e: (e["startdate"] or "9999", int(e["id"])))
+            eventos.sort(key=self._orden_de_proximos())
         return eventos
+
+    def _orden_de_proximos(self):
+        """Primero lo que aún no ha empezado, del más cercano al más lejano.
+
+        `upcoming` incluye también lo que ya está en marcha, y Smoothcomp tiene
+        ligas y circuitos que duran todo un año: arriba del todo taparían los
+        torneos de verdad. Esos van después, los que acaban antes primero.
+        """
+        hoy = self._hoy()
+
+        def clave(e):
+            empezado = bool(e["startdate"]) and e["startdate"] < hoy
+            fecha = (e["enddate"] if empezado else e["startdate"]) or "9999"
+            return (empezado, fecha, int(e["id"]))
+        return clave
 
     def _lista(self, cuando, q, pagina):
         """(eventos, vieja). `vieja` si Smoothcomp falló y se sirve la copia anterior."""
