@@ -18,8 +18,12 @@ enchufado y posponer las actualizaciones antes de salir.
 
 Lo que se escriba después se pasa tal cual al servidor:
 
-    python arrancar_evento.py                       # solo este equipo
-    python arrancar_evento.py --host 0.0.0.0        # abierto a la wifi del pabellón
+    python arrancar_evento.py                       # el servidor escucha solo en este equipo
+    python arrancar_evento.py --host 0.0.0.0        # además, abierto a la misma wifi
+
+Para que entren los móviles con sus datos se usa un túnel (Tailscale Funnel), que
+se configura una sola vez y aparte (ver el README). Al arrancar, este lanzador solo
+**lee** su estado para decir cuál es el enlace que repartir; no lo cambia.
 
 Uso:  python arrancar_evento.py [opciones de scraper.servidor]
       (Ctrl+C para parar)
@@ -31,8 +35,11 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from scraper import publico
+
 RAIZ = Path(__file__).resolve().parent
 REGISTRO = RAIZ / "registro"
+PUERTO_POR_DEFECTO = 8765  # el mismo que scraper.servidor
 
 # Banderas de SetThreadExecutionState: mantener el sistema despierto mientras
 # este proceso viva, sin tocar el plan de energía del usuario.
@@ -68,10 +75,27 @@ def permitir_suspension():
         pass
 
 
+def puerto_de(opciones):
+    """El puerto que se le pasará al servidor (`--puerto 9000` o `--puerto=9000`)."""
+    for i, opcion in enumerate(opciones):
+        valor = None
+        if opcion == "--puerto" and i + 1 < len(opciones):
+            valor = opciones[i + 1]
+        elif opcion.startswith("--puerto="):
+            valor = opcion.split("=", 1)[1]
+        if valor is not None:
+            try:
+                return int(valor)
+            except ValueError:
+                break
+    return PUERTO_POR_DEFECTO
+
+
 def main():
     REGISTRO.mkdir(exist_ok=True)
     diario = REGISTRO / "evento.log"
     opciones = sys.argv[1:]
+    puerto = puerto_de(opciones)
 
     print()
     log("=" * 62, diario)
@@ -83,7 +107,9 @@ def main():
     else:
         log("AVISO: no se pudo evitar la suspensión; revisa el plan de energía.", diario)
 
-    log("Web y panel del grupo: http://127.0.0.1:8765  (el panel, solo desde este equipo)", diario)
+    log(f"Web y panel del grupo: http://127.0.0.1:{puerto}  (el panel, solo desde este equipo)", diario)
+    for linea in publico.lineas_de_arranque(puerto):
+        log(linea, diario)
     if "--host" in opciones:
         log("Abierto a otros equipos: los móviles entran por la IP de este equipo "
             "(y el cortafuegos de Windows debe permitirlo).", diario)
