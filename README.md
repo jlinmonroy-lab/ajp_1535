@@ -1,16 +1,21 @@
-# AJP en directo
+# Madrid BJJ Cup en directo
 
-Seguimiento casi en tiempo real de un torneo de AJP Tour para un grupo pequeño de personas:
+Seguimiento casi en tiempo real de un torneo de Smoothcomp para un grupo pequeño de personas:
 buscar atletas, ver sus combates (hora estimada, tatami, ronda, rival, resultado, estado) y sus
 medallas, desde el móvil y sin coste.
 
-Evento objetivo: **1535 — AJP NO-GI MADRID INTERNATIONAL JIU-JITSU CHAMPIONSHIP 2026**.
+Evento objetivo: **33588 — FIJJD INTERNATIONAL CHAMPIONSHIP MADRID BJJ CUP GI & NO-GI 2026**
+(Arganda del Rey, 17 de octubre de 2026), en el tenant de Spain BJJ Tour:
+<https://spainbjjtour.smoothcomp.com/en/event/33588>. Gi y No-Gi van dentro del mismo evento.
+
+El proyecto nació para dos eventos AJP (1535 y 1526, en `ajptour.com`); `docs/` y `research/`
+conservan ese trabajo. El formato de los datos es el mismo en ambos tenants.
 
 ## Cómo funciona
 
-Smoothcomp (la plataforma de la que `ajptour.com` es una instancia) expone tres endpoints JSON
+Smoothcomp (la plataforma de `spainbjjtour.smoothcomp.com`, y también de `ajptour.com`) expone tres endpoints JSON
 públicos con el schedule. El scraper los lee cada ~75s desde un PC, los normaliza a un `data.json`
-y lo publica como fichero estático; los móviles solo hablan con esa copia, nunca con AJP.
+y lo publica como fichero estático; los móviles solo hablan con esa copia, nunca con Smoothcomp.
 
 Detalle de la fuente en [`docs/data-source.md`](docs/data-source.md) y del diseño en
 [`docs/architecture.md`](docs/architecture.md).
@@ -84,13 +89,12 @@ resultados son inventados.
 
 ## Configuración
 
-Todo en `config.json`: `eventId`, ritmo de refresco, pausa entre peticiones, umbral de `stale`,
+Todo en `config.json`: `events`, `baseUrl` (el tenant de Smoothcomp), ritmo de refresco, pausa entre peticiones, umbral de `stale`,
 mapeo de streams por tatami y opciones de publicación por git.
 
 ## Estado
 
-Funciona de punta a punta contra eventos con schedule publicado (probado con el 1257: 443 combates,
-446 atletas, 9 tatamis). **El evento 1535 aún no tiene schedule publicado**, así que hasta que AJP
-lo publique no se pueden ver sus datos reales.
-
-Pendiente: publicar en GitHub Pages y medir la latencia real de publicación.
+Funciona de punta a punta contra eventos con schedule publicado (probado con el 1257 de AJP y con
+eventos pasados de Spain BJJ Tour). **El evento 33588 aún no tiene schedule publicado** (sus
+endpoints devuelven `403 - not allowed`), así que hasta que lo publiquen no se pueden ver sus
+datos reales.

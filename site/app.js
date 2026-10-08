@@ -1,4 +1,4 @@
-/* Frontend de AJP en directo.
+/* Frontend del seguimiento en directo del torneo.
  *
  * Sin dependencias ni build: descarga data.json, lo guarda en memoria y pinta.
  * El polling usa ETag, así que un ciclo sin cambios no descarga nada.
@@ -6,8 +6,9 @@
 'use strict';
 
 const REFRESCO_MS = 30000;
-const CLAVE_SEGUIDOS = 'ajp:seguidos';
-const CANAL_AJP = 'https://youtube.com/channel/UC7m2_Wx33tfrMYYVMVqIOzg/videos';
+// Propia de este torneo: la web vive en la misma URL que la del AJP y, si no,
+// los móviles arrastrarían a quienes siguieron allí.
+const CLAVE_SEGUIDOS = 'sbjj:seguidos';
 
 // El botón "Seguir para todos" escribe en la configuración del scraper, y eso
 // solo puede hacerse desde el portátil donde corre. En la web pública ni se
@@ -92,15 +93,7 @@ async function cargar() {
     datos = await resp.json();
     porId = new Map(datos.matches.map((m) => [m.id, m]));
     revisarPendientes();
-
-    const eventos = datos.events || [];
-    if (eventos.length) {
-      const etiquetas = eventos.map((e) => e.label || e.id).join(' + ');
-      $('#nombre-evento').textContent = eventos.length === 1
-        ? (eventos[0].name || etiquetas)
-        : `AJP Madrid · ${etiquetas}`;
-      document.title = $('#nombre-evento').textContent;
-    }
+    // El título es fijo (index.html): no se sustituye por el nombre del evento.
     pintar();
   } catch (e) {
     const estado = $('#estado');
@@ -244,7 +237,7 @@ function revisarPendientes() {
   }
 }
 
-// Enlace a la llave en ajptour.com. Con más de un cuadro (Gi y No-Gi) se
+// Enlace a la llave en Smoothcomp. Con más de un cuadro (Gi y No-Gi) se
 // distingue por categoría, que si no no se sabe cuál es cuál.
 function enlacesLlave(atleta, { conCategoria = false } = {}) {
   const cuadros = atleta.brackets || [];
@@ -254,7 +247,7 @@ function enlacesLlave(atleta, { conCategoria = false } = {}) {
       ? `${b.eventLabel ? escapar(b.eventLabel) + ' · ' : ''}${escapar(b.category)}`
       : 'Ver llave';
     return `<a class="llave" href="${escapar(b.url)}" target="_blank" rel="noopener"
-              title="Ver la llave en ajptour.com">⤢ ${etiqueta}</a>`;
+              title="Ver la llave en Smoothcomp">⤢ ${etiqueta}</a>`;
   }).join('') + `</div>`;
 }
 
@@ -370,10 +363,7 @@ function pintarTatamis() {
   const nombres = [...porMat.keys()].sort();
   caja.innerHTML = (nombres.length
     ? nombres.map(tarjeta).join('')
-    : '<p class="vacio">Todavía no hay tatamis publicados.</p>')
-    + `<p class="sub" style="text-align:center;margin-top:1rem">
-         <a class="enlace-stream" href="${CANAL_AJP}" target="_blank" rel="noopener">
-           Canal de YouTube de AJP ↗</a></p>`;
+    : '<p class="vacio">Todavía no hay tatamis publicados.</p>');
 }
 
 function pintar() {

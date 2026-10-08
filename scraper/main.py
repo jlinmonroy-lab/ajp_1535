@@ -84,7 +84,7 @@ def un_ciclo(cfg, estado_previo):
         eventos=eventos, datos_por_evento=datos, fetched_at=ahora_iso(),
         streams=cfg.get("streams") or [],
         grupo=cfg.get("grupo"),
-        base_url=cfg.get("baseUrl", "https://ajptour.com"),
+        base_url=cfg["baseUrl"],
         lang=cfg.get("lang", "en"),
     )
     en_curso = sum(1 for m in estado["matches"] if m["state"] == "running")
@@ -107,7 +107,7 @@ def marcar_stale(estado, desde):
 
 
 def main():
-    p = argparse.ArgumentParser(description="Scraper del schedule de AJP Tour")
+    p = argparse.ArgumentParser(description="Scraper del schedule de un evento de Smoothcomp")
     p.add_argument("--once", action="store_true", help="un solo ciclo y salir")
     p.add_argument("--event", help="id de evento, sobreescribe config.json")
     p.add_argument("--config", help="ruta de configuración alternativa")

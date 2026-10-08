@@ -246,7 +246,7 @@ main { padding: 0 16px; }
   letter-spacing: .06em;
   color: var(--texto-tenue);
 }
-/* Enlaces a la llave en ajptour.com. Van al final de la ficha porque son un
+/* Enlaces a la llave en Smoothcomp. Van al final de la ficha porque son un
    salto fuera de la aplicación, no algo que se consulte de un vistazo. */
 .llaves { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
 .llave {

@@ -83,7 +83,7 @@ def clave_atleta(lado):
 
 
 def url_bracket(base_url, lang, event_id, bracket_id):
-    """Enlace a la llave en ajptour.com.
+    """Enlace a la llave en Smoothcomp.
 
     El `bracketId` del modelo lleva el evento delante ("1535-135577") para que
     dos eventos no se pisen; Smoothcomp solo quiere el número de después.
