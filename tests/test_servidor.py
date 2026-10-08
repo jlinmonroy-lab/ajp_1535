@@ -365,6 +365,15 @@ class TestGrupo(Entorno):
         self.assertEqual(self.pedir("POST", "/", self.ANA).status, 404)
 
 
+class TestPuertoOcupado(Entorno):
+    def test_un_segundo_servidor_en_el_mismo_puerto_falla(self):
+        # En Windows, http.server permitía abrirlo dos veces sin error y nadie
+        # sabía cuál de los dos contestaba.
+        with self.assertRaises(OSError):
+            crear_servidor(CFG, "127.0.0.1", self.puerto, self.buscador, self.almacen,
+                           self.grupos)
+
+
 class TestEsPanelLocal(unittest.TestCase):
     @staticmethod
     def handler(ip="127.0.0.1", **cabeceras):

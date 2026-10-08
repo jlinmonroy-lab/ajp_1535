@@ -87,6 +87,7 @@ class TestNormalizarEvento(unittest.TestCase):
                     "javascript:alert(1)", None, ""):
             e = eventos.normalizar_evento(evento_crudo(1, url=url))
             self.assertIsNone(e["baseUrl"], url)
+            self.assertIsNone(e["url"], f"{url}: no se ofrece como enlace")
         self.assertEqual(eventos.normalizar_evento(
             evento_crudo(1, url="https://smoothcomp.com/es/event/1"))["baseUrl"],
             "https://smoothcomp.com")

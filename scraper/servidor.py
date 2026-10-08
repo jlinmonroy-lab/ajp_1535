@@ -18,6 +18,7 @@ Uso:  python -m scraper.servidor [--host 127.0.0.1] [--puerto 8765] [--origen UR
 import argparse
 import ipaddress
 import json
+import os
 import re
 import sys
 import threading
@@ -40,6 +41,10 @@ SITIO = RAIZ / "site"
 DATOS = RAIZ / "data"
 LIMITE_CUERPO = 64 * 1024     # más que de sobra para un atleta
 PUERTO_POR_DEFECTO = 8765
+# Código de salida de "no he podido arrancar" (puerto ocupado, config ilegible).
+# Distinto de 1, que es lo que da Python al caerse con una excepción: el lanzador
+# del día del torneo relanza lo segundo, pero repetir lo primero no arreglaría nada.
+SALIDA_NO_ARRANCA = 3
 BRANDING = {"teamName": "FC Team", "logo": "img/logo.png"}
 
 RUTA_DATOS = re.compile(r"^/api/events/([^/]+)/data$")
@@ -51,6 +56,14 @@ CABECERAS_DE_PROXY = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto"
                       "Forwarded", "X-Real-Ip", "True-Client-IP", "CF-Connecting-IP",
                       "CF-Ray", "Via")
 HOSTS_LOCALES = ("localhost", "127.0.0.1", "::1")
+
+
+class _Servidor(ThreadingHTTPServer):
+    # En Windows, SO_REUSEADDR deja que dos procesos abran el mismo puerto sin
+    # error: el segundo servidor "arrancaría" y nadie sabría cuál contesta. En
+    # Linux hace falta para poder reiniciar sin esperar al TIME_WAIT.
+    allow_reuse_address = os.name != "nt"
+    daemon_threads = True
 
 
 def log(mensaje):
@@ -291,9 +304,7 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
                 f"({len(grupo['atletas'])} en la lista)")
             self._json(200, grupo)
 
-    servidor = ThreadingHTTPServer((host, puerto), partial(Handler, directory=str(sitio)))
-    servidor.daemon_threads = True
-    return servidor
+    return _Servidor((host, puerto), partial(Handler, directory=str(sitio)))
 
 
 def main(argv=None):
@@ -305,7 +316,11 @@ def main(argv=None):
     p.add_argument("--origen", help="URL base de Smoothcomp (para ensayar con el origen simulado)")
     args = p.parse_args(argv)
 
-    cfg = cargar_config(args.config, args.origen)
+    try:
+        cfg = cargar_config(args.config, args.origen)
+    except (OSError, ValueError) as e:
+        print(f"No se pudo leer la configuración {args.config} ({e}).")
+        return SALIDA_NO_ARRANCA
     puerto = args.puerto or (cfg.get("servidor") or {}).get("puerto", PUERTO_POR_DEFECTO)
     configurar_ritmo(cfg.get("requestPauseSeconds", 2.0))
 
@@ -316,7 +331,7 @@ def main(argv=None):
         servidor = crear_servidor(cfg, args.host, puerto, buscador, almacen, grupos)
     except OSError as e:
         print(f"No se pudo abrir {args.host}:{puerto} ({e}). ¿Ya hay otro servidor en marcha?")
-        return 1
+        return SALIDA_NO_ARRANCA
 
     log(f"Servidor en http://{'127.0.0.1' if args.host == '0.0.0.0' else args.host}:{puerto}"
         f" · origen {cfg['baseUrl']}")

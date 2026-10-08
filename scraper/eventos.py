@@ -76,11 +76,13 @@ def normalizar_evento(crudo):
     except (KeyError, TypeError, ValueError):
         return None
     url = crudo.get("url")
+    valida = host_de_smoothcomp(url)
     return {
         "id": event_id,
         "title": (crudo.get("title") or "").strip() or f"Evento {event_id}",
-        "url": url or None,
-        "baseUrl": fetch.origen_de(url) if host_de_smoothcomp(url) else None,
+        # Se enseña como enlace en la web: solo si es de Smoothcomp.
+        "url": url if valida else None,
+        "baseUrl": fetch.origen_de(url) if valida else None,
         "startdate": crudo.get("startdate") or None,
         "enddate": crudo.get("enddate") or None,
         "city": (crudo.get("location_city") or "").strip() or None,
