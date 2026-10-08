@@ -16,6 +16,7 @@ construir los enlaces a las llaves.
 """
 import json
 import re
+import math
 import threading
 import time
 import urllib.parse
@@ -24,6 +25,7 @@ from datetime import date
 
 from scraper import fetch
 from scraper.fetch import ErrorOrigen
+from scraper.parse import normalizar
 
 CUANDO = ("upcoming", "past", "all")
 POR_PAGINA = 40                    # tamaño de página de `past`; el de `upcoming` lo ponemos nosotros
@@ -68,6 +70,15 @@ def host_de_smoothcomp(url):
                                          or host.endswith(".smoothcomp.com"))
 
 
+def _coordenada(valor, maximo):
+    """Un número dentro de [-maximo, maximo], o None. Smoothcomp las manda como texto."""
+    try:
+        numero = float(valor)
+    except (TypeError, ValueError):
+        return None
+    return numero if math.isfinite(numero) and abs(numero) <= maximo else None
+
+
 def normalizar_evento(crudo):
     """Un evento del buscador con los campos que usa la web, o None si no sirve."""
     if not isinstance(crudo, dict):
@@ -88,9 +99,79 @@ def normalizar_evento(crudo):
         "enddate": crudo.get("enddate") or None,
         "city": (crudo.get("location_city") or "").strip() or None,
         "country": crudo.get("location_country") or None,
+        "lat": _coordenada(crudo.get("location_lat"), 90),
+        "lon": _coordenada(crudo.get("location_long"), 180),
         "ended": bool(crudo.get("eventEnded")),
         "cover": crudo.get("cover_image") or None,
     }
+
+
+def distancia_km(lat1, lon1, lat2, lon2):
+    """Distancia en línea recta sobre la esfera terrestre (haversine), en km."""
+    p = math.pi / 180
+    a = (math.sin((lat2 - lat1) * p / 2) ** 2
+         + math.cos(lat1 * p) * math.cos(lat2 * p) * math.sin((lon2 - lon1) * p / 2) ** 2)
+    return 12742 * math.asin(math.sqrt(a))
+
+
+class Zona:
+    """Un sitio con el que acotar el buscador, p. ej. «Madrid, España».
+
+    Un evento es de la zona si es del país y, o bien dice el texto (en el título o
+    en la ciudad), o bien sus coordenadas caen dentro del radio. Las dos vías se
+    complementan: el texto no necesita que el organizador haya puesto
+    coordenadas, y el radio encuentra el torneo de Alcalá cuyo título no dice Madrid.
+    """
+
+    def __init__(self, nombre, pais, texto=None, centro=None, radio_km=None):
+        self.nombre = nombre
+        self.pais = pais
+        self.texto = texto
+        self.centro = centro
+        self.radio_km = radio_km
+        self._texto = normalizar(texto) if texto else None
+
+    @classmethod
+    def de_config(cls, datos):
+        """La zona de `config.json`. Lanza ValueError si está mal escrita."""
+        if not isinstance(datos, dict):
+            raise ValueError("'zona' debe ser un objeto")
+        nombre = str(datos.get("nombre") or "").strip()
+        pais = str(datos.get("pais") or "").strip().upper()
+        texto = str(datos.get("texto") or "").strip() or None
+        if not nombre:
+            raise ValueError("zona: falta 'nombre'")
+        if not re.fullmatch(r"[A-Z]{2}", pais):
+            raise ValueError("zona: 'pais' debe ser un código de dos letras, como ES")
+
+        centro, radio = datos.get("centro"), datos.get("radioKm")
+        if centro is not None or radio is not None:
+            if (not isinstance(centro, (list, tuple)) or len(centro) != 2
+                    or _coordenada(centro[0], 90) is None
+                    or _coordenada(centro[1], 180) is None):
+                raise ValueError("zona: 'centro' debe ser [latitud, longitud]")
+            if isinstance(radio, bool) or not isinstance(radio, (int, float)) or radio <= 0:
+                raise ValueError("zona: 'radioKm' debe ser un número mayor que 0")
+            centro = (float(centro[0]), float(centro[1]))
+        if not texto and centro is None:
+            raise ValueError("zona: hace falta 'texto' o 'centro' con 'radioKm'")
+        return cls(nombre, pais, texto, centro, float(radio) if radio is not None else None)
+
+    def contiene(self, evento):
+        if (evento.get("country") or "").upper() != self.pais:
+            return False
+        if self._texto and self._texto in normalizar(
+                f"{evento.get('title') or ''} {evento.get('city') or ''}"):
+            return True
+        if self.centro and evento.get("lat") is not None and evento.get("lon") is not None:
+            return distancia_km(*self.centro, evento["lat"], evento["lon"]) <= self.radio_km
+        return False
+
+
+def _coincide(evento, q):
+    """¿Aparece lo que se escribió en el título o la ciudad? Sin acentos ni mayúsculas."""
+    return not q or normalizar(q) in normalizar(
+        f"{evento.get('title') or ''} {evento.get('city') or ''}")
 
 
 def limpiar_consulta(q):
@@ -107,6 +188,8 @@ class Buscador:
     def __init__(self, cfg, pedir_html=None, pedir_json=None, reloj=time.monotonic,
                  hoy=None):
         self.cfg = cfg
+        # La zona por defecto del buscador (None si no hay): lanza ValueError si está mal escrita.
+        self.zona = Zona.de_config(cfg["zona"]) if cfg.get("zona") else None
         self._hoy = hoy or (lambda: date.today().isoformat())
         self.ttl = (cfg.get("servidor") or {}).get("listaEventosTtlSeconds", 600)
         # Inyectables: las pruebas no tocan la red.
@@ -120,10 +203,12 @@ class Buscador:
 
     # ---- lista ----
 
-    def _url(self, cuando, q, pagina):
+    def _url(self, cuando, q, pagina, pais=None):
         raiz = self.cfg["baseUrl"].rstrip("/")
         lang = self.cfg.get("lang", "en")
         params = {}
+        if pais:
+            params["countries"] = pais    # Smoothcomp sí filtra por país en el servidor
         if q:
             params["search"] = q
         if cuando == "past" and pagina > 1:
@@ -131,8 +216,8 @@ class Buscador:
         consulta = f"?{urllib.parse.urlencode(params)}" if params else ""
         return f"{raiz}/{lang}/events/{cuando}{consulta}"
 
-    def _leer_lista(self, cuando, q, pagina):
-        html, _ = self._pedir_html(self._url(cuando, q, pagina),
+    def _leer_lista(self, cuando, q, pagina, pais=None):
+        html, _ = self._pedir_html(self._url(cuando, q, pagina, pais),
                                    self.cfg.get("timeoutSeconds", 30))
         eventos = [e for e in map(normalizar_evento, extraer_eventos(html)) if e]
         if cuando == "upcoming":
@@ -154,9 +239,9 @@ class Buscador:
             return (empezado, fecha, int(e["id"]))
         return clave
 
-    def _lista(self, cuando, q, pagina):
+    def _lista(self, cuando, q, pagina, pais=None):
         """(eventos, vieja). `vieja` si Smoothcomp falló y se sirve la copia anterior."""
-        clave = (cuando, q.lower(), pagina if cuando == "past" else 1)
+        clave = (cuando, q.lower(), pagina if cuando == "past" else 1, pais)
         with self._candado:
             candado = self._por_clave.setdefault(clave, threading.Lock())
 
@@ -168,7 +253,7 @@ class Buscador:
                 return guardado[1], guardado[2]
 
             try:
-                eventos = self._leer_lista(cuando, q, pagina)
+                eventos = self._leer_lista(cuando, q, pagina, pais)
             except ErrorOrigen:
                 if not guardado:
                     raise
@@ -187,10 +272,20 @@ class Buscador:
                     self._por_clave.pop(vieja, None)
             return eventos, False
 
-    def buscar(self, q="", cuando="upcoming", pagina=1):
+    def buscar(self, q="", cuando="upcoming", pagina=1, zona=False):
         """Una página de resultados.
 
         {"events": [...], "page": n, "hasMore": bool, "stale": bool}
+
+        Con `zona=True` solo salen los eventos de la zona de la configuración. El
+        texto `search` de Smoothcomp es una frase exacta sobre el título y no mira
+        la ciudad, así que no sirve para acotar por sitio:
+
+          - **próximos:** se pide la lista del país entera, una sola vez y sin
+            texto, y se filtra aquí por zona y por lo escrito. Esa lista en caché
+            sirve a cualquier búsqueda.
+          - **pasados:** son demasiados para filtrar por coordenadas, así que se
+            pide el texto de la zona (p. ej. «madrid») y se filtra aquí por lo escrito.
 
         Lanza ValueError si los parámetros no valen y ErrorOrigen si Smoothcomp
         falla y no hay copia anterior.
@@ -204,20 +299,33 @@ class Buscador:
             raise ValueError("la página debe ser un número") from None
         if not 1 <= pagina <= MAX_PAGINA:
             raise ValueError(f"la página debe estar entre 1 y {MAX_PAGINA}")
+        if zona and self.zona is None:
+            raise ValueError("no hay ninguna zona configurada")
+        z = self.zona if zona else None
 
         eventos, hay_mas, vieja = [], False, False
 
         if cuando in ("upcoming", "all"):
-            lista, v = self._lista("upcoming", q, pagina)
+            if z:
+                pais_entero, v = self._lista("upcoming", "", 1, z.pais)
+                lista = [e for e in pais_entero if z.contiene(e) and _coincide(e, q)]
+            else:
+                lista, v = self._lista("upcoming", q, pagina)
             inicio = (pagina - 1) * POR_PAGINA
             eventos += lista[inicio:inicio + POR_PAGINA]
             hay_mas = hay_mas or len(lista) > inicio + POR_PAGINA
             vieja = vieja or v
 
         if cuando in ("past", "all"):
-            lista, v = self._lista("past", q, pagina)
+            if z:
+                pagina_cruda, v = self._lista("past", z.texto or "", pagina, z.pais)
+                lista = [e for e in pagina_cruda if z.contiene(e) and _coincide(e, q)]
+                # ¿Hay otra página en origen? Se mide antes de filtrar aquí.
+                hay_mas = hay_mas or len(pagina_cruda) >= POR_PAGINA
+            else:
+                lista, v = self._lista("past", q, pagina)
+                hay_mas = hay_mas or len(lista) >= POR_PAGINA
             eventos += lista
-            hay_mas = hay_mas or len(lista) >= POR_PAGINA
             vieja = vieja or v
 
         self._recordar(eventos)
