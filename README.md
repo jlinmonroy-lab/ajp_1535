@@ -89,8 +89,8 @@ resultados son inventados.
 
 ## Logo y colores del equipo
 
-- **Logo**: `site/img/logo.png`. Es el logo de FC Team con los colores invertidos (el original es
-  negro sobre blanco), para que se funda con el fondo negro. Para cambiarlo, sustituye ese fichero:
+- **Logo**: `site/img/logo.png`, el logo de FC Team reducido a 160×160 px. Tiene fondo negro, así
+  que se funde con la web. Para cambiarlo, sustituye ese fichero:
   cuadrado o casi, de unos 256 px y pocas decenas de KB.
 - **Colores**: la web es siempre negra con letras blancas. El color de botones y pestaña activa es
   `--equipo` (ahora blanco), y `--equipo-texto` el del texto encima (ahora negro); los dos están al
