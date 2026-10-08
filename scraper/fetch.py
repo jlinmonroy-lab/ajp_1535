@@ -82,7 +82,7 @@ def configurar_ritmo(pausa):
     RITMO.pausa = max(0.0, float(pausa))
 
 
-def _es_desafio(texto, cabeceras=None):
+def es_desafio(texto, cabeceras=None):
     """¿Es la página de reto de Cloudflare en vez de una respuesta de Smoothcomp?"""
     if cabeceras is not None and "challenge" in (cabeceras.get("Cf-Mitigated") or "").lower():
         return True
@@ -111,7 +111,7 @@ def _pedir(url, timeout, cabeceras, intentos=3, espera_base=1.0):
                 # 403 en los .json suele significar "schedule no publicado".
                 cuerpo = e.read(4096).decode("utf-8", errors="replace")
                 raise ErrorOrigen(f"HTTP {e.code} en {url}", codigo=e.code,
-                                  desafio=_es_desafio(cuerpo, e.headers)) from e
+                                  desafio=es_desafio(cuerpo, e.headers)) from e
             ultimo = f"HTTP {e.code}"
             espera = _retry_after(e.headers) or espera_base * 2 ** intento
         except Exception as e:  # noqa: BLE001 - red inestable: merece reintento
@@ -132,7 +132,12 @@ def _get(url, timeout, intentos=3, espera_base=1.0):
         return json.loads(texto), final
     except ValueError as e:
         raise ErrorOrigen(f"respuesta que no es JSON en {url}",
-                          desafio=_es_desafio(texto)) from e
+                          desafio=es_desafio(texto)) from e
+
+
+def pedir_json(url, timeout=30):
+    """GET de un endpoint JSON suelto. Devuelve (datos, url_final)."""
+    return _get(url, timeout)
 
 
 def pedir_html(url, timeout=30):

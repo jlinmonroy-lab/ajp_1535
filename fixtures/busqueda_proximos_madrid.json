@@ -1,0 +1,86 @@
+[
+  {
+    "id": 31768,
+    "title": "ADCC SPAIN MADRID OPEN 2026",
+    "cover_image": "https://smoothcomp.com/pictures/t/8843754-7s24/adcc-spain-madrid-open-2026.jpg",
+    "cover_image_fallback": "/build/webpack/img/sc/fallback.8fe47956faa4fb29c29f..jpg",
+    "url": "https://adcc-spain.smoothcomp.com/es/event/31768",
+    "days_to_start": 2,
+    "eventPeriod": "October 10",
+    "eventEnded": false,
+    "location_country": "ES",
+    "location_country_human": "Spain",
+    "location_city": "Torrejon de ardoz",
+    "location_lat": "40.4783576",
+    "location_long": "-3.4783155",
+    "categoryGroups": [
+      "4"
+    ],
+    "startdate": "2026-10-10",
+    "enddate": "2026-10-10"
+  },
+  {
+    "id": 33588,
+    "title": "MADRID BJJ CUP GI & NO-GI 2026",
+    "cover_image": "https://smoothcomp.com/pictures/t/9233032-zmy7/madrid-bjj-cup-gi-no-gi-2026.jpg",
+    "cover_image_fallback": "/build/webpack/img/sc/fallback.8fe47956faa4fb29c29f..jpg",
+    "url": "https://spainbjjtour.smoothcomp.com/es/event/33588",
+    "days_to_start": 9,
+    "eventPeriod": "October 17",
+    "eventEnded": false,
+    "location_country": "ES",
+    "location_country_human": "Spain",
+    "location_city": "Arganda del Rey, (Madrid)",
+    "location_lat": "40.3072077",
+    "location_long": "-3.4493504",
+    "categoryGroups": [
+      "1",
+      "7"
+    ],
+    "startdate": "2026-10-17",
+    "enddate": "2026-10-17"
+  },
+  {
+    "id": 33644,
+    "title": "All Stars BJJ Madrid",
+    "cover_image": "https://smoothcomp.com/pictures/t/9178992-5csp/all-stars-bjj-madrid-2026.jpg",
+    "cover_image_fallback": "/build/webpack/img/sc/fallback.8fe47956faa4fb29c29f..jpg",
+    "url": "https://allstarsbjj.smoothcomp.com/es/event/33644",
+    "days_to_start": 66,
+    "eventPeriod": "December 13",
+    "eventEnded": false,
+    "location_country": "ES",
+    "location_country_human": "Spain",
+    "location_city": "Madrid",
+    "location_lat": "40.4167279",
+    "location_long": "-3.7032905",
+    "categoryGroups": [
+      "1",
+      "7"
+    ],
+    "startdate": "2026-12-13",
+    "enddate": "2026-12-13"
+  },
+  {
+    "id": 34939,
+    "title": "Grappling Industries MADRID",
+    "cover_image": "https://smoothcomp.com/pictures/t/9570684-o7gc/grappling-industries-madrid-2027.jpg",
+    "cover_image_fallback": "/build/webpack/img/sc/fallback.8fe47956faa4fb29c29f..jpg",
+    "url": "https://grapplingindustries.smoothcomp.com/es/event/34939",
+    "days_to_start": 226,
+    "eventPeriod": "2027 May 22",
+    "eventEnded": false,
+    "location_country": "ES",
+    "location_country_human": "Spain",
+    "location_city": "Madrid",
+    "location_lat": "40.3717436",
+    "location_long": "-3.7574326",
+    "categoryGroups": [
+      "1",
+      "7",
+      "3"
+    ],
+    "startdate": "2027-05-22",
+    "enddate": "2027-05-22"
+  }
+]
