@@ -55,8 +55,8 @@ class BuscadorFalso:
         self.respuesta = {"events": [{"id": "33588", "title": "MADRID BJJ CUP"}],
                           "page": 1, "hasMore": False, "stale": False}
 
-    def buscar(self, q, cuando, pagina):
-        self.consultas.append((q, cuando, pagina))
+    def buscar(self, q, cuando, pagina, zona=False):
+        self.consultas.append((q, cuando, pagina, zona))
         if isinstance(self.respuesta, Exception):
             raise self.respuesta
         return self.respuesta
@@ -72,6 +72,8 @@ class BuscadorFalso:
 
 
 class Entorno(unittest.TestCase):
+    CFG_EXTRA = {}     # claves que una clase de pruebas añade a la config del servidor
+
     def setUp(self):
         carpeta = tempfile.TemporaryDirectory()
         self.addCleanup(carpeta.cleanup)
@@ -90,7 +92,8 @@ class Entorno(unittest.TestCase):
             leer=lambda cfg, event_id, base_url=None, log=print: self._leer(event_id),
             log=lambda *_: None, workers=0)
         self.servidor = crear_servidor(
-            {**CFG, "branding": {"teamName": "Mi Club"}}, "127.0.0.1", 0, self.buscador,
+            {**CFG, "branding": {"teamName": "Mi Club"}, **self.CFG_EXTRA}, "127.0.0.1", 0,
+            self.buscador,
             self.almacen, self.grupos, sitio)
         self.puerto = self.servidor.server_address[1]
         threading.Thread(target=self.servidor.serve_forever, args=(0.02,), daemon=True).start()
@@ -133,7 +136,8 @@ class TestConfigYEstaticos(Entorno):
     def test_config_mezcla_el_branding_con_los_valores_por_defecto(self):
         r = self.pedir("GET", "/api/config")
         self.assertEqual(r.status, 200)
-        self.assertEqual(self.json(r), {"teamName": "Mi Club", "logo": "img/logo.png"})
+        self.assertEqual(self.json(r), {"teamName": "Mi Club", "logo": "img/logo.png",
+                                        "zona": None})
 
     def test_sirve_la_web(self):
         r = self.pedir("GET", "/")
@@ -164,12 +168,12 @@ class TestBusqueda(Entorno):
     def test_pasa_los_parametros_al_buscador(self):
         r = self.pedir("GET", "/api/events/search?q=madrid%20cup&when=past&page=2")
         self.assertEqual(r.status, 200)
-        self.assertEqual(self.buscador.consultas, [("madrid cup", "past", "2")])
+        self.assertEqual(self.buscador.consultas, [("madrid cup", "past", "2", False)])
         self.assertEqual(self.json(r)["events"][0]["id"], "33588")
 
     def test_valores_por_defecto(self):
         self.pedir("GET", "/api/events/search")
-        self.assertEqual(self.buscador.consultas, [("", "upcoming", "1")])
+        self.assertEqual(self.buscador.consultas, [("", "upcoming", "1", False)])
 
     def test_parametros_invalidos_son_un_400(self):
         self.buscador.respuesta = ValueError("'when' debe ser uno de upcoming, past, all")
@@ -188,6 +192,32 @@ class TestBusqueda(Entorno):
         r = self.pedir("GET", "/api/events/search?q=x")
         self.assertEqual(r.status, 502)
         self.assertIn("número o su enlace", self.json(r)["error"])
+
+
+class TestZona(Entorno):
+    CFG_EXTRA = {"zona": {"nombre": "Madrid, España", "pais": "ES", "texto": "madrid",
+                          "centro": [40.4168, -3.7038], "radioKm": 50}}
+
+    def test_la_config_de_la_web_solo_dice_como_se_llama_la_zona(self):
+        zona = self.json(self.pedir("GET", "/api/config"))["zona"]
+        self.assertEqual(zona, {"nombre": "Madrid, España"})   # ni centro ni radio
+
+    def test_zona_uno_llega_al_buscador(self):
+        for valor in ("1", "true"):
+            self.pedir("GET", f"/api/events/search?q=x&zona={valor}")
+        self.assertEqual([c[3] for c in self.buscador.consultas], [True, True])
+
+    def test_sin_zona_o_con_otro_valor_no_hay_zona(self):
+        for ruta in ("/api/events/search", "/api/events/search?zona=0",
+                     "/api/events/search?zona=", "/api/events/search?zona=si"):
+            self.pedir("GET", ruta)
+        self.assertEqual([c[3] for c in self.buscador.consultas], [False] * 4)
+
+    def test_pedir_la_zona_sin_tenerla_es_un_400(self):
+        self.buscador.respuesta = ValueError("no hay ninguna zona configurada")
+        r = self.pedir("GET", "/api/events/search?zona=1")
+        self.assertEqual(r.status, 400)
+        self.assertIn("zona", self.json(r)["error"])
 
 
 class TestDatos(Entorno):

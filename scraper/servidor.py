@@ -5,8 +5,8 @@ Sirve `site/` y una API JSON pequeña. Nunca lee Smoothcomp dentro de una
 petición: el buscador contesta de su caché y el almacén de la suya, y son ellos
 quienes (con un ritmo global) van a Smoothcomp. Ver docs/architecture.md.
 
-  GET  /api/config                    -> {teamName, logo}
-  GET  /api/events/search             -> ?q=&when=upcoming|past|all&page=
+  GET  /api/config                    -> {teamName, logo, zona: {nombre} | null}
+  GET  /api/events/search             -> ?q=&when=upcoming|past|all&page=&zona=1
   GET  /api/events/{ids}/data         -> 202 cargando · 200 estado · 404 · 502
   GET  /api/events/{ids}/grupo        -> la lista del grupo de esa vista
   POST /api/events/{ids}/grupo        -> añadir/quitar; SOLO desde el panel local
@@ -125,6 +125,10 @@ def _coincide(if_none_match, etag):
 def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
     """El servidor listo para servir. Lanza OSError si el puerto está ocupado."""
     branding = {**BRANDING, **(cfg.get("branding") or {})}
+    # La web solo necesita saber que hay una zona por defecto y cómo se llama.
+    zona = cfg.get("zona")
+    config_web = {**branding,
+                  "zona": {"nombre": zona.get("nombre")} if isinstance(zona, dict) else None}
 
     class Handler(SimpleHTTPRequestHandler):
         def log_message(self, *args):
@@ -188,7 +192,7 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
                 return super().do_GET()    # la web estática
 
             if ruta == "/api/config":
-                return self._json(200, branding)
+                return self._json(200, config_web)
             if ruta == "/api/events/search":
                 return self._buscar(urllib.parse.parse_qs(partes.query))
             if m := RUTA_DATOS.match(ruta):
@@ -203,7 +207,8 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
 
             try:
                 resultado = buscador.buscar(uno("q", ""), uno("when", "upcoming"),
-                                            uno("page", "1"))
+                                            uno("page", "1"),
+                                            zona=uno("zona", "") in ("1", "true"))
             except ValueError as e:
                 return self._error(400, str(e))
             except ErrorOrigen as e:
@@ -325,7 +330,11 @@ def main(argv=None):
     configurar_ritmo(cfg.get("requestPauseSeconds", 2.0))
 
     grupos = Grupos(DATOS / "grupos.json")
-    buscador = Buscador(cfg)
+    try:
+        buscador = Buscador(cfg)
+    except ValueError as e:      # la zona de config.json está mal escrita
+        print(f"Configuración incorrecta en {args.config}: {e}")
+        return SALIDA_NO_ARRANCA
     almacen = Almacen(cfg, buscador, grupos, log=log)
     try:
         servidor = crear_servidor(cfg, args.host, puerto, buscador, almacen, grupos)
@@ -337,6 +346,8 @@ def main(argv=None):
         f" · origen {cfg['baseUrl']}")
     if args.host == "0.0.0.0":
         log("Abierto a la red local. El panel de grupo sigue limitado a este equipo.")
+    if buscador.zona:
+        log(f"Buscador acotado por defecto a: {buscador.zona.nombre}")
     log(f"Refresco de cada evento: {cfg.get('refreshSeconds', 75)} s · "
         f"pausa entre peticiones a Smoothcomp: {cfg.get('requestPauseSeconds', 2.0)} s")
     try:

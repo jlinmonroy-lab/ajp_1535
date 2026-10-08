@@ -9,6 +9,13 @@
     "teamName": "FC Team",
     "logo": "img/logo.png"
   },
+  "zona": {
+    "nombre": "Madrid, España",
+    "pais": "ES",
+    "texto": "madrid",
+    "centro": [40.4168, -3.7038],
+    "radioKm": 50
+  },
   "servidor": {
     "puerto": 8765,
     "listaEventosTtlSeconds": 600,
