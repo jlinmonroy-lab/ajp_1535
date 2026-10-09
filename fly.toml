@@ -1,7 +1,7 @@
 # Fly.io: una sola máquina siempre encendida con un volumen para data/grupos.json.
 # La caché y el ritmo de peticiones a Smoothcomp viven en el proceso: no escalar a más de una.
 # El nombre de la app es único en todo Fly: si está cogido, cámbialo aquí y en los comandos del README.
-app = "eventos-bjj"
+app = "fcteam-competicion"
 primary_region = "cdg"          # París. Madrid figura como región en retirada.
 
 kill_signal = "SIGINT"          # el servidor cierra limpio con Ctrl+C (KeyboardInterrupt)

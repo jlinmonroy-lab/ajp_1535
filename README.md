@@ -108,7 +108,7 @@ se comprueban además el `Host`, las cabeceras de proxy y el `Origin`). La únic
 ## Alojamiento fijo (Fly.io)
 
 Alternativa a tener el equipo encendido: el servidor vive en una máquina de [Fly.io](https://fly.io) y la
-dirección (`https://eventos-bjj.fly.dev`) funciona a cualquier hora desde cualquier móvil. Cuesta del orden de
+dirección (`https://fcteam-competicion.fly.dev`) funciona a cualquier hora desde cualquier móvil. Cuesta del orden de
 2-3 $/mes (máquina `shared-cpu-1x` de 256 MB + un volumen de 1 GB); Fly pide tarjeta y no tiene capa gratuita
 para cuentas nuevas. Tailscale Funnel sigue valiendo como respaldo.
 
@@ -121,7 +121,7 @@ para `grupos.json`. **La clave no va en ningún fichero**: el repositorio es pú
 ```sh
 pwsh -Command "iwr https://fly.io/install.ps1 -useb | iex"    # instala flyctl (ver fly.io/docs/flyctl/install)
 fly auth login                                                 # o `fly auth signup`; pide tarjeta
-fly apps create eventos-bjj                                    # el nombre es único en todo Fly: si está cogido,
+fly apps create fcteam-competicion                             # el nombre es único en todo Fly: si está cogido,
                                                                # elige otro y cámbialo en `app =` de fly.toml
 fly volumes create datos --region cdg --size 1                 # el volumen de grupos.json
 python -c "import secrets; print(secrets.token_urlsafe(32))"   # genera una clave larga y guárdala (gestor de contraseñas)
@@ -134,8 +134,8 @@ fly deploy --ha=false                                          # --ha=false: una
 deja de hacerlo, se ve así con la app desplegada:
 
 ```sh
-curl "https://eventos-bjj.fly.dev/api/events/search?q=madrid&when=past"   # lista de eventos (HTML tras Cloudflare)
-curl "https://eventos-bjj.fly.dev/api/events/26416/data"                  # 202 «cargando»; repite hasta el 200
+curl "https://fcteam-competicion.fly.dev/api/events/search?q=madrid&when=past"   # lista de eventos (HTML tras Cloudflare)
+curl "https://fcteam-competicion.fly.dev/api/events/26416/data"                  # 202 «cargando»; repite hasta el 200
 ```
 
 Si el buscador da `502` («Smoothcomp está bloqueando la búsqueda») pero abrir un evento por número funciona,
