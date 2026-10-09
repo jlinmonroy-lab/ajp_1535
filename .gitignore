@@ -36,3 +36,6 @@ registro/
 
 # Listas de grupo del servidor: nombres de personas, no van al repo (es público)
 data/
+
+# Apuntes locales con la clave de administrador de Fly.io. El repo es público.
+localhost.txt
