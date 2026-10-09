@@ -129,8 +129,9 @@ fly secrets set ADMIN_TOKEN=<la clave>
 fly deploy --ha=false                                          # --ha=false: una sola máquina
 ```
 
-**Antes de fiarte, la prueba que importa:** que Smoothcomp conteste a la IP de un servidor en la nube. Todo lo
-verificado hasta ahora (`docs/data-source.md`) fue desde una IP residencial. Con la app desplegada:
+**La prueba que importa** es que Smoothcomp conteste a la IP de un servidor en la nube, porque lo documentado en
+`docs/data-source.md` se midió desde una IP residencial. Desde Fly (París) **funcionó el 2026-10-09**; si algún día
+deja de hacerlo, se ve así con la app desplegada:
 
 ```sh
 curl "https://eventos-bjj.fly.dev/api/events/search?q=madrid&when=past"   # lista de eventos (HTML tras Cloudflare)

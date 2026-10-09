@@ -303,9 +303,12 @@ nunca (la IP de origen no es loopback y el proxy añade cabeceras).
 - **Sin cambios en el puerto.** El servidor sigue leyendo `--puerto`/`config.json`; no se lee `PORT` del entorno
   porque el lanzador del día del torneo da por hecho el 8765 y una variable suelta en el equipo lo desincronizaría.
 
-**Sin verificar todavía:** que Cloudflare deje pasar a Smoothcomp desde la IP de un servidor en la nube. `data-source.md`
-solo lo comprueba desde una IP residencial. Es lo primero que hay que probar tras el primer despliegue (ver el
-README); si falla, las salidas son otro proveedor/región o volver al equipo de casa con Funnel.
+**Verificado (2026-10-09, Fly.io, París):** Cloudflare deja pasar a Smoothcomp desde la IP de la nube. La lista de
+eventos (HTML) responde 200 y el Kimura Cup Madrid (26416) se lee entero: 712 combates, 661 atletas y 9 tatamis en
+25 s; con él cargado el servidor ocupa ~38 MB de los 256 MB de la máquina. `data-source.md` solo lo había
+comprobado desde una IP residencial, así que esto es una comprobación de un día en una IP concreta: si Cloudflare
+endureciera, las salidas son otro proveedor/región o volver al equipo de casa con Funnel (el buscador degrada
+a «abrir por número», ver `ErrorOrigen.desafio`).
 
 **Se mantiene** la decisión de que el enlace sea abierto para leer (`noindex` en meta, `robots.txt` y
 `X-Robots-Tag`). Que la dirección sea permanente aumenta el tiempo de exposición de nombres de atletas, algunos
