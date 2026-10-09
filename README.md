@@ -102,7 +102,54 @@ nadie, y que se guarda en `data/grupos.json` (no se versiona: son nombres de per
 
 Los móviles ven la lista pero no pueden cambiarla. El servidor solo acepta el cambio si viene de
 este equipo, y **también cuando hay un túnel por medio** (el túnel conecta desde `127.0.0.1`, así que
-se comprueban además el `Host`, las cabeceras de proxy y el `Origin`).
+se comprueban además el `Host`, las cabeceras de proxy y el `Origin`). La única excepción es la
+[clave de administrador](#alojamiento-fijo-flyio), que solo existe si el servidor se arranca con `ADMIN_TOKEN`.
+
+## Alojamiento fijo (Fly.io)
+
+Alternativa a tener el equipo encendido: el servidor vive en una máquina de [Fly.io](https://fly.io) y la
+dirección (`https://eventos-bjj.fly.dev`) funciona a cualquier hora desde cualquier móvil. Cuesta del orden de
+2-3 $/mes (máquina `shared-cpu-1x` de 256 MB + un volumen de 1 GB); Fly pide tarjeta y no tiene capa gratuita
+para cuentas nuevas. Tailscale Funnel sigue valiendo como respaldo.
+
+La imagen es `Dockerfile` (Python puro, 178 MB) y la configuración `fly.toml`: una **sola** máquina (la caché y el
+ritmo de peticiones a Smoothcomp son del proceso, no se puede repartir) en París, con un volumen en `/data`
+para `grupos.json`. **La clave no va en ningún fichero**: el repositorio es público.
+
+**Una sola vez:**
+
+```sh
+pwsh -Command "iwr https://fly.io/install.ps1 -useb | iex"    # instala flyctl (ver fly.io/docs/flyctl/install)
+fly auth login                                                 # o `fly auth signup`; pide tarjeta
+fly apps create eventos-bjj                                    # el nombre es único en todo Fly: si está cogido,
+                                                               # elige otro y cámbialo en `app =` de fly.toml
+fly volumes create datos --region cdg --size 1                 # el volumen de grupos.json
+python -c "import secrets; print(secrets.token_urlsafe(32))"   # genera una clave larga y guárdala (gestor de contraseñas)
+fly secrets set ADMIN_TOKEN=<la clave>
+fly deploy --ha=false                                          # --ha=false: una sola máquina
+```
+
+**Antes de fiarte, la prueba que importa:** que Smoothcomp conteste a la IP de un servidor en la nube. Todo lo
+verificado hasta ahora (`docs/data-source.md`) fue desde una IP residencial. Con la app desplegada:
+
+```sh
+curl "https://eventos-bjj.fly.dev/api/events/search?q=madrid&when=past"   # lista de eventos (HTML tras Cloudflare)
+curl "https://eventos-bjj.fly.dev/api/events/26416/data"                  # 202 «cargando»; repite hasta el 200
+```
+
+Si el buscador da `502` («Smoothcomp está bloqueando la búsqueda») pero abrir un evento por número funciona,
+solo falla la lista; si tampoco hay datos del evento, esta IP no sirve y toca otro proveedor o volver al equipo
+de casa con Funnel.
+
+**La clave de administrador.** Con `ADMIN_TOKEN` puesto, la pantalla de inicio enseña al pie *Acceso de
+administrador*: se escribe la clave una vez por dispositivo (queda en su `localStorage`, nunca en la URL) y desde ahí
+sale el botón **«Seguir para todos»** y el formulario de alta, igual que en el equipo del servidor. *Salir* la
+borra del dispositivo. Para cambiarla: `fly secrets set ADMIN_TOKEN=<otra>` (reinicia la máquina; los
+dispositivos con la clave vieja la olvidan solos al abrir la web). Mínimo 16 caracteres: con menos, el servidor
+no arranca.
+
+Día a día: `fly deploy --ha=false` para publicar cambios, `fly logs` para ver qué pasa y `fly status` para ver
+si está en marcha. Los avisos de gasto se configuran en el panel de Fly (no tiene tope duro).
 
 ## Configuración
 
@@ -120,6 +167,14 @@ Todo en `config.json`:
 | `servidor` | `puerto`, `listaEventosTtlSeconds` (caché del buscador, 600), `inactividadMinutos` (30), `maxEventosEnCache` (20), `workers` (2) |
 
 Las opciones de línea de comandos del servidor: `--host`, `--puerto`, `--config`, `--origen`.
+
+Y dos variables de entorno, pensadas para el [alojamiento fijo](#alojamiento-fijo-flyio) y sin efecto si no
+se ponen:
+
+| Variable | Qué hace |
+| --- | --- |
+| `ADMIN_TOKEN` | clave (≥16 caracteres) que permite cambiar la lista del grupo desde cualquier dispositivo, con la cabecera `X-Admin-Token`. Sin ella solo vale el equipo del servidor |
+| `DATA_DIR` | carpeta donde se guarda `grupos.json` (por defecto `data/`); en Fly es el volumen `/data` |
 
 ### La zona por defecto
 
@@ -211,5 +266,6 @@ AJP, pon `baseUrl` a `https://ajptour.com`.
 | `scraper/grupos.py` | lista del grupo por evento |
 | `scraper/main.py`, `panel.py`, `publish.py` | modo instantánea estática |
 | `site/` | frontend (HTML/CSS/JS vanilla, sin build): `buscador.js` (inicio), `app.js` (evento) |
+| `Dockerfile`, `fly.toml` | imagen y configuración del [alojamiento fijo](#alojamiento-fijo-flyio) |
 | `docs/` | `architecture.md`, `data-source.md` |
 | `research/` | scripts de investigación y simuladores, no forman parte de la app |

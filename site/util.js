@@ -33,6 +33,12 @@ function guardarLocal(clave, valor) {
   } catch { /* sin persistencia, pero la sesión sigue */ }
 }
 
+function borrarLocal(clave) {
+  try {
+    localStorage.removeItem(clave);
+  } catch { /* sin persistencia: no había nada que borrar */ }
+}
+
 /* ---------- Fechas ---------- */
 // 'YYYY-MM-DD' -> Date a mediodía, para que ninguna zona horaria la cambie de día.
 function fechaLocal(iso) {

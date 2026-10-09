@@ -7,9 +7,12 @@ y un lector de Smoothcomp falsos; las lecturas encoladas las procesa el test.
 
 Uso:  python -m unittest discover -s tests
 """
+import contextlib
 import gzip
 import http.client
+import io
 import json
+import os
 import sys
 import tempfile
 import threading
@@ -18,6 +21,7 @@ from collections import namedtuple
 from email.message import Message
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
@@ -25,7 +29,7 @@ sys.path.insert(0, str(RAIZ))
 from scraper.almacen import Almacen  # noqa: E402
 from scraper.fetch import ErrorOrigen, Lectura  # noqa: E402
 from scraper.grupos import Grupos  # noqa: E402
-from scraper.servidor import crear_servidor, es_panel_local  # noqa: E402
+from scraper.servidor import SALIDA_NO_ARRANCA, crear_servidor, es_panel_local, main  # noqa: E402
 
 CFG = {"baseUrl": "https://smoothcomp.com", "lang": "en", "refreshSeconds": 75,
        "staleAfterFailures": 3,
@@ -71,8 +75,12 @@ class BuscadorFalso:
                 "baseUrl": "https://org.smoothcomp.com"}
 
 
+CLAVE = "una-clave-de-administrador-larga"
+
+
 class Entorno(unittest.TestCase):
     CFG_EXTRA = {}     # claves que una clase de pruebas añade a la config del servidor
+    CLAVE_ADMIN = None  # la clave de administrador del servidor de la prueba, si la hay
 
     def setUp(self):
         carpeta = tempfile.TemporaryDirectory()
@@ -94,7 +102,7 @@ class Entorno(unittest.TestCase):
         self.servidor = crear_servidor(
             {**CFG, "branding": {"teamName": "Mi Club"}, **self.CFG_EXTRA}, "127.0.0.1", 0,
             self.buscador,
-            self.almacen, self.grupos, sitio)
+            self.almacen, self.grupos, sitio, clave_admin=self.CLAVE_ADMIN)
         self.puerto = self.servidor.server_address[1]
         threading.Thread(target=self.servidor.serve_forever, args=(0.02,), daemon=True).start()
         self.addCleanup(self._cerrar)
@@ -417,6 +425,96 @@ class TestGrupo(Entorno):
         self.assertEqual(self.pedir("POST", "/", self.ANA).status, 404)
 
 
+class TestSinClaveDeAdmin(Entorno):
+    """Sin ADMIN_TOKEN el servidor se comporta como siempre: solo vale el equipo local."""
+
+    def test_la_cabecera_de_clave_no_abre_nada(self):
+        r = self.pedir("POST", "/api/events/33588/grupo", {"name": "Ana"},
+                       {"X-Forwarded-For": "203.0.113.9", "X-Admin-Token": "cualquiera"})
+        self.assertEqual(r.status, 403)
+        self.assertEqual(self.grupos.leer("33588")["atletas"], [])
+
+    def test_ni_siquiera_una_clave_vacia(self):
+        r = self.pedir("POST", "/api/events/33588/grupo", {"name": "Ana"},
+                       {"X-Forwarded-For": "203.0.113.9", "X-Admin-Token": ""})
+        self.assertEqual(r.status, 403)
+
+    def test_la_comprobacion_de_clave_dice_que_no(self):
+        r = self.pedir("GET", "/api/admin", cabeceras={"X-Admin-Token": "cualquiera"})
+        self.assertEqual(r.status, 403)
+
+    def test_la_config_no_ofrece_entrar_como_administrador(self):
+        self.assertNotIn("admin", self.json(self.pedir("GET", "/api/config")))
+
+
+class TestClaveDeAdmin(Entorno):
+    """Con ADMIN_TOKEN, la clave permite editar la lista desde un host público y tras un proxy."""
+    CLAVE_ADMIN = CLAVE
+    ANA = {"name": "Ana Pérez", "club": "Gracie Madrid", "accion": "añadir"}
+    # Lo que llega a una app en la nube: Host público y cabeceras del proxy.
+    EN_LA_NUBE = {"Host": "mi-app.fly.dev", "X-Forwarded-For": "203.0.113.9",
+                  "X-Forwarded-Proto": "https"}
+
+    def escribir(self, clave=None, **extra):
+        cabeceras = {**self.EN_LA_NUBE, **extra}
+        if clave is not None:
+            cabeceras["X-Admin-Token"] = clave
+        return self.pedir("POST", "/api/events/33588/grupo", self.ANA, cabeceras)
+
+    def test_con_la_clave_se_puede_apuntar_desde_fuera(self):
+        r = self.escribir(CLAVE)
+        self.assertEqual(r.status, 200, r.cuerpo)
+        self.assertEqual(self.grupos.leer("33588")["atletas"][0]["name"], "Ana Pérez")
+
+    def test_sin_clave_o_con_otra_clave_no(self):
+        for clave in (None, "", "otra", CLAVE[:-1], CLAVE + "x", CLAVE.upper()):
+            with self.subTest(clave):
+                self.assertEqual(self.escribir(clave).status, 403)
+        self.assertEqual(self.grupos.leer("33588")["atletas"], [], "no debe haber escrito nada")
+
+    def test_una_clave_con_caracteres_raros_no_rompe_la_comparacion(self):
+        # compare_digest lanza TypeError con str no ASCII: tiene que ser un 403 y no un 500.
+        self.assertEqual(self.escribir("clavé-ñandú").status, 403)
+
+    def test_la_clave_no_salta_el_resto_de_las_comprobaciones(self):
+        r = self.pedir("POST", "/api/events/33588/grupo", json.dumps(self.ANA),
+                       {**self.EN_LA_NUBE, "X-Admin-Token": CLAVE, "Content-Type": "text/plain"})
+        self.assertEqual(r.status, 415)
+        r = self.pedir("POST", "/api/events/33588/grupo", {"accion": "añadir"},
+                       {**self.EN_LA_NUBE, "X-Admin-Token": CLAVE})
+        self.assertEqual(r.status, 400)
+
+    def test_el_equipo_local_sigue_sin_necesitar_clave(self):
+        self.assertEqual(self.pedir("POST", "/api/events/33588/grupo", self.ANA).status, 200)
+
+    def test_leer_la_lista_sigue_siendo_publico(self):
+        self.escribir(CLAVE)
+        r = self.pedir("GET", "/api/events/33588/grupo", cabeceras=self.EN_LA_NUBE)
+        self.assertEqual(r.status, 200)
+        self.assertEqual(self.json(r)["atletas"][0]["name"], "Ana Pérez")
+
+    def test_comprobar_la_clave(self):
+        self.assertEqual(self.pedir("GET", "/api/admin",
+                                    cabeceras={"X-Admin-Token": CLAVE}).status, 200)
+        for clave in (None, "otra"):
+            cabeceras = {} if clave is None else {"X-Admin-Token": clave}
+            self.assertEqual(self.pedir("GET", "/api/admin", cabeceras=cabeceras).status, 403)
+
+    def test_la_config_ofrece_entrar_como_administrador(self):
+        self.assertTrue(self.json(self.pedir("GET", "/api/config"))["admin"])
+
+    def test_no_se_abre_a_otras_webs_por_cors(self):
+        # La cabecera propia obliga a un preflight, y el servidor no contesta OPTIONS.
+        r = self.pedir("GET", "/api/admin",
+                       cabeceras={"Origin": "https://malo.example", "X-Admin-Token": CLAVE})
+        self.assertNotIn("access-control-allow-origin", r.headers)
+        self.assertEqual(self.pedir("OPTIONS", "/api/events/33588/grupo").status, 501)
+
+    def test_las_respuestas_de_clave_tampoco_se_dejan_indexar(self):
+        for r in (self.pedir("GET", "/api/admin"), self.escribir(CLAVE), self.escribir("mal")):
+            self.assertEqual(r.headers.get("x-robots-tag"), "noindex, nofollow", r.status)
+
+
 class TestPuertoOcupado(Entorno):
     def test_un_segundo_servidor_en_el_mismo_puerto_falla(self):
         # En Windows, http.server permitía abrirlo dos veces sin error y nadie
@@ -424,6 +522,15 @@ class TestPuertoOcupado(Entorno):
         with self.assertRaises(OSError):
             crear_servidor(CFG, "127.0.0.1", self.puerto, self.buscador, self.almacen,
                            self.grupos)
+
+
+class TestArranque(unittest.TestCase):
+    def test_una_clave_de_admin_corta_impide_arrancar(self):
+        # Una clave fácil de adivinar dejaría la lista del grupo abierta a todo internet.
+        with mock.patch.dict(os.environ, {"ADMIN_TOKEN": "corta"}), \
+                contextlib.redirect_stdout(io.StringIO()) as salida:
+            self.assertEqual(main(["--puerto", "0"]), SALIDA_NO_ARRANCA)
+        self.assertIn("ADMIN_TOKEN", salida.getvalue())
 
 
 class TestEsPanelLocal(unittest.TestCase):

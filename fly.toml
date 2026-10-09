@@ -1,0 +1,35 @@
+# Fly.io: una sola máquina siempre encendida con un volumen para data/grupos.json.
+# La caché y el ritmo de peticiones a Smoothcomp viven en el proceso: no escalar a más de una.
+# El nombre de la app es único en todo Fly: si está cogido, cámbialo aquí y en los comandos del README.
+app = "eventos-bjj"
+primary_region = "cdg"          # París. Madrid figura como región en retirada.
+
+kill_signal = "SIGINT"          # el servidor cierra limpio con Ctrl+C (KeyboardInterrupt)
+kill_timeout = 10
+
+[build]
+
+[env]
+  DATA_DIR = "/data"
+
+[mounts]
+  source = "datos"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8765
+  force_https = true
+  auto_stop_machines = "off"    # el sondeo del móvil lo despertaría igual, pero la caché se perdería
+  auto_start_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "15s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/config"        # no toca Smoothcomp
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

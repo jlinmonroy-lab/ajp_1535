@@ -255,8 +255,9 @@ relanza).
 Los móviles con datos propios no están en la wifi del equipo: necesitan una dirección pública con HTTPS.
 Se usa **Tailscale Funnel**, que ya estaba instalado y activo: dirección fija, sin instalar nada y sin tocar
 el cortafuegos. Se descartó `--host 0.0.0.0` (solo vale en la misma wifi), cloudflared (hay que instalarlo y
-la dirección cambia en cada arranque) y un hosting (el panel del grupo solo funciona desde el equipo del
-servidor, y habría que rediseñarlo con una clave de administración).
+la dirección cambia en cada arranque) y, por entonces, un hosting (el panel del grupo solo funcionaba desde
+el equipo del servidor, y habría que rediseñarlo con una clave de administración; ver «Alojamiento fijo»
+más abajo, que es justo eso).
 
 - **El servidor sigue escuchando solo en `127.0.0.1`.** Funnel conecta desde el propio equipo, así que
   no se abre ningún puerto a la red.
@@ -273,3 +274,39 @@ servidor, y habría que rediseñarlo con una clave de administración).
   enseguida con el ETag. Sin esto, un móvil en el bolsillo habría seguido gastando datos cada 30 s.
 
 `scraper/publico.py` lee `tailscale funnel status` para que el lanzador diga el enlace; nunca cambia el túnel.
+
+## Alojamiento fijo (Fly.io)
+
+Funnel exige el equipo encendido, sin suspender y con el servidor lanzado. Para tener una dirección que funcione
+siempre, el mismo servidor corre en una máquina de Fly.io (`Dockerfile`, `fly.toml`). El código casi no cambia;
+lo que cambia es **quién puede escribir**, porque en un alojamiento la guarda «solo el equipo local» no se cumple
+nunca (la IP de origen no es loopback y el proxy añade cabeceras).
+
+- **Clave de administrador (`ADMIN_TOKEN`).** `POST /api/events/{ids}/grupo` se acepta desde el panel local **o**
+  con la cabecera `X-Admin-Token` correcta (`servidor.tiene_clave`, comparación en tiempo constante). Sin
+  `ADMIN_TOKEN`, el comportamiento es el de siempre: la cabecera no abre nada. El resto de comprobaciones
+  (`Content-Type: application/json`, tamaño, validación) siguen valiendo con clave.
+- **Por qué una cabecera y no una cookie o un parámetro.** Una cabecera propia obliga al navegador a pedir un
+  `OPTIONS` antes de mandarla desde otra web, y el servidor no lo contesta: otra página no puede escribir aunque
+  conozca la ruta. Con una cookie haría falta además protección CSRF. En la URL acabaría en el historial y en los
+  registros.
+- **La clave es larga o no hay servidor.** Menos de 16 caracteres impide arrancar (código 3): una clave fácil de
+  adivinar dejaría la lista abierta a todo internet. El repositorio es público, así que la clave se pasa como
+  secreto del alojamiento (`fly secrets set`), nunca en un fichero.
+- **En la web.** `/api/config` añade `admin: true` solo si hay clave. La clave se escribe una vez por
+  dispositivo, se guarda en `localStorage` y viaja en `X-Admin-Token`; al abrir la web se comprueba con
+  `GET /api/admin` y, si el servidor ya no la acepta, se olvida. En el equipo del servidor no se ofrece: ya
+  tiene el panel abierto.
+- **Persistencia.** Lo único que se escribe en disco es `grupos.json`; `DATA_DIR` lo lleva a un volumen
+  (`/data`). La caché de eventos sigue en memoria y se rehace sola tras un reinicio. Una sola máquina, porque la
+  caché y el ritmo de peticiones a Smoothcomp son del proceso (`fly deploy --ha=false`).
+- **Sin cambios en el puerto.** El servidor sigue leyendo `--puerto`/`config.json`; no se lee `PORT` del entorno
+  porque el lanzador del día del torneo da por hecho el 8765 y una variable suelta en el equipo lo desincronizaría.
+
+**Sin verificar todavía:** que Cloudflare deje pasar a Smoothcomp desde la IP de un servidor en la nube. `data-source.md`
+solo lo comprueba desde una IP residencial. Es lo primero que hay que probar tras el primer despliegue (ver el
+README); si falla, las salidas son otro proveedor/región o volver al equipo de casa con Funnel.
+
+**Se mantiene** la decisión de que el enlace sea abierto para leer (`noindex` en meta, `robots.txt` y
+`X-Robots-Tag`). Que la dirección sea permanente aumenta el tiempo de exposición de nombres de atletas, algunos
+menores; si eso preocupa, el siguiente paso es una clave de lectura en el enlace.

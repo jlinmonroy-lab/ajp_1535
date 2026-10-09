@@ -9,13 +9,20 @@ quienes (con un ritmo global) van a Smoothcomp. Ver docs/architecture.md.
   GET  /api/events/search             -> ?q=&when=upcoming|past|all&page=&zona=1
   GET  /api/events/{ids}/data         -> 202 cargando · 200 estado · 404 · 502
   GET  /api/events/{ids}/grupo        -> la lista del grupo de esa vista
-  POST /api/events/{ids}/grupo        -> añadir/quitar; SOLO desde el panel local
+  POST /api/events/{ids}/grupo        -> añadir/quitar; SOLO desde el panel local o
+                                         con la clave de administrador (X-Admin-Token)
+  GET  /api/admin                     -> 200 si la clave de administrador es válida
 
 `{ids}` es un id de evento (`33588`) o varios separados por comas (`1535,1526`).
 
 Uso:  python -m scraper.servidor [--host 127.0.0.1] [--puerto 8765] [--origen URL]
+
+En un alojamiento fijo se configura por entorno: `DATA_DIR` (dónde se guarda
+grupos.json) y `ADMIN_TOKEN` (la clave que desbloquea el panel desde cualquier
+dispositivo; sin ella solo vale el equipo del servidor).
 """
 import argparse
+import hmac
 import ipaddress
 import json
 import os
@@ -59,6 +66,11 @@ CABECERAS_DE_PROXY = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto"
                       "Forwarded", "X-Real-Ip", "True-Client-IP", "CF-Connecting-IP",
                       "CF-Ray", "Via")
 HOSTS_LOCALES = ("localhost", "127.0.0.1", "::1")
+
+# La clave de administrador viaja en esta cabecera, no en la URL. Al ser propia, el
+# navegador pediría un OPTIONS antes de mandarla desde otra web, y aquí no se contesta.
+CABECERA_CLAVE = "X-Admin-Token"
+CLAVE_MIN_LARGO = 16
 
 
 class _Servidor(ThreadingHTTPServer):
@@ -119,19 +131,34 @@ def es_panel_local(handler):
     return True
 
 
+def tiene_clave(handler, clave):
+    """¿Trae la petición la clave de administrador? Sin clave configurada, nunca."""
+    if not clave:
+        return False
+    recibida = handler.headers.get(CABECERA_CLAVE) or ""
+    return hmac.compare_digest(recibida.encode("utf-8"), clave.encode("utf-8"))
+
+
 def _coincide(if_none_match, etag):
     """¿Alguno de los ETag del cliente es este? Se comparan como débiles."""
     debil = lambda e: e.strip().removeprefix("W/")  # noqa: E731
     return any(debil(e) == debil(etag) for e in if_none_match.split(","))
 
 
-def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
-    """El servidor listo para servir. Lanza OSError si el puerto está ocupado."""
+def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO,
+                   clave_admin=None):
+    """El servidor listo para servir. Lanza OSError si el puerto está ocupado.
+
+    Con `clave_admin`, quien la mande en `X-Admin-Token` puede cambiar la lista del
+    grupo desde cualquier sitio, además del equipo del servidor.
+    """
     branding = {**BRANDING, **(cfg.get("branding") or {})}
     # La web solo necesita saber que hay una zona por defecto y cómo se llama.
     zona = cfg.get("zona")
     config_web = {**branding,
                   "zona": {"nombre": zona.get("nombre")} if isinstance(zona, dict) else None}
+    if clave_admin:
+        config_web["admin"] = True    # la web ofrece entrar con la clave
 
     class Handler(SimpleHTTPRequestHandler):
         # Sin tiempo máximo, un cliente que declara un cuerpo y no lo manda dejaría
@@ -203,6 +230,12 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
 
             if ruta == "/api/config":
                 return self._json(200, config_web)
+            if ruta == "/api/admin":
+                if tiene_clave(self, clave_admin):
+                    return self._json(200, {"admin": True})
+                if self.headers.get(CABECERA_CLAVE):
+                    log("admin: rechazada una clave de administrador incorrecta")
+                return self._error(403, "clave de administrador incorrecta")
             if ruta == "/api/events/search":
                 return self._buscar(urllib.parse.parse_qs(partes.query))
             if m := RUTA_DATOS.match(ruta):
@@ -289,8 +322,11 @@ def crear_servidor(cfg, host, puerto, buscador, almacen, grupos, sitio=SITIO):
             if not m:
                 return self._error(404, "ruta desconocida")
 
-            if not es_panel_local(self):
-                return self._error(403, "solo se puede cambiar desde el equipo del servidor")
+            if not (es_panel_local(self) or tiene_clave(self, clave_admin)):
+                if self.headers.get(CABECERA_CLAVE):
+                    log("grupo: rechazada una clave de administrador incorrecta")
+                return self._error(403, "solo se puede cambiar desde el equipo del servidor "
+                                        "o con la clave de administrador")
             # Un formulario de otra web no puede mandar JSON sin permiso del servidor
             # (el navegador pediría antes un OPTIONS, que aquí no se contesta).
             tipo = self.headers.get("Content-Type", "").split(";")[0].strip().lower()
@@ -342,10 +378,18 @@ def main(argv=None):
     except (OSError, ValueError) as e:
         print(f"No se pudo leer la configuración {args.config} ({e}).")
         return SALIDA_NO_ARRANCA
+    clave_admin = os.environ.get("ADMIN_TOKEN") or None
+    if clave_admin and len(clave_admin) < CLAVE_MIN_LARGO:
+        print(f"ADMIN_TOKEN es demasiado corta: mínimo {CLAVE_MIN_LARGO} caracteres. "
+              "Una clave fácil de adivinar dejaría la lista del grupo abierta a todo internet.")
+        return SALIDA_NO_ARRANCA
     puerto = args.puerto or (cfg.get("servidor") or {}).get("puerto", PUERTO_POR_DEFECTO)
     configurar_ritmo(cfg.get("requestPauseSeconds", 2.0))
 
-    grupos = Grupos(DATOS / "grupos.json")
+    # En un alojamiento fijo el disco del programa se borra en cada despliegue; los
+    # datos van a un volumen aparte.
+    datos = Path(os.environ.get("DATA_DIR") or DATOS)
+    grupos = Grupos(datos / "grupos.json")
     try:
         buscador = Buscador(cfg)
     except ValueError as e:      # la zona de config.json está mal escrita
@@ -353,7 +397,8 @@ def main(argv=None):
         return SALIDA_NO_ARRANCA
     almacen = Almacen(cfg, buscador, grupos, log=log)
     try:
-        servidor = crear_servidor(cfg, args.host, puerto, buscador, almacen, grupos)
+        servidor = crear_servidor(cfg, args.host, puerto, buscador, almacen, grupos,
+                                  clave_admin=clave_admin)
     except OSError as e:
         print(f"No se pudo abrir {args.host}:{puerto} ({e}). ¿Ya hay otro servidor en marcha?")
         return SALIDA_NO_ARRANCA
@@ -361,7 +406,10 @@ def main(argv=None):
     log(f"Servidor en http://{'127.0.0.1' if args.host == '0.0.0.0' else args.host}:{puerto}"
         f" · origen {cfg['baseUrl']}")
     if args.host == "0.0.0.0":
-        log("Abierto a la red local. El panel de grupo sigue limitado a este equipo.")
+        log("Abierto a la red. El panel de grupo se desbloquea con la clave de administrador."
+            if clave_admin else
+            "Abierto a la red local. El panel de grupo sigue limitado a este equipo.")
+    log(f"Datos del grupo en {datos / 'grupos.json'}")
     if buscador.zona:
         log(f"Buscador acotado por defecto a: {buscador.zona.nombre}")
     log(f"Refresco de cada evento: {cfg.get('refreshSeconds', 75)} s · "

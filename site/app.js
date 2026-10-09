@@ -26,9 +26,12 @@ const MAX_REVALIDACIONES = 3;
 const CLAVE_SEGUIDOS = 'sbjj:seguidos';
 
 // El botón "Seguir para todos" escribe la lista del grupo en el servidor, y eso
-// solo se permite desde el equipo donde corre. En la web pública ni se enseña:
-// sería una opción que nadie podría usar.
-const ESdPANEL = ['localhost', '127.0.0.1'].includes(location.hostname);
+// solo se permite desde el equipo donde corre o con la clave de administrador
+// (ver "Clave de administrador" más abajo). Al resto ni se les enseña: sería una
+// opción que nadie podría usar.
+const ES_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
+let ESdPANEL = ES_LOCAL;        // arrancar() lo enciende si hay una clave válida guardada
+const CLAVE_ADMIN = 'sbjj:admin';
 
 // Lo pulsado en el panel tarda un ciclo en volver dentro de los datos. Hasta
 // que vuelva se recuerda aquí; si no, el refresco de cada 30s lo desmarcaría y
@@ -582,7 +585,7 @@ function listaGrupoPanel() {
 async function enviarGrupo(cuerpo) {
   const resp = await fetch(urlGrupo(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...cabecerasAdmin() },
     body: JSON.stringify(cuerpo),
   });
   if (!resp.ok) throw new Error(await mensajeDeError(resp));
@@ -802,9 +805,61 @@ $('#busqueda').addEventListener('input', pintarBusqueda);
 $('#recargar').addEventListener('click', reiniciarCiclo);
 $('#volver').addEventListener('click', () => { location.hash = '#/'; });
 
-if (ESdPANEL) {
-  $('#alta-grupo').addEventListener('submit', altaManual);
+// El formulario sigue oculto salvo en el panel; engancharlo siempre evita depender de
+// si la clave ya se había comprobado cuando se llega aquí.
+$('#alta-grupo').addEventListener('submit', altaManual);
+
+/* ---------- Clave de administrador ---------- */
+// Con ADMIN_TOKEN en el servidor, la clave guardada en este dispositivo desbloquea
+// "Seguir para todos" sin estar delante del equipo. Viaja en una cabecera, nunca en la URL.
+const claveAdmin = () => leerLocal(CLAVE_ADMIN, '');
+const cabecerasAdmin = () => (claveAdmin() ? { 'X-Admin-Token': claveAdmin() } : {});
+
+// true si el servidor la acepta, false si la rechaza, null si no se pudo saber (sin red).
+async function comprobarAdmin(clave) {
+  try {
+    const resp = await fetch('api/admin', { cache: 'no-store', headers: { 'X-Admin-Token': clave } });
+    if (resp.ok) return true;
+    if (resp.status === 403) return false;
+  } catch { /* sin red */ }
+  return null;
 }
+
+function pintarAdmin() {
+  // En el equipo del servidor el panel ya está abierto: no hace falta clave.
+  const visible = marca.admin && !ES_LOCAL;
+  $('#admin').classList.toggle('oculta', !visible);
+  $('#admin-boton').textContent = ESdPANEL ? 'Administrador · Salir' : 'Acceso de administrador';
+}
+
+$('#admin-boton').addEventListener('click', () => {
+  if (ESdPANEL) {
+    borrarLocal(CLAVE_ADMIN);
+    location.reload();      // el panel se decide al arrancar
+    return;
+  }
+  const form = $('#admin-form');
+  form.classList.toggle('oculta');
+  if (!form.classList.contains('oculta')) form.clave.focus();
+});
+
+$('#admin-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const form = ev.target;
+  const clave = form.clave.value.trim();
+  if (!clave) return;
+  const boton = form.querySelector('button');
+  boton.disabled = true;
+  const valida = await comprobarAdmin(clave);
+  boton.disabled = false;
+  if (valida) {
+    guardarLocal(CLAVE_ADMIN, clave);
+    location.reload();
+    return;
+  }
+  avisar(valida === false ? 'Clave incorrecta.' : 'No se pudo comprobar la clave. ¿Hay conexión?', true);
+  if (valida === false) form.clave.value = '';
+});
 
 /* ---------- Arranque ---------- */
 async function arrancar() {
@@ -824,6 +879,13 @@ async function arrancar() {
     abrirEvento(null);
     return;
   }
+
+  if (marca.admin && !ES_LOCAL && claveAdmin()) {
+    const valida = await comprobarAdmin(claveAdmin());
+    if (valida === false) borrarLocal(CLAVE_ADMIN);           // cambiada en el servidor
+    ESdPANEL = valida !== false;                              // sin red, se fía de la guardada
+  }
+  pintarAdmin();
 
   Inicio.configurar(marca.zona);   // antes de enrutar: la primera búsqueda ya sale acotada
   window.addEventListener('hashchange', enrutar);

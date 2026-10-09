@@ -182,6 +182,18 @@ body[data-evento="inexistente"] #alta-grupo { display: none; }
 .alta-grupo button { width: 100%; padding: .6rem; }
 .alta-grupo .sub { margin: .5rem 0 0; }
 
+/* Acceso de administrador: discreto, al pie del inicio */
+.pie-admin { margin: 1.6rem 0 1rem; text-align: center; }
+.enlace-admin {
+  padding: .4rem .6rem;
+  background: none;
+  border: 0;
+  color: var(--texto-tenue);
+  font-size: .8rem;
+  text-decoration: underline;
+}
+.pie-admin .alta-grupo { margin-top: .6rem; text-align: left; }
+
 /* ---------- Inicio: buscar un evento ---------- */
 #form-eventos { margin: 0; }
 #busqueda-eventos { margin-top: .9rem; margin-bottom: .5rem; }
