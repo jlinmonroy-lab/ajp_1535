@@ -1,0 +1,982 @@
+{
+ "athletes": [
+  {
+   "bestMedal": "silver",
+   "brackets": [
+    {
+     "category": "Men's GI / Brown / Master 2 / 85KG",
+     "eventLabel": "AJP",
+     "id": "1257-109155",
+     "url": "https://ajptour.com/en/event/1257/bracket/109155"
+    }
+   ],
+   "categories": [
+    "Men's GI / Brown / Master 2 / 85KG"
+   ],
+   "club": "Commando Group",
+   "country": "CO",
+   "events": [
+    "1257"
+   ],
+   "id": "atleta 153|commando group",
+   "image": null,
+   "inGroup": true,
+   "matchIds": [
+    "1257-1043313"
+   ],
+   "medals": [
+    {
+     "bracketId": "1257-109155",
+     "category": "Men's GI / Brown / Master 2 / 85KG",
+     "eventId": "1257",
+     "medal": "silver"
+    }
+   ],
+   "name": "Atleta 153",
+   "registrationIds": [
+    "900153"
+   ]
+  },
+  {
+   "bestMedal": "gold",
+   "brackets": [
+    {
+     "category": "Men's GI / Brown / Master 2 / 85KG",
+     "eventLabel": "AJP",
+     "id": "1257-109155",
+     "url": "https://ajptour.com/en/event/1257/bracket/109155"
+    }
+   ],
+   "categories": [
+    "Men's GI / Brown / Master 2 / 85KG"
+   ],
+   "club": "Commando Group",
+   "country": "CO",
+   "events": [
+    "1257"
+   ],
+   "id": "atleta 155|commando group",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1257-1043313"
+   ],
+   "medals": [
+    {
+     "bracketId": "1257-109155",
+     "category": "Men's GI / Brown / Master 2 / 85KG",
+     "eventId": "1257",
+     "medal": "gold"
+    }
+   ],
+   "name": "Atleta 155",
+   "registrationIds": [
+    "900155"
+   ]
+  },
+  {
+   "bestMedal": "gold",
+   "brackets": [
+    {
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventLabel": "AJP",
+     "id": "1257-109153",
+     "url": "https://ajptour.com/en/event/1257/bracket/109153"
+    }
+   ],
+   "categories": [
+    "Women's GI / Blue / Amateur / 70KG"
+   ],
+   "club": "Commando Group",
+   "country": "IR",
+   "events": [
+    "1257"
+   ],
+   "id": "atleta 336|commando group",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1257-1043450",
+    "1257-1043452"
+   ],
+   "medals": [
+    {
+     "bracketId": "1257-109153",
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventId": "1257",
+     "medal": "gold"
+    }
+   ],
+   "name": "Atleta 336",
+   "registrationIds": [
+    "900336"
+   ]
+  },
+  {
+   "bestMedal": "bronze",
+   "brackets": [
+    {
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventLabel": "AJP",
+     "id": "1257-109153",
+     "url": "https://ajptour.com/en/event/1257/bracket/109153"
+    }
+   ],
+   "categories": [
+    "Women's GI / Blue / Amateur / 70KG"
+   ],
+   "club": "Al Jazira Jiu-Jitsu Club",
+   "country": "AE",
+   "events": [
+    "1257"
+   ],
+   "id": "atleta 319|al jazira jiu-jitsu club",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1257-1043450",
+    "1257-1043451"
+   ],
+   "medals": [
+    {
+     "bracketId": "1257-109153",
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventId": "1257",
+     "medal": "bronze"
+    }
+   ],
+   "name": "Atleta 319",
+   "registrationIds": [
+    "900319"
+   ]
+  },
+  {
+   "bestMedal": "silver",
+   "brackets": [
+    {
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventLabel": "AJP",
+     "id": "1257-109153",
+     "url": "https://ajptour.com/en/event/1257/bracket/109153"
+    }
+   ],
+   "categories": [
+    "Women's GI / Blue / Amateur / 70KG"
+   ],
+   "club": "Al Jazira Jiu-Jitsu Club",
+   "country": "EG",
+   "events": [
+    "1257"
+   ],
+   "id": "atleta 318|al jazira jiu-jitsu club",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1257-1043451",
+    "1257-1043452"
+   ],
+   "medals": [
+    {
+     "bracketId": "1257-109153",
+     "category": "Women's GI / Blue / Amateur / 70KG",
+     "eventId": "1257",
+     "medal": "silver"
+    }
+   ],
+   "name": "Atleta 318",
+   "registrationIds": [
+    "900318"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Women's NO-GI / Purple / Professional / 62KG",
+     "eventLabel": "Open",
+     "id": "1535-135586",
+     "url": "https://ajptour.com/en/event/1535/bracket/135586"
+    }
+   ],
+   "categories": [
+    "Women's NO-GI / Purple / Professional / 62KG"
+   ],
+   "club": "Absoluto Bjj ( Romania )",
+   "country": "RO",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 64|absoluto bjj ( romania )",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247722"
+   ],
+   "medals": [],
+   "name": "Atleta 64",
+   "registrationIds": [
+    "900064"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Women's NO-GI / Purple / Professional / 62KG",
+     "eventLabel": "Open",
+     "id": "1535-135586",
+     "url": "https://ajptour.com/en/event/1535/bracket/135586"
+    }
+   ],
+   "categories": [
+    "Women's NO-GI / Purple / Professional / 62KG"
+   ],
+   "club": "Enjoy the Process Brazilian Jiu-jitsu",
+   "country": "IN",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 89|enjoy the process brazilian jiu-jitsu",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247722"
+   ],
+   "medals": [],
+   "name": "Atleta 89",
+   "registrationIds": [
+    "900089"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Men's NO-GI / Blue / Amateur / 85KG",
+     "eventLabel": "Open",
+     "id": "1535-135570",
+     "url": "https://ajptour.com/en/event/1535/bracket/135570"
+    }
+   ],
+   "categories": [
+    "Men's NO-GI / Blue / Amateur / 85KG"
+   ],
+   "club": "Círculo de Jiu Jitsu",
+   "country": "ES",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 169|circulo de jiu jitsu",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247660"
+   ],
+   "medals": [],
+   "name": "Atleta 169",
+   "registrationIds": [
+    "900169"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Men's NO-GI / Blue / Amateur / 85KG",
+     "eventLabel": "Open",
+     "id": "1535-135570",
+     "url": "https://ajptour.com/en/event/1535/bracket/135570"
+    }
+   ],
+   "categories": [
+    "Men's NO-GI / Blue / Amateur / 85KG"
+   ],
+   "club": "Lotus Bjj Espana",
+   "country": "PE",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 19|lotus bjj espana",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247660"
+   ],
+   "medals": [],
+   "name": "Atleta 19",
+   "registrationIds": [
+    "900019"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Women's NO-GI / Purple / Professional / 62KG",
+     "eventLabel": "Open",
+     "id": "1535-135586",
+     "url": "https://ajptour.com/en/event/1535/bracket/135586"
+    }
+   ],
+   "categories": [
+    "Women's NO-GI / Purple / Professional / 62KG"
+   ],
+   "club": "Flow",
+   "country": "IT",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 177|flow",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247723"
+   ],
+   "medals": [],
+   "name": "Atleta 177",
+   "registrationIds": [
+    "900177"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Men's NO-GI / Blue / Amateur / 85KG",
+     "eventLabel": "Open",
+     "id": "1535-135570",
+     "url": "https://ajptour.com/en/event/1535/bracket/135570"
+    }
+   ],
+   "categories": [
+    "Men's NO-GI / Blue / Amateur / 85KG"
+   ],
+   "club": "Equipe Elite",
+   "country": "MA",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 136|equipe elite",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247661"
+   ],
+   "medals": [],
+   "name": "Atleta 136",
+   "registrationIds": [
+    "900136"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Men's NO-GI / Blue / Amateur / 85KG",
+     "eventLabel": "Open",
+     "id": "1535-135570",
+     "url": "https://ajptour.com/en/event/1535/bracket/135570"
+    }
+   ],
+   "categories": [
+    "Men's NO-GI / Blue / Amateur / 85KG"
+   ],
+   "club": "STRIPE BJJ ACADEMY",
+   "country": "ES",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 35|stripe bjj academy",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247661"
+   ],
+   "medals": [],
+   "name": "Atleta 35",
+   "registrationIds": [
+    "900035"
+   ]
+  },
+  {
+   "bestMedal": null,
+   "brackets": [
+    {
+     "category": "Men's NO-GI / Blue / Amateur / 85KG",
+     "eventLabel": "Open",
+     "id": "1535-135570",
+     "url": "https://ajptour.com/en/event/1535/bracket/135570"
+    }
+   ],
+   "categories": [
+    "Men's NO-GI / Blue / Amateur / 85KG"
+   ],
+   "club": "Lavica project SICILIA",
+   "country": "IT",
+   "events": [
+    "1535"
+   ],
+   "id": "atleta 23|lavica project sicilia",
+   "image": null,
+   "inGroup": false,
+   "matchIds": [
+    "1535-1247663"
+   ],
+   "medals": [],
+   "name": "Atleta 23",
+   "registrationIds": [
+    "900023"
+   ]
+  }
+ ],
+ "events": [
+  {
+   "days": [
+    {
+     "date": "2025-09-05T11:00:00+04:00",
+     "id": 1688,
+     "name": "Friday"
+    }
+   ],
+   "id": "1257",
+   "label": "AJP",
+   "name": "Evento de prueba 1257"
+  },
+  {
+   "days": [
+    {
+     "date": "2026-09-26T16:40:00+02:00",
+     "id": 2075,
+     "name": "Saturday"
+    },
+    {
+     "date": "2026-09-27T12:00:00+02:00",
+     "id": 2144,
+     "name": "Sunday"
+    }
+   ],
+   "id": "1535",
+   "label": "Open",
+   "name": "Evento de prueba 1535"
+  }
+ ],
+ "fetchedAt": "2026-09-20T12:00:00Z",
+ "group": {
+  "athletes": [
+   {
+    "club": "Commando Group",
+    "id": "atleta 153|commando group",
+    "name": "Atleta 153"
+   },
+   {
+    "id": "atleta 999999|",
+    "name": "Atleta 999999"
+   }
+  ],
+  "name": "Nuestro equipo"
+ },
+ "matches": [
+  {
+   "bracketId": "1257-109155",
+   "bracketUrl": "https://ajptour.com/en/event/1257/bracket/109155",
+   "category": {
+    "ageGroup": "Master 2",
+    "belt": "Brown",
+    "division": "Men's GI",
+    "gi": true,
+    "raw": "Men's GI / Brown / Master 2 / 85KG",
+    "weight": "85KG"
+   },
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedStart": "2025-09-05T12:34:51+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": "1257-1043313",
+   "mat": "Mat 6",
+   "matId": 9671,
+   "matKey": "1257:9671",
+   "matMatchNr": "6-17",
+   "matchNr": 1,
+   "round": "Final",
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 153|commando group",
+     "club": "Commando Group",
+     "country": "CO",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 153",
+     "registrationId": "900153"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 155|commando group",
+     "club": "Commando Group",
+     "country": "CO",
+     "image": null,
+     "isWinner": true,
+     "name": "Atleta 155",
+     "registrationId": "900155"
+    }
+   ],
+   "state": "finished",
+   "timePassed": "01:20",
+   "wonBy": "submission"
+  },
+  {
+   "bracketId": "1257-109153",
+   "bracketUrl": "https://ajptour.com/en/event/1257/bracket/109153",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Women's GI",
+    "gi": true,
+    "raw": "Women's GI / Blue / Amateur / 70KG",
+    "weight": "70KG"
+   },
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedStart": "2025-09-05T14:02:44+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": "1257-1043450",
+   "mat": "Mat 9",
+   "matId": 10651,
+   "matKey": "1257:10651",
+   "matMatchNr": "9-21",
+   "matchNr": 1,
+   "round": null,
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 336|commando group",
+     "club": "Commando Group",
+     "country": "IR",
+     "image": null,
+     "isWinner": true,
+     "name": "Atleta 336",
+     "registrationId": "900336"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 319|al jazira jiu-jitsu club",
+     "club": "Al Jazira Jiu-Jitsu Club",
+     "country": "AE",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 319",
+     "registrationId": "900319"
+    }
+   ],
+   "state": "finished",
+   "timePassed": "00:39",
+   "wonBy": "submission"
+  },
+  {
+   "bracketId": "1257-109153",
+   "bracketUrl": "https://ajptour.com/en/event/1257/bracket/109153",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Women's GI",
+    "gi": true,
+    "raw": "Women's GI / Blue / Amateur / 70KG",
+    "weight": "70KG"
+   },
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedStart": "2025-09-05T14:07:03+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": "1257-1043451",
+   "mat": "Mat 9",
+   "matId": 10651,
+   "matKey": "1257:10651",
+   "matMatchNr": "9-23",
+   "matchNr": 2,
+   "round": "Bronze match",
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 318|al jazira jiu-jitsu club",
+     "club": "Al Jazira Jiu-Jitsu Club",
+     "country": "EG",
+     "image": null,
+     "isWinner": true,
+     "name": "Atleta 318",
+     "registrationId": "900318"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 319|al jazira jiu-jitsu club",
+     "club": "Al Jazira Jiu-Jitsu Club",
+     "country": "AE",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 319",
+     "registrationId": "900319"
+    }
+   ],
+   "state": "finished",
+   "timePassed": "05:00",
+   "wonBy": "points"
+  },
+  {
+   "bracketId": "1257-109153",
+   "bracketUrl": "https://ajptour.com/en/event/1257/bracket/109153",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Women's GI",
+    "gi": true,
+    "raw": "Women's GI / Blue / Amateur / 70KG",
+    "weight": "70KG"
+   },
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedStart": "2025-09-05T14:34:07+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": "1257-1043452",
+   "mat": "Mat 9",
+   "matId": 10651,
+   "matKey": "1257:10651",
+   "matMatchNr": "9-26",
+   "matchNr": 3,
+   "round": "Final",
+   "roundNr": 2,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 336|commando group",
+     "club": "Commando Group",
+     "country": "IR",
+     "image": null,
+     "isWinner": true,
+     "name": "Atleta 336",
+     "registrationId": "900336"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 318|al jazira jiu-jitsu club",
+     "club": "Al Jazira Jiu-Jitsu Club",
+     "country": "EG",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 318",
+     "registrationId": "900318"
+    }
+   ],
+   "state": "finished",
+   "timePassed": "00:40",
+   "wonBy": "submission"
+  },
+  {
+   "bracketId": "1535-135586",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135586",
+   "category": {
+    "ageGroup": "Professional",
+    "belt": "Purple",
+    "division": "Women's NO-GI",
+    "gi": false,
+    "raw": "Women's NO-GI / Purple / Professional / 62KG",
+    "weight": "62KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T16:40:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247722",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-1",
+   "matchNr": 1,
+   "round": null,
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": "Absoluto BJJ International ",
+     "athleteId": "atleta 64|absoluto bjj ( romania )",
+     "club": "Absoluto Bjj ( Romania )",
+     "country": "RO",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 64",
+     "registrationId": "900064"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 89|enjoy the process brazilian jiu-jitsu",
+     "club": "Enjoy the Process Brazilian Jiu-jitsu",
+     "country": "IN",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 89",
+     "registrationId": "900089"
+    }
+   ],
+   "state": "seeded",
+   "timePassed": null,
+   "wonBy": null
+  },
+  {
+   "bracketId": "1535-135570",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135570",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Men's NO-GI",
+    "gi": false,
+    "raw": "Men's NO-GI / Blue / Amateur / 85KG",
+    "weight": "85KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T16:46:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247660",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-2",
+   "matchNr": 2,
+   "round": "Quarterfinals",
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 169|circulo de jiu jitsu",
+     "club": "Círculo de Jiu Jitsu",
+     "country": "ES",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 169",
+     "registrationId": "900169"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 19|lotus bjj espana",
+     "club": "Lotus Bjj Espana",
+     "country": "PE",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 19",
+     "registrationId": "900019"
+    }
+   ],
+   "state": "seeded",
+   "timePassed": null,
+   "wonBy": null
+  },
+  {
+   "bracketId": "1535-135586",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135586",
+   "category": {
+    "ageGroup": "Professional",
+    "belt": "Purple",
+    "division": "Women's NO-GI",
+    "gi": false,
+    "raw": "Women's NO-GI / Purple / Professional / 62KG",
+    "weight": "62KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T16:52:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247723",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-3",
+   "matchNr": 2,
+   "round": "Bronze match",
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 177|flow",
+     "club": "Flow",
+     "country": "IT",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 177",
+     "registrationId": "900177"
+    }
+   ],
+   "state": "unseeded",
+   "timePassed": null,
+   "wonBy": null
+  },
+  {
+   "bracketId": "1535-135570",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135570",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Men's NO-GI",
+    "gi": false,
+    "raw": "Men's NO-GI / Blue / Amateur / 85KG",
+    "weight": "85KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T16:58:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247661",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-4",
+   "matchNr": 3,
+   "round": "Quarterfinals",
+   "roundNr": 1,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 136|equipe elite",
+     "club": "Equipe Elite",
+     "country": "MA",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 136",
+     "registrationId": "900136"
+    },
+    {
+     "affiliation": null,
+     "athleteId": "atleta 35|stripe bjj academy",
+     "club": "STRIPE BJJ ACADEMY",
+     "country": "ES",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 35",
+     "registrationId": "900035"
+    }
+   ],
+   "state": "seeded",
+   "timePassed": null,
+   "wonBy": null
+  },
+  {
+   "bracketId": "1535-135570",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135570",
+   "category": {
+    "ageGroup": "Amateur",
+    "belt": "Blue",
+    "division": "Men's NO-GI",
+    "gi": false,
+    "raw": "Men's NO-GI / Blue / Amateur / 85KG",
+    "weight": "85KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T17:04:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247663",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-5",
+   "matchNr": 5,
+   "round": "Semifinals",
+   "roundNr": 2,
+   "sides": [
+    {
+     "affiliation": null,
+     "athleteId": "atleta 23|lavica project sicilia",
+     "club": "Lavica project SICILIA",
+     "country": "IT",
+     "image": null,
+     "isWinner": false,
+     "name": "Atleta 23",
+     "registrationId": "900023"
+    }
+   ],
+   "state": "unseeded",
+   "timePassed": null,
+   "wonBy": null
+  },
+  {
+   "bracketId": "1535-135586",
+   "bracketUrl": "https://ajptour.com/en/event/1535/bracket/135586",
+   "category": {
+    "ageGroup": "Professional",
+    "belt": "Purple",
+    "division": "Women's NO-GI",
+    "gi": false,
+    "raw": "Women's NO-GI / Purple / Professional / 62KG",
+    "weight": "62KG"
+   },
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedStart": "2026-09-26T17:10:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": "1535-1247724",
+   "mat": "Mat 1",
+   "matId": 12184,
+   "matKey": "1535:12184",
+   "matMatchNr": "1-6",
+   "matchNr": 3,
+   "round": "Final",
+   "roundNr": 2,
+   "sides": [],
+   "state": "unseeded",
+   "timePassed": null,
+   "wonBy": null
+  }
+ ],
+ "mats": [
+  {
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedEnd": "2025-09-05T17:09:09+04:00",
+   "estimatedStart": "2025-09-05T11:00:00+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": 9671,
+   "key": "1257:9671",
+   "name": "Mat 6"
+  },
+  {
+   "day": "2025-09-05",
+   "dayName": "Friday",
+   "estimatedEnd": "2025-09-05T16:51:19+04:00",
+   "estimatedStart": "2025-09-05T11:00:00+04:00",
+   "eventId": "1257",
+   "eventLabel": "AJP",
+   "id": 10651,
+   "key": "1257:10651",
+   "name": "Mat 9"
+  },
+  {
+   "day": "2026-09-26",
+   "dayName": "Saturday",
+   "estimatedEnd": "2026-09-26T19:10:00+02:00",
+   "estimatedStart": "2026-09-26T16:40:00+02:00",
+   "eventId": "1535",
+   "eventLabel": "Open",
+   "id": 12184,
+   "key": "1535:12184",
+   "name": "Mat 1"
+  }
+ ],
+ "stale": false,
+ "staleSince": null,
+ "streams": [
+  {
+   "mat": "Mat 1",
+   "url": "https://stream.example.test/mat1"
+  }
+ ]
+}

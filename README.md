@@ -164,6 +164,9 @@ panel de Fly (no tiene tope duro).
 
 ### Qué está pasando (observabilidad)
 
+Qué hacer cuando algo falla, paso a paso, está en **[docs/operacion.md](docs/operacion.md)** (incluye cómo montar el
+monitor externo, cómo desplegar con la prueba de humo y cómo deshacer). Lo esencial:
+
 - **`/api/health`** dice si el servidor está bien sin tocar Smoothcomp: `ok`, `degradado` (hay eventos con datos
   viejos o sin poder leerse: Smoothcomp caído o bloqueando) o `error` (503: un hilo de lectura ha muerto o falta
   la web compilada). Lleva la versión desplegada (`GIT_SHA`), el tiempo en marcha, la cola, cuánto hace que se
@@ -250,6 +253,25 @@ npm --prefix web test                    # la web: utilidades, sondeo, component
 npm --prefix web run typecheck
 ```
 
+El **CI** (`.github/workflows/ci.yml`) lo ejecuta todo en cada push y pull request, y además construye la imagen
+Docker, arranca el contenedor y le pasa la prueba de humo.
+
+**El contrato entre Python y la web.** `scraper/parse.py` (lo que se emite) y `web/src/tipos.ts` (lo que la web
+espera) no se ven entre sí, así que los une una muestra versionada, `web/src/pruebas/estado.contrato.json`,
+construida con el código real sobre las fixtures anonimizadas. Si cambias lo que emite `parse.py`, el test de
+Python falla hasta que regeneres la muestra (`python tests/contrato.py`), y entonces `npm --prefix web test` dice
+si la web lo soporta; si cambias `tipos.ts`, `typecheck` falla hasta que lo describas en
+`web/src/app/contrato.test.ts`. `tipos.ts` es parcial a propósito: a Python le pueden sobrar campos.
+
+**Prueba de humo de un servidor ya desplegado** (o de uno local):
+
+```sh
+python research/smoke_api.py https://fcteam-competicion.fly.dev --esperar-version $(git rev-parse --short HEAD)
+python research/smoke_api.py http://127.0.0.1:8765 --omitir-busqueda      # sin tocar Smoothcomp
+```
+
+Salida 0 todo bien, 1 algo roto, 2 solo avisos (p. ej. `degradado`, o Smoothcomp no contesta desde esa IP).
+
 Para ver la web funcionando **sin mandar tráfico a Smoothcomp**, hay un origen simulado con búsqueda,
 eventos sin publicar, eventos de otros sitios (Barcelona, Lisboa, un «Madrid Open» de Texas y un torneo
 en Alcalá que no dice Madrid, para probar la zona) y un torneo que avanza (`seeded` → `running` → `finished`):
@@ -312,5 +334,7 @@ AJP, pon `baseUrl` a `https://ajptour.com`.
 | `site/` | la web compilada por `npm --prefix web run build`; **no se versiona** (el servidor la sirve; el Dockerfile la compila) |
 | `scraper/telemetria.py` | registro (`logging`), contadores y el límite de informes del navegador |
 | `Dockerfile`, `fly.toml` | imagen y configuración del [alojamiento fijo](#alojamiento-fijo-flyio) |
-| `docs/` | `architecture.md`, `data-source.md` |
-| `research/` | scripts de investigación y simuladores, no forman parte de la app |
+| `.github/workflows/ci.yml` | integración continua: tests de Python y web, y la imagen Docker |
+| `docs/` | `architecture.md`, `data-source.md`, [`operacion.md`](docs/operacion.md) (el runbook) |
+| `tests/contrato.py` | la muestra del contrato Python↔web; `python tests/contrato.py` la regenera |
+| `research/` | scripts de investigación y simuladores, no forman parte de la app; `smoke_api.py` es la prueba de humo post-despliegue |

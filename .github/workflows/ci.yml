@@ -1,0 +1,77 @@
+# Integración continua: lo que antes solo se comprobaba a mano, en cada cambio.
+#
+# Tres trabajos independientes, para que un fallo diga de dónde viene:
+#   python  el servidor y el scraper, y el contrato con la web (tests/test_contrato.py)
+#   web     typecheck, pruebas y compilación de la web (incluye el contrato: contrato.test.ts)
+#   imagen  que el Dockerfile construye, que el contenedor arranca y que sirve la web con la
+#           versión que se le dio (research/smoke_api.py). Es lo que no se puede probar sin Docker.
+#
+# El despliegue sigue siendo manual (`fly deploy`, ver docs/operacion.md): aquí no hay ningún secreto.
+name: CI
+
+on:
+  push:
+    branches: [main, frontend-react]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un push nuevo a la misma rama cancela la ejecución anterior, que ya no interesa.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (servidor, scraper y contrato)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"     # la misma que la imagen (Dockerfile)
+      - name: Pruebas
+        run: python -m unittest discover -s tests -v
+
+  web:
+    name: Web (typecheck, pruebas y compilación)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24           # la misma que la etapa de compilación del Dockerfile
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Instalar dependencias
+        run: npm --prefix web ci
+      - name: Typecheck
+        run: npm --prefix web run typecheck
+      - name: Pruebas
+        run: npm --prefix web test
+      - name: Compilar
+        run: npm --prefix web run build
+        env:
+          GIT_SHA: ${{ github.sha }}
+
+  imagen:
+    name: Imagen Docker (construir, arrancar y probar)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir la imagen
+        run: docker build --build-arg GIT_SHA=${{ github.sha }} -t eventos-bjj:ci .
+      - name: Arrancar el contenedor
+        run: docker run -d --name servidor -p 8765:8765 eventos-bjj:ci
+      - name: Prueba de humo
+        # Sin la búsqueda: no se golpea Smoothcomp desde CI. Con la versión, comprueba también que
+        # el ARG GIT_SHA llegó a la imagen.
+        run: python3 research/smoke_api.py http://127.0.0.1:8765 --esperar-version ${{ github.sha }} --omitir-busqueda
+      - name: Registro del contenedor
+        if: always()
+        run: docker logs servidor

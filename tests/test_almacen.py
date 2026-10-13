@@ -14,6 +14,7 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
+from unittest import mock
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
@@ -351,6 +352,45 @@ class TestResumen(PruebaAlmacen):
         self.almacen._hilos.append(vivo)
         r = self.almacen.resumen()
         self.assertEqual((r["workers"], r["workersVivos"]), (1, 1))
+
+
+class TestFrescura(PruebaAlmacen):
+    """`fetchedAt` es lo que hace verdadero el «Actualizado hace X» de la web."""
+
+    def test_cada_ciclo_estampa_su_propia_fecha(self):
+        fechas = iter(["2026-10-17T10:00:00Z", "2026-10-17T10:01:15Z"])
+        with mock.patch.object(modulo_almacen, "ahora_iso", lambda: next(fechas)):
+            self.montar({"33588": lectura(combate(1))})
+            primero = self.estado(self.pedir_y_leer())
+            self.reloj.t += 75
+            self.almacen.pedir("33588")
+            self.almacen.procesar_pendientes()
+            segundo = self.estado(self.almacen.pedir("33588"))
+        self.assertEqual(primero["fetchedAt"], "2026-10-17T10:00:00Z")
+        self.assertEqual(segundo["fetchedAt"], "2026-10-17T10:01:15Z")
+
+    def test_la_fecha_es_utc_con_z_aunque_no_se_parchee(self):
+        self.montar({"33588": lectura(combate(1))})
+        self.assertRegex(self.estado(self.pedir_y_leer())["fetchedAt"],
+                         r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+
+    def test_mientras_esta_vieja_conserva_la_fecha_del_ultimo_exito(self):
+        # Si el estado viejo renovara su fecha, la web diría «actualizado hace 3 s» de unos datos
+        # que no se han podido refrescar en minutos.
+        marcas = iter(["2026-10-17T10:00:00Z"])
+        with mock.patch.object(modulo_almacen, "ahora_iso",
+                               lambda: next(marcas, "2026-10-17T10:09:00Z")):
+            self.montar({"33588": lectura(combate(1))})
+            self.pedir_y_leer()
+            self.lector.respuestas["33588"] = ErrorOrigen("HTTP 503", codigo=503)
+            for _ in range(3):
+                self.reloj.t += 75
+                self.almacen.pedir("33588")
+                self.almacen.procesar_pendientes()
+            estado = self.estado(self.almacen.pedir("33588"))
+        self.assertTrue(estado["stale"])
+        self.assertEqual(estado["fetchedAt"], "2026-10-17T10:00:00Z")
+        self.assertEqual(estado["staleSince"], "2026-10-17T10:09:00Z")
 
 
 class TestStale(PruebaAlmacen):

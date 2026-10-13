@@ -1,4 +1,10 @@
 """
+OBSOLETO: ya no funciona con la web actual (React). Para comprobar un servidor desplegado usa
+`research/smoke_api.py` (solo biblioteca estándar, sirve también en CI). Este script lee
+`/data.json` del modo estático, que el servidor ya no tiene, abre `/` esperando un evento (hoy es
+el buscador) y depende de patchright. Se conserva por si interesa recuperar el recorrido con
+navegador; habría que reescribirlo contra `#/evento/<id>`.
+
 Prueba de humo del frontend, a tamaño de móvil.
 
 Levanta nada: asume que el sitio ya se sirve (python -m http.server 8765

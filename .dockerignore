@@ -2,6 +2,7 @@
 # del contexto salen web/node_modules y web/dist (en Windows llevan binarios que no valen en
 # Linux) y site/, que es la salida de la compilación local.
 .git
+.github/
 .gitignore
 .gitattributes
 .publish/
