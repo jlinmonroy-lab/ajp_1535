@@ -1,0 +1,34 @@
+/* Librería de componentes de FC Team (@fcteam/ui): lo único que ve quien la importa. */
+import './estilos';
+
+export { AccesoAdmin, type AccesoAdminProps } from './AccesoAdmin/AccesoAdmin';
+export { AvisoSinSchedule } from './AvisoSinSchedule/AvisoSinSchedule';
+export { Aviso, type AvisoProps } from './Aviso/Aviso';
+export { Boton, type BotonProps, type VarianteBoton } from './Boton/Boton';
+export { Cabecera, type CabeceraProps } from './Cabecera/Cabecera';
+export { Campo, type CampoProps } from './Campo/Campo';
+export { CampoBusqueda, type CampoBusquedaProps } from './CampoBusqueda/CampoBusqueda';
+export { ChipZona, type ChipZonaProps } from './ChipZona/ChipZona';
+export { Contador, type ContadorProps } from './Contador/Contador';
+export { EnlaceExterno, type EnlaceExternoProps } from './EnlaceExterno/EnlaceExterno';
+export { EnlaceInterno, type EnlaceInternoProps } from './EnlaceInterno/EnlaceInterno';
+export { Etiqueta, type EtiquetaProps, type TonoEtiqueta } from './Etiqueta/Etiqueta';
+export { FilaCombate, type FilaCombateProps, type ResultadoCombate } from './FilaCombate/FilaCombate';
+export { Filtros, type FiltrosProps, type OpcionFiltro } from './Filtros/Filtros';
+export { FormAltaGrupo, type FormAltaGrupoProps } from './FormAltaGrupo/FormAltaGrupo';
+export { Foto, type FotoProps } from './Foto/Foto';
+export { LineaEstado, type LineaEstadoProps } from './LineaEstado/LineaEstado';
+export { Llaves, type LlavesProps, type Llave } from './Llaves/Llaves';
+export { ListaGrupo, type ListaGrupoProps, type EntradaListaGrupo } from './ListaGrupo/ListaGrupo';
+export { Medalla, type MedallaProps, type TipoMedalla } from './Medalla/Medalla';
+export { PanelDetalle, type PanelDetalleProps } from './PanelDetalle/PanelDetalle';
+export { Pestanas, type PestanasProps, type Pestana } from './Pestanas/Pestanas';
+export { CabeceraTarjeta, Tarjeta, type CabeceraTarjetaProps, type TarjetaProps } from './Tarjeta/Tarjeta';
+export { TarjetaAtleta, type TarjetaAtletaProps, type TarjetaAtletaParaTodos } from './TarjetaAtleta/TarjetaAtleta';
+export { TarjetaEvento, type TarjetaEventoProps } from './TarjetaEvento/TarjetaEvento';
+export { TarjetaProximo, type TarjetaProximoProps } from './TarjetaProximo/TarjetaProximo';
+export { TarjetaSinCombates, type TarjetaSinCombatesProps } from './TarjetaSinCombates/TarjetaSinCombates';
+export { TarjetaTatami, type TarjetaTatamiProps } from './TarjetaTatami/TarjetaTatami';
+export { TextoTenue, type TextoTenueProps } from './TextoTenue/TextoTenue';
+export { TituloSeccion, type TituloSeccionProps } from './TituloSeccion/TituloSeccion';
+export { Vacio, type VacioProps } from './Vacio/Vacio';

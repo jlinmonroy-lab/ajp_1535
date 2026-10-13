@@ -10,7 +10,8 @@ entere:
     todo vuelve a su sitio solo. La pantalla sí puede apagarse, y bloquearla no
     afecta.
   - **Que el servidor se caiga.** Si termina por lo que sea, se relanza. Cada
-    arranque y cada caída quedan en registro/evento.log con su hora.
+    arranque y cada caída quedan en registro/evento.log con su hora, y lo que
+    cuenta el propio servidor (errores, fallos de Smoothcomp) en registro/servidor.log.
 
 Lo que NO puede cubrir: un corte de luz, que Windows reinicie por
 actualizaciones o que se caiga el wifi. Merece la pena dejar el equipo
@@ -29,16 +30,18 @@ Uso:  python arrancar_evento.py [opciones de scraper.servidor]
       (Ctrl+C para parar)
 """
 import ctypes
+import os
 import subprocess
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 
-from scraper import publico
+from scraper import publico, sitio
 
 RAIZ = Path(__file__).resolve().parent
 REGISTRO = RAIZ / "registro"
+SITIO = RAIZ / "site"  # la web compilada; ver scraper/sitio.py
 PUERTO_POR_DEFECTO = 8765  # el mismo que scraper.servidor
 
 # Banderas de SetThreadExecutionState: mantener el sistema despierto mientras
@@ -97,10 +100,16 @@ def main():
     opciones = sys.argv[1:]
     puerto = puerto_de(opciones)
 
+    if not sitio.sitio_compilado(SITIO):
+        # Sin web que servir el servidor arrancaría igual, y nadie lo notaría hasta abrir el
+        # enlace el día del torneo: mejor parar aquí, donde alguien está mirando.
+        log(f"ERROR: {sitio.aviso_sin_compilar(SITIO)}", diario)
+        return 1
+
     print()
     log("=" * 62, diario)
     log("Arrancando el servidor de seguimiento de eventos", diario)
-    log(f"Registro en {diario}", diario)
+    log(f"Registro en {diario} (lo del servidor, en {REGISTRO / 'servidor.log'})", diario)
 
     if evitar_suspension():
         log("Windows no suspenderá el equipo mientras esto esté abierto.", diario)
@@ -124,8 +133,13 @@ def main():
             if intentos > 1:
                 log(f"Reinicio nº {intentos - 1} del servidor", diario)
 
+            # El servidor sigue escribiendo en esta consola, y además deja su registro
+            # (con rotación) en un fichero: al cerrar la ventana no se pierde.
+            entorno = {**os.environ, "LOG_FILE": os.environ.get("LOG_FILE")
+                       or str(REGISTRO / "servidor.log")}
             proceso = subprocess.run(
-                [sys.executable, "-u", "-m", "scraper.servidor", *opciones], cwd=str(RAIZ))
+                [sys.executable, "-u", "-m", "scraper.servidor", *opciones], cwd=str(RAIZ),
+                env=entorno)
 
             # "No pude arrancar" (puerto ocupado, config rota): repetirlo cada diez
             # segundos solo llenaría el registro de lo mismo. Una caída con

@@ -1,0 +1,23 @@
+.fc-tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: .8rem;
+  margin-bottom: .6rem;
+}
+.fc-tarjeta--acento { border-color: var(--acento); }
+.fc-tarjeta--oro { border-color: var(--oro); line-height: 1.5; }
+
+.fc-tarjeta-cabecera { display: flex; align-items: center; gap: .7rem; }
+.fc-nombre { font-weight: 650; }
+.fc-crece { flex: 1; min-width: 0; }
+/* Han de ser de bloque: en un span inline, text-overflow no recorta nada y el
+   texto largo se desliza por debajo del botón de seguir. */
+.fc-crece .fc-nombre, .fc-crece .fc-sub {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Debe ir después de la regla anterior: misma especificidad, gana la última. */
+.fc-tarjeta-cabecera--varias .fc-sub { white-space: normal; overflow: visible; }

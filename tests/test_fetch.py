@@ -25,6 +25,7 @@ sys.path.insert(0, str(RAIZ))
 
 from scraper import fetch  # noqa: E402
 from scraper.fetch import ErrorOrigen, Ritmo  # noqa: E402
+from scraper.telemetria import contadores  # noqa: E402
 
 DIA = {"id": 10, "name": "Day 1", "date": "2026-10-17T09:00:00+02:00"}
 RUTA_BASE = "/en/event/5/schedule/new"
@@ -184,14 +185,21 @@ class TestCodigosDeError(PruebaConServidor):
             "/ok": lambda visto: (503, "", {}) if visto == 1 else (200, {"va": "bien"}, {}),
             "/caido": (503, "", {}),
         })
-        datos, _ = fetch._get(f"{s.url}/ok", 5, espera_base=0.01)
+        reintentos = contadores.todos().get("origen_reintentos", 0)
+        with self.assertLogs("bjj", level="WARNING") as registro:
+            datos, _ = fetch._get(f"{s.url}/ok", 5, espera_base=0.01)
         self.assertEqual(datos, {"va": "bien"})
         self.assertEqual(s.peticiones.count("/ok"), 2)
+        self.assertEqual(len(registro.output), 1, "cada reintento deja una línea")
+        self.assertIn("reintento 1/2", registro.output[0])
+        self.assertIn("HTTP 503", registro.output[0])
 
         with self.assertRaises(ErrorOrigen) as ctx:
             fetch._get(f"{s.url}/caido", 5, intentos=2, espera_base=0.01)
         self.assertEqual(ctx.exception.codigo, 503)
         self.assertEqual(s.peticiones.count("/caido"), 2)
+        # 1 en /ok y 1 en /caido: el último intento no es un reintento
+        self.assertEqual(contadores.todos()["origen_reintentos"], reintentos + 2)
 
     def test_una_respuesta_que_no_es_json_es_un_fallo(self):
         s = self.falso({"/raro": (200, "<html>Just a moment...</html>", {})})

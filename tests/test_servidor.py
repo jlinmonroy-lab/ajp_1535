@@ -12,7 +12,9 @@ import gzip
 import http.client
 import io
 import json
+import mimetypes
 import os
+import socket
 import sys
 import tempfile
 import threading
@@ -30,6 +32,7 @@ from scraper.almacen import Almacen  # noqa: E402
 from scraper.fetch import ErrorOrigen, Lectura  # noqa: E402
 from scraper.grupos import Grupos  # noqa: E402
 from scraper.servidor import SALIDA_NO_ARRANCA, crear_servidor, es_panel_local, main  # noqa: E402
+from scraper.telemetria import Limitador, contadores  # noqa: E402
 
 CFG = {"baseUrl": "https://smoothcomp.com", "lang": "en", "refreshSeconds": 75,
        "staleAfterFailures": 3,
@@ -81,11 +84,12 @@ CLAVE = "una-clave-de-administrador-larga"
 class Entorno(unittest.TestCase):
     CFG_EXTRA = {}     # claves que una clase de pruebas añade a la config del servidor
     CLAVE_ADMIN = None  # la clave de administrador del servidor de la prueba, si la hay
+    LIMITADOR = None    # el límite de informes de error del navegador, si la prueba pone uno
 
     def setUp(self):
         carpeta = tempfile.TemporaryDirectory()
         self.addCleanup(carpeta.cleanup)
-        sitio = Path(carpeta.name) / "site"
+        sitio = self.sitio = Path(carpeta.name) / "site"
         sitio.mkdir()
         (sitio / "index.html").write_text("<h1>hola web</h1>", encoding="utf-8")
         (sitio / "app.js").write_text("console.log(1)", encoding="utf-8")
@@ -102,7 +106,8 @@ class Entorno(unittest.TestCase):
         self.servidor = crear_servidor(
             {**CFG, "branding": {"teamName": "Mi Club"}, **self.CFG_EXTRA}, "127.0.0.1", 0,
             self.buscador,
-            self.almacen, self.grupos, sitio, clave_admin=self.CLAVE_ADMIN)
+            self.almacen, self.grupos, sitio, clave_admin=self.CLAVE_ADMIN, version="test",
+            limitador=self.LIMITADOR)
         self.puerto = self.servidor.server_address[1]
         threading.Thread(target=self.servidor.serve_forever, args=(0.02,), daemon=True).start()
         self.addCleanup(self._cerrar)
@@ -145,7 +150,7 @@ class TestConfigYEstaticos(Entorno):
         r = self.pedir("GET", "/api/config")
         self.assertEqual(r.status, 200)
         self.assertEqual(self.json(r), {"teamName": "Mi Club", "logo": "img/logo.png",
-                                        "zona": None})
+                                        "zona": None, "version": "test"})
 
     def test_sirve_la_web(self):
         r = self.pedir("GET", "/")
@@ -153,6 +158,55 @@ class TestConfigYEstaticos(Entorno):
         self.assertEqual(r.headers["cache-control"], "no-cache")
         self.assertEqual(r.headers["x-content-type-options"], "nosniff")
         self.assertEqual(self.pedir("GET", "/app.js").status, 200)
+
+    def test_los_modulos_de_la_web_salen_como_javascript_aunque_el_registro_diga_otra_cosa(self):
+        # Pasa en Windows: el registro puede dar text/plain para .js, y la web compilada
+        # carga sus scripts como módulos, que el navegador rechaza con otro tipo.
+        mimetypes.add_type("text/plain", ".js")
+        self.addCleanup(mimetypes.add_type, "text/javascript", ".js")
+        tipo = self.pedir("GET", "/app.js").headers["content-type"]
+        self.assertTrue(tipo.startswith("text/javascript"), tipo)
+
+    def test_la_web_de_texto_sale_comprimida_si_el_cliente_lo_admite(self):
+        r = self.pedir("GET", "/app.js", cabeceras={"Accept-Encoding": "gzip, deflate"})
+        self.assertEqual(r.status, 200)
+        self.assertEqual(r.headers["content-encoding"], "gzip")
+        self.assertEqual(r.headers["vary"], "Accept-Encoding")
+        self.assertTrue(r.headers["content-type"].startswith("text/javascript"))
+        self.assertEqual(r.headers["cache-control"], "no-cache")
+        self.assertEqual(gzip.decompress(r.cuerpo), b"console.log(1)")
+
+    def test_sin_gzip_en_la_peticion_sale_tal_cual(self):
+        r = self.pedir("GET", "/app.js")
+        self.assertNotIn("content-encoding", r.headers)
+        self.assertEqual(r.cuerpo, b"console.log(1)")
+
+    def test_la_web_comprimida_se_revalida_con_etag_y_se_renueva_si_cambia(self):
+        gzip_ok = {"Accept-Encoding": "gzip"}
+        primera = self.pedir("GET", "/app.js", cabeceras=gzip_ok)
+        etag = primera.headers["etag"]
+
+        r304 = self.pedir("GET", "/app.js", cabeceras={**gzip_ok, "If-None-Match": etag})
+        self.assertEqual((r304.status, r304.cuerpo), (304, b""))
+
+        (self.sitio / "app.js").write_text("console.log(2222)", encoding="utf-8")
+        nueva = self.pedir("GET", "/app.js", cabeceras={**gzip_ok, "If-None-Match": etag})
+        self.assertEqual(nueva.status, 200)
+        self.assertNotEqual(nueva.headers["etag"], etag)
+        self.assertEqual(gzip.decompress(nueva.cuerpo), b"console.log(2222)")
+
+    def test_comprimir_no_abre_la_puerta_a_salir_de_site(self):
+        for ruta in ("/../secreto.txt", "/%2e%2e/secreto.txt", "/..%2fsecreto.txt"):
+            r = self.pedir("GET", ruta, cabeceras={"Accept-Encoding": "gzip"})
+            self.assertNotIn(b"no debe salir", r.cuerpo, ruta)
+            self.assertNotIn(b"no debe salir", gzip.decompress(r.cuerpo) if r.headers.get("content-encoding") else r.cuerpo, ruta)
+            self.assertEqual(r.status, 404, ruta)
+
+    def test_lo_que_ya_viene_comprimido_no_se_vuelve_a_comprimir(self):
+        (self.sitio / "logo.png").write_bytes(b"\x89PNG-no-es-texto")
+        r = self.pedir("GET", "/logo.png", cabeceras={"Accept-Encoding": "gzip"})
+        self.assertNotIn("content-encoding", r.headers)
+        self.assertEqual(r.cuerpo, b"\x89PNG-no-es-texto")
 
     def test_no_sale_nada_de_fuera_de_site(self):
         for ruta in ("/../secreto.txt", "/%2e%2e/secreto.txt", "/..%2fsecreto.txt",
@@ -513,6 +567,221 @@ class TestClaveDeAdmin(Entorno):
     def test_las_respuestas_de_clave_tampoco_se_dejan_indexar(self):
         for r in (self.pedir("GET", "/api/admin"), self.escribir(CLAVE), self.escribir("mal")):
             self.assertEqual(r.headers.get("x-robots-tag"), "noindex, nofollow", r.status)
+
+    def test_el_registro_deja_constancia_de_quien_cambia_la_lista_sin_nombrar_al_atleta(self):
+        with self.assertLogs("bjj", level="INFO") as registro:
+            self.escribir(CLAVE, **{"Fly-Client-IP": "198.51.100.7"})
+            self.pedir("POST", "/api/events/33588/grupo", self.ANA)          # desde el panel local
+        texto = "\n".join(registro.output)
+        self.assertIn("[grupo 33588] añadir (1 en la lista) · clave · 198.51.100.7", texto)
+        self.assertIn("· panel local ·", texto)
+        self.assertNotIn("Ana", texto, "el registro no debe llevar nombres de atletas")
+
+    def test_el_registro_deja_constancia_de_los_intentos_rechazados(self):
+        with self.assertLogs("bjj", level="INFO") as registro:
+            self.escribir("otra", **{"Fly-Client-IP": "198.51.100.7"})
+            self.escribir(None, **{"Fly-Client-IP": "198.51.100.8"})
+            self.pedir("GET", "/api/admin", cabeceras={**self.EN_LA_NUBE, "X-Admin-Token": "mal"})
+        texto = "\n".join(registro.output)
+        self.assertIn("grupo: rechazada una clave de administrador incorrecta (198.51.100.7)", texto)
+        self.assertIn("grupo: petición sin permiso (198.51.100.8)", texto)
+        self.assertIn("admin: rechazada una clave de administrador incorrecta (203.0.113.9)", texto)
+
+
+class TestObservabilidad(Entorno):
+    """/api/health, el registro de accesos y los contadores."""
+
+    def health(self, metodo="GET"):
+        return self.pedir(metodo, "/api/health")
+
+    def test_health_ok_con_la_cache_vacia(self):
+        r = self.health()
+        cuerpo = self.json(r)
+        self.assertEqual(r.status, 200)
+        self.assertEqual((cuerpo["estado"], cuerpo["version"]), ("ok", "test"))
+        self.assertTrue(cuerpo["sitioCompilado"])
+        self.assertEqual((cuerpo["eventosEnCache"], cuerpo["enCola"]), (0, 0))
+        self.assertIsNone(cuerpo["origen"]["ultimoExitoS"])
+        self.assertGreaterEqual(cuerpo["uptimeS"], 0)
+        self.assertEqual(r.headers["cache-control"], "no-cache")
+
+    def test_health_cuenta_los_eventos_y_la_cola(self):
+        self.pedir("GET", "/api/events/33588/data")
+        cuerpo = self.json(self.health())
+        self.assertEqual((cuerpo["eventosEnCache"], cuerpo["enCola"]), (1, 1))
+
+        self.almacen.procesar_pendientes()
+        cuerpo = self.json(self.health())
+        self.assertEqual((cuerpo["estado"], cuerpo["enCola"]), ("ok", 0))
+        self.assertIsNotNone(cuerpo["origen"]["ultimoExitoS"])
+
+    def test_health_degradado_si_smoothcomp_falla_pero_el_servidor_esta_bien(self):
+        self.respuestas_lector["33588"] = ErrorOrigen("HTTP 403", codigo=403, desafio=True)
+        self.pedir("GET", "/api/events/33588/data")
+        self.almacen.procesar_pendientes()
+        r = self.health()
+        cuerpo = self.json(r)
+        self.assertEqual(r.status, 200, "reiniciar la máquina no arregla un bloqueo de Smoothcomp")
+        self.assertEqual((cuerpo["estado"], cuerpo["eventosConError"]), ("degradado", 1))
+        self.assertEqual((cuerpo["origen"]["ultimoErrorCodigo"], cuerpo["origen"]["ultimoErrorReto"]),
+                         (403, True))
+
+    def test_health_es_503_si_falta_la_web_compilada(self):
+        (self.sitio / "index.html").unlink()
+        r = self.health()
+        self.assertEqual(r.status, 503)
+        self.assertEqual(self.json(r)["estado"], "error")
+        self.assertFalse(self.json(r)["sitioCompilado"])
+
+    def test_health_es_503_si_un_hilo_del_almacen_ha_muerto(self):
+        muerto = threading.Thread(target=lambda: None)
+        muerto.start()
+        muerto.join()
+        self.almacen._hilos.append(muerto)
+        r = self.health()
+        self.assertEqual(r.status, 503)
+        self.assertEqual((self.json(r)["workers"], self.json(r)["workersVivos"]), (1, 0))
+
+    def test_health_contesta_a_head_para_los_monitores(self):
+        r = self.health("HEAD")
+        self.assertEqual((r.status, r.cuerpo), (200, b""))
+        self.assertGreater(int(r.headers["content-length"]), 0)
+
+    def test_head_de_la_web_sigue_siendo_el_de_siempre(self):
+        r = self.pedir("HEAD", "/")
+        self.assertEqual((r.status, r.cuerpo), (200, b""))
+
+    def test_las_peticiones_normales_no_llenan_el_registro_pero_se_cuentan(self):
+        antes = contadores.todos().get("http_200", 0)
+        with self.assertNoLogs("bjj", level="INFO"):
+            self.pedir("GET", "/api/config")
+        self.assertEqual(contadores.todos()["http_200"], antes + 1)
+        # El cuerpo de /api/health se arma antes de contar su propia respuesta.
+        self.assertEqual(self.json(self.health())["contadores"]["http_200"], antes + 1)
+
+    def test_un_fallo_deja_una_linea_con_codigo_tiempo_y_motivo_sin_la_query(self):
+        with self.assertLogs("bjj", level="INFO") as registro:
+            self.pedir("GET", "/api/nada?q=Ana+Perez")
+        (linea,) = registro.output
+        self.assertRegex(linea, r"GET /api/nada 404 \d+ms · ruta desconocida")
+        self.assertNotIn("Ana", linea, "la query puede llevar lo que se busca")
+
+    def test_un_error_inesperado_deja_el_traceback(self):
+        self.almacen.pedir = lambda ids: 1 / 0
+        with self.assertLogs("bjj", level="ERROR") as registro:
+            self.pedir("GET", "/api/events/33588/data")
+        texto = "\n".join(registro.output)
+        self.assertIn("error atendiendo GET /api/events/33588/data: ZeroDivisionError", texto)
+        self.assertIn("Traceback (most recent call last)", texto)
+
+    def test_el_503_por_saturacion_dice_por_que(self):
+        for i in range(1, 11):
+            self.pedir("GET", f"/api/events/{i}/data")
+        with self.assertLogs("bjj", level="WARNING") as registro:
+            self.pedir("GET", "/api/events/999/data")
+        self.assertRegex("\n".join(registro.output), r"503 \d+ms · hay demasiadas lecturas")
+
+    def test_una_ruta_con_caracteres_de_control_no_se_cuela_en_el_registro(self):
+        # http.client no deja mandar caracteres de control en la ruta: se hace a mano.
+        with self.assertLogs("bjj", level="INFO") as registro:
+            with socket.create_connection(("127.0.0.1", self.puerto), timeout=10) as s:
+                s.sendall(b"GET /api/nada\x1b[31mX HTTP/1.0\r\n\r\n")
+                while s.recv(4096):
+                    pass
+        (linea,) = registro.output
+        self.assertIn("/api/nada?[31mX", linea)
+        self.assertNotIn("\x1b", linea)
+
+
+class TestErroresDelNavegador(Entorno):
+    """POST /api/client-error: la web cuenta aquí lo que le falla al usuario."""
+    INFORME = {"tipo": "js", "mensaje": "TypeError: x is undefined",
+               "pila": "TypeError: x is undefined\n    at a (index.js:1:2)\n    at b (index.js:3:4)",
+               "ruta": "/#/evento/33588", "build": "abc1234", "ua": "Mozilla/5.0 (iPhone)"}
+    EN_LA_NUBE = {"Host": "mi-app.fly.dev", "Origin": "https://mi-app.fly.dev",
+                  "X-Forwarded-For": "203.0.113.9", "Fly-Client-IP": "198.51.100.7"}
+
+    def enviar(self, informe=None, cabeceras=None):
+        return self.pedir("POST", "/api/client-error",
+                          self.INFORME if informe is None else informe, cabeceras)
+
+    def test_queda_en_el_registro_con_su_pila_y_se_cuenta(self):
+        antes = contadores.todos().get("cliente_errores", 0)
+        with self.assertLogs("bjj", level="WARNING") as registro:
+            r = self.enviar()
+        self.assertEqual((r.status, r.cuerpo), (204, b""))
+        self.assertNotIn("content-length", r.headers, "un 204 no lleva cuerpo ni su longitud")
+        (texto,) = registro.output
+        self.assertIn("cliente [js] TypeError: x is undefined · /#/evento/33588"
+                      " · build abc1234 · Mozilla/5.0 (iPhone)", texto)
+        self.assertIn("\n    at a (index.js:1:2)\n    at b (index.js:3:4)", texto)
+        self.assertEqual(contadores.todos()["cliente_errores"], antes + 1)
+
+    def test_funciona_desde_un_movil_sin_clave_y_no_guarda_la_ip(self):
+        with self.assertLogs("bjj", level="WARNING") as registro:
+            r = self.enviar(cabeceras=self.EN_LA_NUBE)
+        self.assertEqual(r.status, 204)
+        texto = "\n".join(registro.output)
+        for ip in ("198.51.100.7", "203.0.113.9", "127.0.0.1"):
+            self.assertNotIn(ip, texto, "la IP no hace falta y es un dato personal")
+
+    def test_lo_que_manda_el_navegador_se_recorta_y_se_limpia(self):
+        informe = {"tipo": "hackeado\nFALSO", "mensaje": "a\x1b[31m" + "b" * 1000,
+                   "pila": "\n".join(f"linea {i}" for i in range(20)),
+                   "ruta": 5, "build": None, "extra": "ignorado"}
+        with self.assertLogs("bjj", level="WARNING") as registro:
+            self.enviar(informe)
+        texto = registro.output[0]
+        primera, *pila = texto.splitlines()
+        self.assertIn("cliente [otro] a?[31mbbb", primera)
+        self.assertNotIn("\x1b", texto)
+        self.assertNotIn("FALSO", texto)
+        self.assertLessEqual(len(primera), 400, "el mensaje se recorta")
+        self.assertEqual(len(pila), 6, "como mucho seis líneas de pila")
+
+    def test_los_tipos_conocidos_se_conservan(self):
+        for tipo in ("render", "js", "promesa", "datos"):
+            with self.subTest(tipo), self.assertLogs("bjj", level="WARNING") as registro:
+                self.enviar({**self.INFORME, "tipo": tipo, "pila": ""})
+            self.assertIn(f"cliente [{tipo}] ", registro.output[0])
+
+    def test_un_informe_demasiado_grande_es_413(self):
+        with self.assertNoLogs("bjj", level="WARNING"):
+            r = self.enviar(json.dumps({"mensaje": "x" * 5000}))
+        self.assertEqual(r.status, 413)
+
+    def test_json_inválido_es_400(self):
+        for cuerpo in ("esto no es json", "[1, 2]", "\"texto\"", b"\xff\xfe"):
+            with self.subTest(cuerpo):
+                self.assertEqual(self.enviar(cuerpo).status, 400)
+
+    def test_solo_acepta_informes_de_la_propia_web(self):
+        r = self.enviar(cabeceras={"Origin": "https://malo.example"})
+        self.assertEqual(r.status, 403)
+        propio = f"http://127.0.0.1:{self.puerto}"
+        self.assertEqual(self.enviar(cabeceras={"Origin": propio}).status, 204)
+
+    def test_get_no_existe(self):
+        self.assertEqual(self.pedir("GET", "/api/client-error").status, 404)
+
+    def test_el_health_cuenta_los_informes(self):
+        self.enviar()
+        self.assertGreaterEqual(self.json(self.pedir("GET", "/api/health"))
+                                ["contadores"]["cliente_errores"], 1)
+
+
+class TestLimiteDeInformes(Entorno):
+    LIMITADOR = Limitador(2, 60, reloj=lambda: 0.0)     # sin reposición: dos y se acabó
+
+    def test_pasado_el_limite_se_descarta_con_429_y_se_cuenta(self):
+        antes = contadores.todos().get("cliente_errores_descartados", 0)
+        informe = {"tipo": "js", "mensaje": "otra vez"}
+        self.assertEqual(self.pedir("POST", "/api/client-error", informe).status, 204)
+        self.assertEqual(self.pedir("POST", "/api/client-error", informe).status, 204)
+        with self.assertNoLogs("bjj", level="WARNING"):
+            r = self.pedir("POST", "/api/client-error", informe)
+        self.assertEqual((r.status, r.headers["retry-after"]), (429, "60"))
+        self.assertEqual(contadores.todos()["cliente_errores_descartados"], antes + 1)
 
 
 class TestPuertoOcupado(Entorno):

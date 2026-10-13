@@ -20,10 +20,13 @@ import tempfile
 import time
 from pathlib import Path
 
-# Ficheros del sitio que acompañan al data.json en la rama publicada.
-ESTATICOS = ("index.html", "util.js", "buscador.js", "app.js", "style.css", "robots.txt",
-             ".nojekyll")
-CARPETA_IMAGENES = "img"
+# De la web compilada (site/) a la rama publicada va todo menos esto: el data.json lo copia
+# `publicar` aparte, con su propia lógica de cuándo merece un push, y los .tmp son las
+# escrituras atómicas a medias.
+EXCLUIDOS = ("data.json",)
+# Los ficheros de esta carpeta llevan un hash en el nombre y cambian en cada compilación:
+# los de la compilación anterior sobran y hay que quitarlos de la rama.
+CARPETA_ASSETS = "assets"
 
 # Campos que cambian en cada ciclo aunque no haya pasado nada en el tatami.
 # Compararlos haría que "no hay cambios" no ahorrase nunca un push.
@@ -93,31 +96,29 @@ def _minutos_desde_ultimo_push(worktree: Path):
 
 
 def sincronizar_estaticos(origen: Path, worktree: Path, log) -> int:
-    """Copia los ficheros del sitio que hayan cambiado. Devuelve cuántos."""
-    copiados = 0
-    for nombre in ESTATICOS:
-        fuente = origen / nombre
-        if not fuente.exists():
-            continue
-        destino = worktree / nombre
-        if destino.exists() and destino.read_bytes() == fuente.read_bytes():
-            continue
-        shutil.copy2(fuente, destino)
-        copiados += 1
-    # Logo y demás imágenes del equipo: la carpeta entera, con subcarpetas.
-    carpeta = origen / CARPETA_IMAGENES
-    for fuente in (sorted(carpeta.rglob("*")) if carpeta.is_dir() else []):
+    """Lleva la web compilada a la rama publicada: copia lo nuevo o cambiado y quita los
+    assets con hash que ya no existen. Devuelve cuántos ficheros cambió."""
+    cambios = 0
+    for fuente in sorted(origen.rglob("*")):
         if not fuente.is_file():
             continue
-        destino = worktree / fuente.relative_to(origen)
+        relativa = fuente.relative_to(origen)
+        if relativa.as_posix() in EXCLUIDOS or fuente.suffix == ".tmp":
+            continue
+        destino = worktree / relativa
         if destino.exists() and destino.read_bytes() == fuente.read_bytes():
             continue
         destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(fuente, destino)
-        copiados += 1
-    if copiados:
-        log(f"  {copiados} fichero(s) del sitio actualizados")
-    return copiados
+        cambios += 1
+    carpeta = worktree / CARPETA_ASSETS
+    for publicado in (sorted(carpeta.rglob("*")) if carpeta.is_dir() else []):
+        if publicado.is_file() and not (origen / publicado.relative_to(worktree)).exists():
+            publicado.unlink()
+            cambios += 1
+    if cambios:
+        log(f"  {cambios} fichero(s) del sitio actualizados")
+    return cambios
 
 
 def hay_que_publicar(cfg, data_json: Path, worktree: Path, log):

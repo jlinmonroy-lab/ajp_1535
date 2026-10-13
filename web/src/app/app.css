@@ -1,0 +1,15 @@
+/* Maquetación de la web (lo que no es de un componente): el cuerpo de página y sus huecos.
+   Los componentes traen su propio aspecto desde src/ui. */
+body { padding-bottom: 2rem; }
+
+main { padding: 0 16px; }
+
+/* ---------- Inicio: buscar un evento ---------- */
+#form-eventos { margin: 0; }
+#form-eventos .fc-campo-busqueda { margin-top: .9rem; margin-bottom: .5rem; }
+.app-nota-busqueda { margin: 0 0 .8rem; }
+.app-zona-fila { margin-bottom: .6rem; }
+
+@media (min-width: 640px) {
+  main { max-width: 720px; margin-inline: auto; }
+}

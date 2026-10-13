@@ -1,0 +1,24 @@
+.fc-etiqueta {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border-radius: 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  border: 1px solid var(--borde);
+  background: var(--superficie-2);
+  color: var(--texto-tenue);
+  white-space: nowrap;
+}
+.fc-etiqueta--vivo { background: var(--vivo); border-color: var(--vivo); color: #fff; }
+.fc-etiqueta--ganado { background: var(--ok); border-color: var(--ok); color: #05210f; }
+.fc-etiqueta--perdido { background: transparent; border-color: var(--vivo); color: var(--vivo); }
+.fc-etiqueta--grupo { border-color: var(--ok); color: var(--ok); margin-right: .3rem; }
+/* Distingue de un vistazo el combate de Gi del de No-Gi: los dos eventos
+   ocurren el mismo fin de semana en el mismo pabellón. */
+.fc-etiqueta--evento {
+  background: transparent;
+  border-color: var(--acento);
+  color: var(--acento);
+  font-size: .68rem;
+  margin-right: .25rem;
+}

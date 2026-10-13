@@ -49,11 +49,31 @@ Consecuencias sobre el diseño original:
 | `scraper/parse.py` | normaliza al modelo; deriva medallas; **puro, sin red** |
 | `scraper/publish.py` | escritura atómica + commit/push. Aislado a propósito |
 | `scraper/main.py` | bucle, control de `stale` |
-| `site/` | frontend estático (HTML/CSS/JS vanilla, sin build) |
+| `web/` | frontend: React + TypeScript + Vite (ver «El frontend» más abajo) |
+| `site/` | la web compilada, salida de `web/`; no se versiona |
 | `tests/test_parse.py` | 19 pruebas contra la captura real del evento 1257 |
 | `research/` | scripts de investigación, no forman parte de la app |
 
-Sin dependencias: todo con biblioteca estándar. `patchright` solo lo usan los scripts de `research/`.
+El servidor y el scraper no tienen dependencias: todo con biblioteca estándar. `patchright` solo lo usan
+los scripts de `research/`. Node solo hace falta para compilar la web.
+
+## El frontend
+
+`web/` es una aplicación React + TypeScript (Vite), partida en dos a propósito:
+
+- `web/src/ui/` — **librería de componentes** (`@fcteam/ui`). Son presentacionales: reciben textos ya
+  formateados y callbacks, y no leen la red, `localStorage`, la URL ni el reloj. Colores y medidas salen
+  de `tokens.css`. Se compila también como paquete (`npm --prefix web run build:lib` → `web/dist/`: JS,
+  `style.css` y los `.d.ts` con las props), que es lo que consume `/design-sync` para llevar el sistema de
+  diseño a Claude Design.
+- `web/src/app/` — la web: lo que habla con el servidor (`api.ts`), el sondeo con ETag
+  (`usarSondeoEvento`), la búsqueda de eventos, la ruta por hash y lo que es de este navegador (a quién
+  sigues). `selectores.ts` traduce los datos de la API a las props de `ui`.
+
+La web importa `src/ui` directamente; el paquete solo existe para quien lo consuma desde fuera. Las
+direcciones de la API son **relativas** (`api/config`) y Vite compila con `base: './'`, para que la web siga
+funcionando colgada de una subcarpeta (GitHub Pages). Con el servidor sirviendo `site/`, los ficheros de
+texto salen con gzip y se revalidan con ETag.
 
 ## Dos eventos, una sola web
 

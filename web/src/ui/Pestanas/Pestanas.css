@@ -1,0 +1,25 @@
+.fc-pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  position: sticky;
+  top: 62px;     /* justo bajo la Cabecera (su altura con una línea de estado) */
+  background: var(--fondo);
+  z-index: 9;
+}
+.fc-pestana {
+  flex: 1;
+  padding: .65rem .4rem;
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fc-pestana--activa { background: var(--acento); color: var(--equipo-texto); border-color: var(--acento); }
+
+@media (min-width: 640px) {
+  .fc-pestanas { max-width: 720px; margin-inline: auto; }
+}

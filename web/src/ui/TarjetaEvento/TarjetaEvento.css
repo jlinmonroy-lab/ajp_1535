@@ -1,0 +1,12 @@
+/* Cada resultado es un enlace. Los títulos largos pueden envolver: el nombre del
+   evento es justo lo que hay que leer para elegir. */
+.fc-tarjeta--evento {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  color: inherit;
+  text-decoration: none;
+}
+.fc-tarjeta--evento:active { background: var(--superficie-2); }
+.fc-tarjeta--evento .fc-crece .fc-nombre,
+.fc-tarjeta--evento .fc-crece .fc-sub { white-space: normal; }

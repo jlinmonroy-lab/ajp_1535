@@ -37,6 +37,46 @@ class TestLeer(PruebaGrupos):
         self.assertEqual(len(self.grupos.leer("1")["atletas"]), 1)
 
 
+class TestAvisos(unittest.TestCase):
+    def setUp(self):
+        carpeta = tempfile.TemporaryDirectory()
+        self.addCleanup(carpeta.cleanup)
+        self.ruta = Path(carpeta.name) / "grupos.json"
+        self.avisos = []
+        self.grupos = Grupos(self.ruta, log=self.avisos.append)
+
+    def test_sin_fichero_es_lo_normal_y_no_se_avisa(self):
+        self.grupos.leer("1")
+        self.grupos.actualizar("1", "añadir", nombre="Ana")
+        self.assertEqual(self.avisos, [])
+        self.assertFalse(self.ruta.with_name("grupos.json.bak").exists())
+
+    def test_un_fichero_roto_se_avisa_una_vez_y_no_en_cada_lectura(self):
+        self.ruta.write_text("{esto no es json", encoding="utf-8")
+        for _ in range(3):
+            self.grupos.leer("1")
+        self.assertEqual(len(self.avisos), 1)
+        self.assertIn("grupos.json", self.avisos[0])
+        self.assertIn("se trata como vacío", self.avisos[0])
+
+    def test_antes_de_escribir_encima_de_un_fichero_roto_se_guarda_una_copia(self):
+        self.ruta.write_text("{esto no es json", encoding="utf-8")
+        self.grupos.actualizar("1", "añadir", nombre="Ana")
+        copia = self.ruta.with_name("grupos.json.bak")
+        self.assertEqual(copia.read_text(encoding="utf-8"), "{esto no es json")
+        self.assertEqual(len(self.grupos.leer("1")["atletas"]), 1, "el fichero nuevo es válido")
+
+    def test_si_se_arregla_y_vuelve_a_romperse_se_vuelve_a_avisar(self):
+        self.ruta.write_text("{roto", encoding="utf-8")
+        self.grupos.leer("1")
+        self.ruta.write_text("{}", encoding="utf-8")
+        self.grupos.leer("1")
+        self.ruta.write_text("[1, 2]", encoding="utf-8")      # JSON válido, pero no un objeto
+        self.grupos.leer("1")
+        self.assertEqual(len(self.avisos), 2)
+        self.assertIn("no es un objeto JSON", self.avisos[1])
+
+
 class TestActualizar(PruebaGrupos):
     def test_alta_a_mano_calcula_el_id_como_el_scraper(self):
         g = self.grupos.actualizar("33588", "añadir", nombre="Ana Pérez", club="Gracie Madrid")

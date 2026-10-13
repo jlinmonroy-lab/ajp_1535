@@ -1,0 +1,4 @@
+.fc-medalla { font-size: .95rem; flex: none; }
+.fc-medalla[data-m="oro"] { color: var(--oro); }
+.fc-medalla[data-m="plata"] { color: var(--plata); }
+.fc-medalla[data-m="bronce"] { color: var(--bronce); }

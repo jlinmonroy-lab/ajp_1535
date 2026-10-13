@@ -9,11 +9,13 @@ Solo el panel local puede escribirla (ver `scraper/servidor.py`); leerla es
 público porque forma parte de lo que ve cualquiera.
 """
 import json
+import shutil
 import threading
 from pathlib import Path
 
 from scraper.parse import clave_atleta
 from scraper.publish import escribir_json
+from scraper.telemetria import nivel
 
 NOMBRE_POR_DEFECTO = "Nuestro equipo"
 ACCIONES = ("añadir", "quitar")
@@ -24,17 +26,32 @@ MAX_TEXTO = 200
 
 
 class Grupos:
-    def __init__(self, ruta, nombre=NOMBRE_POR_DEFECTO):
+    def __init__(self, ruta, nombre=NOMBRE_POR_DEFECTO, log=None):
         self.ruta = Path(ruta)
         self.nombre = nombre
+        self._log = log or (lambda *_: None)
         self._candado = threading.Lock()
+        self._ilegible = False    # el fichero existe pero no se pudo leer (siempre con el candado)
+        self._avisado = False     # ya se avisó de este estado: no repetirlo en cada lectura
 
     def _leer_todo(self):
+        """Todo el fichero. Uno que no existe aún es normal; uno ilegible se avisa."""
+        motivo = None
         try:
             datos = json.loads(self.ruta.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return {}
-        return datos if isinstance(datos, dict) else {}
+        except FileNotFoundError:
+            datos = {}
+        except (OSError, ValueError) as e:
+            datos, motivo = {}, f"no se pudo leer ({type(e).__name__})"
+        else:
+            if not isinstance(datos, dict):
+                datos, motivo = {}, "no es un objeto JSON"
+
+        self._ilegible = motivo is not None
+        if self._ilegible and not self._avisado:
+            nivel(self._log, "error")(f"grupos: {self.ruta.name} {motivo}; se trata como vacío")
+        self._avisado = self._ilegible
+        return datos
 
     def leer(self, clave):
         """{"nombre", "atletas"} de una vista; vacío si nunca se tocó."""
@@ -66,6 +83,13 @@ class Grupos:
 
         with self._candado:
             todo = self._leer_todo()
+            if self._ilegible:
+                # Escribir ahora lo machacaría: se guarda lo que había para poder recuperarlo.
+                try:
+                    shutil.copy2(self.ruta, self.ruta.with_name(self.ruta.name + ".bak"))
+                except OSError as e:
+                    nivel(self._log, "error")(f"grupos: tampoco se pudo copiar la copia de "
+                                              f"seguridad ({type(e).__name__})")
             actual = todo.get(clave) if isinstance(todo.get(clave), dict) else {}
             # Quitar desde la ficha manda el id completo ("nombre|club"), pero el
             # atleta puede estar en el grupo por un alta a mano sin club ("nombre|").

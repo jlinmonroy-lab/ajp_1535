@@ -1,0 +1,8 @@
+.fc-contador {
+  display: inline-block;
+  min-width: 1.2em;
+  padding: 0 .35em;
+  border-radius: 999px;
+  background: rgba(255,255,255,.22);
+  font-size: .75rem;
+}

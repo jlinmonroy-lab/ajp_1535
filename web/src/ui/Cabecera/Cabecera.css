@@ -1,0 +1,39 @@
+.fc-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--fondo);
+  border-bottom: 2px solid var(--equipo);
+  padding: max(env(safe-area-inset-top), .7rem) 16px .6rem;
+}
+.fc-cabecera-fila { display: flex; align-items: center; gap: .5rem; }
+.fc-logo { width: 40px; height: 40px; flex: none; object-fit: contain; }
+.fc-cabecera-titulo {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .fc-cabecera { max-width: 720px; margin-inline: auto; }
+}
+
+/* Inicio: a todo el ancho y más grande. Doble clase para ganar al media query de arriba. */
+.fc-cabecera.fc-cabecera--inicio {
+  max-width: none;
+  margin-inline: 0;
+  padding: max(env(safe-area-inset-top), 1.25rem) 20px 1rem;
+}
+.fc-cabecera--inicio .fc-cabecera-fila { gap: .75rem; }
+.fc-cabecera--inicio .fc-logo { height: 48px; width: auto; }
+.fc-cabecera--inicio .fc-cabecera-titulo {
+  font-size: 1.75rem;
+  line-height: 1.15;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}

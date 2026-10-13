@@ -10,7 +10,6 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -22,12 +21,10 @@ from scraper.fetch import ErrorOrigen, leer_schedule  # noqa: E402
 from scraper.parse import construir_estado  # noqa: E402
 from scraper.panel import arrancar_en_hilo  # noqa: E402
 from scraper.publish import escribir_json, publicar  # noqa: E402
+from scraper.telemetria import configurar_logging  # noqa: E402
+from scraper.telemetria import registro as log  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
-
-
-def log(mensaje):
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] {mensaje}", flush=True)
 
 
 def cargar_config(args, anterior=None):
@@ -117,6 +114,7 @@ def main():
                    help="no levantar el panel local del grupo")
     p.add_argument("--puerto-panel", type=int, default=8765)
     args = p.parse_args()
+    configurar_logging()
 
     cfg = cargar_config(args)
     if not cfg.get("events"):

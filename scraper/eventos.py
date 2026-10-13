@@ -26,6 +26,7 @@ from datetime import date
 from scraper import fetch
 from scraper.fetch import ErrorOrigen
 from scraper.parse import normalizar
+from scraper.telemetria import nivel
 
 CUANDO = ("upcoming", "past", "all")
 POR_PAGINA = 40                    # tamaño de página de `past`; el de `upcoming` lo ponemos nosotros
@@ -174,6 +175,15 @@ def _coincide(evento, q):
         f"{evento.get('title') or ''} {evento.get('city') or ''}")
 
 
+def _finalizado(evento, hoy):
+    """¿Smoothcomp lo da por terminado, o su fecha de fin (o de inicio) ya pasó?
+
+    Mismo criterio que el chip «Finalizado» de la web. Sin fechas no cuenta como finalizado.
+    """
+    fin = evento["enddate"] or evento["startdate"]
+    return bool(evento["ended"]) or bool(fin and fin < hoy)
+
+
 def limpiar_consulta(q):
     """Texto de búsqueda sin espacios de más. Lanza ValueError si es inaceptable."""
     q = re.sub(r"\s+", " ", _CONTROL.sub(" ", q or "")).strip()
@@ -186,8 +196,9 @@ class Buscador:
     """Busca eventos, cacheando, y recuerda los que ha visto."""
 
     def __init__(self, cfg, pedir_html=None, pedir_json=None, reloj=time.monotonic,
-                 hoy=None):
+                 hoy=None, log=None):
         self.cfg = cfg
+        self._log = log or (lambda *_: None)
         # La zona por defecto del buscador (None si no hay): lanza ValueError si está mal escrita.
         self.zona = Zona.de_config(cfg["zona"]) if cfg.get("zona") else None
         self._hoy = hoy or (lambda: date.today().isoformat())
@@ -254,9 +265,11 @@ class Buscador:
 
             try:
                 eventos = self._leer_lista(cuando, q, pagina, pais)
-            except ErrorOrigen:
+            except ErrorOrigen as e:
                 if not guardado:
                     raise
+                nivel(self._log, "aviso")(
+                    f"búsqueda: Smoothcomp falló ({e}); se sirve la copia guardada")
                 # Se sigue sirviendo la copia, marcada como vieja, y se vuelve a
                 # intentar pronto pero no en cada petición.
                 with self._candado:
@@ -311,6 +324,9 @@ class Buscador:
                 lista = [e for e in pais_entero if z.contiene(e) and _coincide(e, q)]
             else:
                 lista, v = self._lista("upcoming", q, pagina)
+            # Los que ya han terminado van en «pasados»; se quitan antes de paginar.
+            hoy = self._hoy()
+            lista = [e for e in lista if not _finalizado(e, hoy)]
             inicio = (pagina - 1) * POR_PAGINA
             eventos += lista[inicio:inicio + POR_PAGINA]
             hay_mas = hay_mas or len(lista) > inicio + POR_PAGINA

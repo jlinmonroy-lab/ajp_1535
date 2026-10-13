@@ -1,4 +1,6 @@
-# La imagen solo necesita config.json, scraper/ y site/ (ver Dockerfile).
+# La imagen necesita config.json, scraper/ y la web, que se compila dentro (ver Dockerfile):
+# del contexto salen web/node_modules y web/dist (en Windows llevan binarios que no valen en
+# Linux) y site/, que es la salida de la compilación local.
 .git
 .gitignore
 .gitattributes
@@ -17,4 +19,6 @@ research/
 tests/
 docs/
 localhost.txt
-site/data.json
+site/
+web/node_modules/
+web/dist/

@@ -1,0 +1,14 @@
+{
+  // Solo los tipos de la librería (src/ui): el JS lo genera Vite con vite.lib.config.ts.
+  // El conversor de /design-sync lee de aquí cada <Nombre>Props.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "src/ui",
+    "outDir": "dist"
+  },
+  "include": ["src/ui"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

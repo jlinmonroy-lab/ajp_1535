@@ -9,11 +9,17 @@ el Madrid BJJ Cup de este mes y para uno de dentro de un año.
 
 ## Uso
 
-Requiere solo Python 3 (sin dependencias; `patchright` únicamente para los scripts de `research/`).
+El servidor es Python 3 puro (sin dependencias; `patchright` únicamente para los scripts de `research/`).
+La web es una aplicación React (`web/`) que hay que **compilar una vez**, con Node 22.12+ o 24+, y
+queda en `site/` (no se versiona):
 
 ```sh
-python -m scraper.servidor        # y abrir http://127.0.0.1:8765
+npm --prefix web ci && npm --prefix web run build     # solo la primera vez y al cambiar la web
+python -m scraper.servidor                            # y abrir http://127.0.0.1:8765
 ```
+
+Sin compilar, el servidor arranca pero la dirección da 404, y lo avisa en el log.
+Para tocar la web: `npm --prefix web run dev` (con el servidor de Python en marcha: Vite le reenvía `/api`).
 
 1. **Busca el evento.** Al abrir salen solo los **próximos eventos en Madrid, España** (el chip
    «📍 Madrid, España ✕»); tócalo para quitarlo y buscar en todo el mundo. Se busca por nombre, ciudad u
@@ -41,7 +47,9 @@ Deja esa ventana abierta y ya está. El lanzador:
 
 - **impide que Windows suspenda el equipo** mientras esté abierto (sin tocar el plan de energía:
   al cerrarlo, todo vuelve a su sitio);
-- **relanza el servidor si se cae**, apuntando cada incidencia en `registro/evento.log`.
+- **relanza el servidor si se cae**, apuntando cada incidencia en `registro/evento.log`;
+- **se niega a arrancar si la web no está compilada**, con el comando que falta, en vez de dejar un
+  servidor que daría 404 sin que nadie lo note hasta abrir el enlace.
 
 No puede cubrir un corte de luz, un reinicio por actualizaciones de Windows ni una caída del wifi,
 así que conviene dejar el equipo enchufado y posponer las actualizaciones antes de salir.
@@ -83,7 +91,8 @@ A tener en cuenta:
   petición cada 2 s, 10 lecturas en cola), y **leer la lista del grupo**, que es lo que ven los móviles.
   Cambiarla, no: el `POST` se rechaza con 403 porque el `Host` no es local. Si hiciera falta cerrarlo
   más, lo siguiente sería una clave en el enlace.
-- **Datos móviles:** la web pesa unos 75 KB la primera vez (después el navegador la reutiliza) y un
+- **Datos móviles:** la web pesa unos 95 KB la primera vez, con el JavaScript comprimido (después el navegador solo
+  pregunta si cambió y recibe un 304 sin cuerpo) y un
   evento de ~450 combates son unos 40 KB por actualización, del orden de 2 MB por hora con la pantalla
   encendida. Con la pantalla apagada o la pestaña en segundo plano no se sondea nada.
 
@@ -112,7 +121,7 @@ dirección (`https://fcteam-competicion.fly.dev`) funciona a cualquier hora desd
 2-3 $/mes (máquina `shared-cpu-1x` de 256 MB + un volumen de 1 GB); Fly pide tarjeta y no tiene capa gratuita
 para cuentas nuevas. Tailscale Funnel sigue valiendo como respaldo.
 
-La imagen es `Dockerfile` (Python puro, 178 MB) y la configuración `fly.toml`: una **sola** máquina (la caché y el
+La imagen es `Dockerfile` (la web se compila con Node en una etapa previa; la final es Python puro, ~178 MB y sin Node) y la configuración `fly.toml`: una **sola** máquina (la caché y el
 ritmo de peticiones a Smoothcomp son del proceso, no se puede repartir) en París, con un volumen en `/data`
 para `grupos.json`. **La clave no va en ningún fichero**: el repositorio es público.
 
@@ -126,7 +135,7 @@ fly apps create fcteam-competicion                             # el nombre es ú
 fly volumes create datos --region cdg --size 1                 # el volumen de grupos.json
 python -c "import secrets; print(secrets.token_urlsafe(32))"   # genera una clave larga y guárdala (gestor de contraseñas)
 fly secrets set ADMIN_TOKEN=<la clave>
-fly deploy --ha=false                                          # --ha=false: una sola máquina
+fly deploy --ha=false --build-arg GIT_SHA=$(git rev-parse --short HEAD)   # --ha=false: una sola máquina
 ```
 
 **La prueba que importa** es que Smoothcomp conteste a la IP de un servidor en la nube, porque lo documentado en
@@ -149,8 +158,36 @@ borra del dispositivo. Para cambiarla: `fly secrets set ADMIN_TOKEN=<otra>` (rei
 dispositivos con la clave vieja la olvidan solos al abrir la web). Mínimo 16 caracteres: con menos, el servidor
 no arranca.
 
-Día a día: `fly deploy --ha=false` para publicar cambios, `fly logs` para ver qué pasa y `fly status` para ver
-si está en marcha. Los avisos de gasto se configuran en el panel de Fly (no tiene tope duro).
+Día a día: `fly deploy --ha=false --build-arg GIT_SHA=$(git rev-parse --short HEAD)` para publicar cambios,
+`fly logs` para ver qué pasa y `fly status` para ver si está en marcha. Los avisos de gasto se configuran en el
+panel de Fly (no tiene tope duro).
+
+### Qué está pasando (observabilidad)
+
+- **`/api/health`** dice si el servidor está bien sin tocar Smoothcomp: `ok`, `degradado` (hay eventos con datos
+  viejos o sin poder leerse: Smoothcomp caído o bloqueando) o `error` (503: un hilo de lectura ha muerto o falta
+  la web compilada). Lleva la versión desplegada (`GIT_SHA`), el tiempo en marcha, la cola, cuánto hace que se
+  leyó Smoothcomp con éxito y el último error (código y si fue el reto de Cloudflare), y contadores de
+  respuestas por código y de reintentos. Es lo que mira el check de Fly y lo que puede vigilar un monitor
+  externo (UptimeRobot, Better Stack…), que acepta también `HEAD`.
+- **El registro** lleva fecha, nivel y, en los errores inesperados, el traceback. Solo salen las peticiones que
+  fallan (4xx/5xx) o tardan más de un segundo; con `LOG_LEVEL=DEBUG` salen todas. Otras variables:
+  `LOG_FORMAT=json` (una línea JSON por mensaje) y `LOG_FILE=ruta` (además de la consola, con rotación de 5 × 1 MB).
+  En el PC, `arrancar_evento.py` lo deja en `registro/servidor.log`. En Fly, `fly logs` guarda poco tiempo: añade
+  `LOG_FILE = "/data/registro/servidor.log"` al `[env]` de `fly.toml` para que el volumen lo conserve entre reinicios.
+- **Los errores del navegador** también llegan al registro. Si a alguien se le rompe la web (una pantalla que no
+  se puede pintar, unos datos con otra forma, un fallo sin atrapar), el móvil lo manda a `POST /api/client-error`
+  y sale una línea `cliente [tipo] mensaje · ruta · build abc1234 · navegador` con las primeras líneas de la pila.
+  Tipos: `render`, `js`, `promesa` y `datos` (el servidor mandó algo que la web no entiende: casi siempre un
+  cambio en `parse.py` sin cambiar `web/src/tipos.ts`). Va sin IP. Cada página manda como mucho 5, sin repetir, y
+  el servidor admite 30 por minuto en total (el resto da 429 y se cuenta en `cliente_errores_descartados` de
+  `/api/health`). Con la web servida como ficheros estáticos no hay a quién mandarlos y se descartan. El
+  `build` es el `GIT_SHA` con el que se construyó la imagen; también está en `<html data-build>`.
+- Si el servidor no contesta al abrir la web (se está desplegando, un 5xx), la web lo dice («Reintentando…») y
+  vuelve a probar sola, en vez de caer al modo de ficheros estáticos. Eso significa que `npm run dev` sin el
+  servidor de Python en marcha se queda reintentando: arráncalo antes.
+- Los cambios de la lista del grupo se anotan con su origen (panel local o clave) y la IP, pero **sin el nombre
+  del atleta**: el registro de la plataforma queda fuera de nuestro control y hay menores.
 
 ## Configuración
 
@@ -198,17 +235,19 @@ alguien lo apagara.
 
 ## Logo y colores del equipo
 
-- **Logo**: `site/img/logo.png`, el logo de FC Team reducido a 160×160 px. Tiene fondo negro, así
-  que se funde con la web. Para cambiarlo, sustituye ese fichero:
+- **Logo**: `web/public/img/logo.png`, el logo de FC Team reducido a 160×160 px. Tiene fondo negro, así
+  que se funde con la web. Para cambiarlo, sustituye ese fichero y vuelve a compilar:
   cuadrado o casi, de unos 256 px y pocas decenas de KB. El nombre de la cabecera es `branding.teamName`.
 - **Colores**: la web es siempre negra con letras blancas. El color de botones y pestaña activa es
   `--equipo` (ahora blanco), y `--equipo-texto` el del texto encima (ahora negro); los dos están al
-  principio de `site/style.css`.
+  principio de `web/src/ui/tokens.css`, junto con el resto de colores de la web.
 
 ## Pruebas
 
 ```sh
-python -m unittest discover -s tests     # no tocan la red
+python -m unittest discover -s tests     # el servidor y el scraper; no tocan la red
+npm --prefix web test                    # la web: utilidades, sondeo, componentes y recorridos
+npm --prefix web run typecheck
 ```
 
 Para ver la web funcionando **sin mandar tráfico a Smoothcomp**, hay un origen simulado con búsqueda,
@@ -222,7 +261,7 @@ python -m scraper.servidor --origen http://127.0.0.1:8899 --puerto 8766
 
 (Con una copia de `config.json` y `requestPauseSeconds` bajo, vía `--config`, para no esperar entre
 peticiones al simulador.) `python research/simular_evento.py` reproduce además un torneo completo sobre
-una copia aislada de la web, con un banner de SIMULACIÓN.
+una copia aislada de la web (compilada), con un banner de SIMULACIÓN.
 
 ## Límites que conviene conocer
 
@@ -252,7 +291,9 @@ python -m scraper.main --event 1257      # un ciclo cada 75 s; --once para uno s
 ```
 
 Si la web no encuentra `api/config` (servida como ficheros estáticos), cae a este modo y lee `data.json`.
-La publicación por git sale de la clave `publish` de `config.json` (apagada por defecto). Para eventos de
+La publicación por git sale de la clave `publish` de `config.json` (apagada por defecto) y lleva a la
+rama publicada la web compilada entera (`site/`, salvo `data.json`, que va aparte), de modo que hay que
+compilarla antes; los `assets` con hash de una compilación anterior se quitan solos. Para eventos de
 AJP, pon `baseUrl` a `https://ajptour.com`.
 
 ## Estructura
@@ -265,8 +306,11 @@ AJP, pon `baseUrl` a `https://ajptour.com`.
 | `scraper/fetch.py` | cliente de Smoothcomp: ritmo global, reintentos, códigos de error |
 | `scraper/parse.py` | normaliza al modelo; atletas y medallas; **puro, sin red** |
 | `scraper/grupos.py` | lista del grupo por evento |
+| `scraper/sitio.py` | la web compilada: tipos MIME y comprobación de que existe |
 | `scraper/main.py`, `panel.py`, `publish.py` | modo instantánea estática |
-| `site/` | frontend (HTML/CSS/JS vanilla, sin build): `buscador.js` (inicio), `app.js` (evento) |
+| `web/` | frontend (React + TypeScript + Vite). `src/ui` es la **librería de componentes** (`@fcteam/ui`: tokens y componentes puros); `src/app` es la web que los usa (red, sondeo, rutas) |
+| `site/` | la web compilada por `npm --prefix web run build`; **no se versiona** (el servidor la sirve; el Dockerfile la compila) |
+| `scraper/telemetria.py` | registro (`logging`), contadores y el límite de informes del navegador |
 | `Dockerfile`, `fly.toml` | imagen y configuración del [alojamiento fijo](#alojamiento-fijo-flyio) |
 | `docs/` | `architecture.md`, `data-source.md` |
 | `research/` | scripts de investigación y simuladores, no forman parte de la app |

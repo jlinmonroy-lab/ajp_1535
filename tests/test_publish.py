@@ -183,5 +183,66 @@ class TestImagenesDelSitio(unittest.TestCase):
             self.assertEqual(sincronizar_estaticos(origen, worktree, lambda _: None), 1)
 
 
+class TestWebCompiladaEnLaRamaPublicada(unittest.TestCase):
+    """La web que genera Vite (index.html + assets con hash) viaja entera a gh-pages."""
+
+    def setUp(self):
+        carpeta = tempfile.TemporaryDirectory()
+        self.addCleanup(carpeta.cleanup)
+        self.origen, self.worktree = Path(carpeta.name) / "site", Path(carpeta.name) / "pub"
+        (self.origen / "assets").mkdir(parents=True)
+        self.worktree.mkdir()
+
+    def escribir(self, ruta, texto="x"):
+        destino = self.origen / ruta
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        destino.write_text(texto, encoding="utf-8")
+
+    def sincronizar(self):
+        return sincronizar_estaticos(self.origen, self.worktree, lambda _: None)
+
+    def test_copia_todo_menos_el_data_json_y_los_temporales(self):
+        self.escribir("index.html")
+        self.escribir("assets/index-AAA.js")
+        self.escribir("assets/index-AAA.css")
+        self.escribir("robots.txt")
+        self.escribir("data.json", "{}")           # lo copia `publicar`, con su propia lógica
+        self.escribir("data.json.abc.tmp", "{")    # una escritura atómica a medias
+
+        self.assertEqual(self.sincronizar(), 4)
+        publicados = sorted(p.relative_to(self.worktree).as_posix()
+                            for p in self.worktree.rglob("*") if p.is_file())
+        self.assertEqual(publicados, ["assets/index-AAA.css", "assets/index-AAA.js",
+                                      "index.html", "robots.txt"])
+
+    def test_sin_cambios_no_hay_nada_que_publicar(self):
+        self.escribir("index.html")
+        self.escribir("assets/index-AAA.js")
+        self.sincronizar()
+        self.assertEqual(self.sincronizar(), 0)
+
+    def test_al_recompilar_se_quitan_los_assets_con_hash_antiguos(self):
+        self.escribir("index.html", "<script src=assets/index-AAA.js>")
+        self.escribir("assets/index-AAA.js")
+        self.sincronizar()
+
+        (self.origen / "assets" / "index-AAA.js").unlink()
+        self.escribir("index.html", "<script src=assets/index-BBB.js>")
+        self.escribir("assets/index-BBB.js")
+
+        # index.html cambia, aparece el nuevo asset y desaparece el viejo.
+        self.assertEqual(self.sincronizar(), 3)
+        self.assertFalse((self.worktree / "assets" / "index-AAA.js").exists())
+        self.assertTrue((self.worktree / "assets" / "index-BBB.js").exists())
+
+    def test_no_toca_lo_que_la_rama_tiene_fuera_de_assets(self):
+        self.escribir("index.html")
+        (self.worktree / "data.json").write_text("{}", encoding="utf-8")
+        (self.worktree / "CNAME").write_text("ejemplo.org", encoding="utf-8")
+        self.sincronizar()
+        self.assertEqual((self.worktree / "data.json").read_text(encoding="utf-8"), "{}")
+        self.assertTrue((self.worktree / "CNAME").exists())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

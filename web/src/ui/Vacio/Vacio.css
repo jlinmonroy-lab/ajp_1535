@@ -1,0 +1,3 @@
+.fc-vacio { color: var(--texto-tenue); text-align: center; padding: 2.5rem 1rem; }
+.fc-vacio--error { color: var(--vivo); }
+.fc-vacio .fc-boton { margin-top: .8rem; }

@@ -25,8 +25,13 @@ tmp-capturas/
 fixtures/*.html
 fixtures/network_log_1535_session.json
 
-# Artefacto generado por el scraper (en gh-pages sí, en main no)
-site/data.json
+# La web compilada (npm --prefix web run build) y el data.json que genera el scraper
+# en el modo estático. En la rama gh-pages sí se publican; en main no.
+site/
+
+# Frontend (web/): dependencias y la librería de componentes compilada
+web/node_modules/
+web/dist/
 
 # Simulación del torneo (copia aislada, nunca se publica)
 tmp-demo/
@@ -39,3 +44,11 @@ data/
 
 # Apuntes locales con la clave de administrador de Fly.io. El repo es público.
 localhost.txt
+
+# /design-sync: scripts del conversor y su salida, estado de la máquina y borradores de subagentes.
+# Lo que SÍ se versiona de .design-sync/ es lo escrito a mano (config.json, NOTES.md, conventions.md, previews/).
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

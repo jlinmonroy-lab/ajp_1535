@@ -1,0 +1,13 @@
+.fc-aviso {
+  margin: 0 16px .6rem;
+  padding: .6rem .8rem;
+  border-radius: var(--radio);
+  background: var(--superficie-2);
+  border: 1px solid var(--ok);
+  font-size: .85rem;
+}
+.fc-aviso--error { border-color: var(--vivo); color: var(--vivo); }
+
+@media (min-width: 640px) {
+  .fc-aviso { max-width: 720px; margin-inline: auto; }
+}

@@ -4,8 +4,10 @@ Pruebas del lanzador del día del torneo (lo que no necesita Windows ni red).
 Uso:  python -m unittest discover -s tests
 """
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ))
@@ -28,6 +30,23 @@ class TestPuertoDe(unittest.TestCase):
         for opciones in (["--puerto"], ["--puerto", "abc"], ["--puerto="], ["--puerto=x"]):
             self.assertEqual(arrancar_evento.puerto_de(opciones), servidor.PUERTO_POR_DEFECTO,
                              opciones)
+
+
+class TestWebCompilada(unittest.TestCase):
+    def arrancar_con(self, sitio):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(arrancar_evento, "SITIO", sitio), \
+                    mock.patch.object(arrancar_evento, "REGISTRO", Path(tmp) / "registro"), \
+                    mock.patch.object(arrancar_evento.sys, "argv", ["arrancar_evento.py"]), \
+                    mock.patch.object(arrancar_evento, "evitar_suspension", return_value=True), \
+                    mock.patch.object(arrancar_evento.subprocess, "run",
+                                      side_effect=AssertionError("no debía arrancar el servidor")):
+                return arrancar_evento.main()
+
+    def test_sin_la_web_compilada_se_rinde_antes_de_arrancar_el_servidor(self):
+        with tempfile.TemporaryDirectory() as vacio:
+            with mock.patch("builtins.print"):
+                self.assertEqual(self.arrancar_con(Path(vacio)), 1)
 
 
 class TestCodigoDeSalida(unittest.TestCase):

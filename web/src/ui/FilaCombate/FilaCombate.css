@@ -1,0 +1,12 @@
+.fc-combate {
+  display: flex;
+  gap: .6rem;
+  align-items: baseline;
+  padding: .55rem 0;
+  border-top: 1px solid var(--borde);
+  font-size: .9rem;
+}
+.fc-combate:first-child { border-top: 0; }
+.fc-hora { font-variant-numeric: tabular-nums; font-weight: 650; flex: none; }
+.fc-combate-detalle { flex: 1; min-width: 0; }
+.fc-rival { overflow: hidden; text-overflow: ellipsis; }

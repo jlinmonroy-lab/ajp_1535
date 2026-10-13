@@ -63,7 +63,7 @@ def main():
         print(f"Buscando un atleta ({busqueda!r})")
         if not busqueda:
             errores.append("data.json no trae atletas con los que buscar")
-        page.click('.pestana[data-vista="buscar"]')
+        page.click('[data-vista="buscar"]')
         page.fill("#busqueda", busqueda)
         page.wait_for_timeout(600)
         resultados = page.inner_text("#resultados").splitlines()[0]
@@ -79,7 +79,7 @@ def main():
         else:
             botones[0].click()
             page.wait_for_timeout(400)
-            page.click('.pestana[data-vista="seguidos"]')
+            page.click('[data-vista="seguidos"]')
             page.wait_for_timeout(600)
             captura("mis-atletas")
 
@@ -89,10 +89,10 @@ def main():
             ficha.click()
             page.wait_for_timeout(500)
             captura("ficha-atleta")
-            page.click("#cerrar-detalle")
+            page.click('[aria-label="Cerrar"]')
 
         print("Vista de tatamis")
-        page.click('.pestana[data-vista="tatamis"]')
+        page.click('[data-vista="tatamis"]')
         page.wait_for_timeout(700)
         captura("tatamis")
 

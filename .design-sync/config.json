@@ -1,0 +1,26 @@
+{
+  "projectId": "56df7fd6-d4ff-47e2-aaec-3f41c5639f1b",
+  "pkg": "@fcteam/ui",
+  "globalName": "FcTeamUI",
+  "shape": "package",
+  "cssEntry": "dist/style.css",
+  "buildCmd": "npm --prefix web run build:lib",
+  "docsDir": "../.design-sync/docs",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "PanelDetalle": {
+      "cardMode": "single",
+      "viewport": "390x640"
+    }
+  },
+  "dtsPropsFor": {
+    "Pestanas": "  /** Las pestañas, en orden: `id` estable, texto y, si se da, el número de la burbuja (con 0 queda vacía). */\n  pestanas: Array<{ id: string; etiqueta: string; contador?: number }>;\n  /** `id` de la pestaña seleccionada. */\n  activa: string;\n  /** Recibe el `id` de la pestaña pulsada. */\n  onCambiar: (id: string) => void;\n  className?: string;",
+    "Filtros": "  /** Las opciones, en orden: `id` estable y texto. */\n  opciones: Array<{ id: string; etiqueta: string }>;\n  /** `id` de la opción seleccionada. */\n  valor: string;\n  /** Recibe el `id` de la opción pulsada. */\n  onCambiar: (id: string) => void;\n  /** Nombre del grupo para lectores de pantalla («Cuándo»). */\n  etiqueta?: string;",
+    "Llaves": "  /** Un enlace por cuadro: dirección `https://…` y texto («Ver llave», o la categoría si hay varios). */\n  llaves: Array<{ url: string; texto: string }>;",
+    "FilaCombate": "  /** Identificador estable del combate; solo sirve de `key` cuando se pintan varias filas. */\n  id?: string;\n  /** Hora estimada ya formateada («17:30»), o «--:--» si no se sabe. */\n  hora: string;\n  /** Rival («vs Ana Pérez») o los dos contendientes («Ana Pérez vs Luis Gómez»). */\n  titulo: string;\n  /** Día corto («sáb 17»). */\n  dia?: string;\n  /** Si el día va en una `Etiqueta` (por defecto) o como texto corrido. */\n  diaComo?: \"etiqueta\" | \"texto\";\n  /** Gi o No-Gi, cuando el seguimiento junta dos eventos. */\n  evento?: string;\n  /** Resto de la segunda línea: «Semifinal · Tatami 3», o la categoría. */\n  detalle?: string;\n  /** Estado a la derecha: «EN CURSO», «Ganó · puntos»… El tono es el de `Etiqueta`. */\n  resultado?: { texto: string; tono?: \"neutro\" | \"vivo\" | \"ganado\" | \"perdido\" | \"grupo\" | \"evento\" };",
+    "TarjetaProximo": "  /** Hora estimada ya formateada («17:30»). */\n  hora: string;\n  /** El atleta al que sigues. */\n  nombre: string;\n  /** Su rival, o «Por determinar». */\n  rival: string;\n  /** Día corto («sáb 17»). */\n  dia?: string;\n  /** Gi o No-Gi, cuando el seguimiento junta dos eventos. */\n  evento?: string;\n  /** Tatami donde le toca. */\n  tatami?: string;\n  /** «EN CURSO» o «Pendiente». El tono es el de `Etiqueta`. */\n  resultado?: { texto: string; tono?: \"neutro\" | \"vivo\" | \"ganado\" | \"perdido\" | \"grupo\" | \"evento\" };",
+    "TarjetaTatami": "  /** Nombre del tatami («Mat 3»). */\n  nombre: string;\n  /** Resumen bajo el nombre («12 combates · 1 en curso»). */\n  resumen: string;\n  /** Lo que está en curso y lo que viene, en orden; unos pocos. Mismas props que `FilaCombate`. */\n  combates: Array<{ id?: string; hora: string; titulo: string; dia?: string; diaComo?: \"etiqueta\" | \"texto\"; evento?: string; detalle?: string; resultado?: { texto: string; tono?: \"neutro\" | \"vivo\" | \"ganado\" | \"perdido\" | \"grupo\" | \"evento\" } }>;\n  /** Retransmisión del tatami (`https://…`). */\n  transmision?: string;",
+    "TarjetaAtleta": "  /** Identificador del atleta (nombre + club); sale como `data-atleta` y `data-seguir`. */\n  id: string;\n  nombre: string;\n  club?: string;\n  /** Una categoría («Men's GI / Brown / Master 1 / 62KG»). */\n  categoria?: string;\n  /** Dirección de la foto; sin ella, un círculo vacío. */\n  foto?: string;\n  /** Mejor medalla conseguida hasta ahora. */\n  medalla?: \"oro\" | \"plata\" | \"bronce\";\n  /** Explica por qué está en la lista alguien a quien no has seguido tú. */\n  delGrupo?: boolean;\n  /** Tú lo sigues: el botón dice «Siguiendo» y se rellena. */\n  siguiendo: boolean;\n  onSeguir: () => void;\n  /** Al tocar el nombre (abre su ficha). */\n  onAbrir?: () => void;\n  /** Sus combates, mismas props que `FilaCombate`. Con la lista (aunque vacía) se pinta la sección. */\n  combates?: Array<{ id?: string; hora: string; titulo: string; dia?: string; diaComo?: \"etiqueta\" | \"texto\"; evento?: string; detalle?: string; resultado?: { texto: string; tono?: \"neutro\" | \"vivo\" | \"ganado\" | \"perdido\" | \"grupo\" | \"evento\" } }>;\n  /** Enlaces a sus cuadros en Smoothcomp (`https://…`). */\n  llaves?: Array<{ url: string; texto: string }>;\n  /** Solo en el panel del servidor: botón para que lo vea todo el grupo. */\n  paraTodos?: { activo: boolean; guardando?: boolean; onAlternar: () => void };",
+    "ListaGrupo": "  /** Quién está apuntado: `club` ya resuelto («sin club» si no hay) y si aún no tiene combates. */\n  entradas: Array<{ id: string; nombre: string; club: string; sinCombates: boolean }>;\n  /** Pulsar «Quitar»; el botón queda bloqueado hasta que termina. */\n  onQuitar: (id: string) => Promise<void> | void;"
+  }
+}

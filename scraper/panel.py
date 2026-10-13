@@ -32,6 +32,7 @@ sys.path.insert(0, str(RAIZ))
 
 from scraper.parse import clave_atleta  # noqa: E402
 from scraper.publish import escribir_json  # noqa: E402
+from scraper.sitio import TIPOS_MIME  # noqa: E402
 
 CONFIG = RAIZ / "config.json"
 SITIO = RAIZ / "site"
@@ -74,6 +75,9 @@ def actualizar_grupo(atleta_id, nombre, accion, club=None):
 
 class Handler(SimpleHTTPRequestHandler):
     """La web estática, más /api/grupo."""
+
+    # Los módulos de la web exigen un tipo de JavaScript (ver scraper/sitio.py).
+    extensions_map = {**SimpleHTTPRequestHandler.extensions_map, **TIPOS_MIME}
 
     def log_message(self, *args):
         pass  # sin ruido: interesa el log del scraper, no el del panel

@@ -1,0 +1,11 @@
+/* Pensado para mirarlo de pie en un pabellón: contraste alto, texto grande,
+   objetivos táctiles amplios y nada que dependa del color para entenderse. */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}

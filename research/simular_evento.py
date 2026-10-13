@@ -18,6 +18,7 @@ Uso:  python research/simular_evento.py [--velocidad 15] [--puerto 8766]
 import argparse
 import json
 import random
+import re
 import shutil
 import sys
 import threading
@@ -32,10 +33,11 @@ sys.path.insert(0, str(RAIZ))
 
 from scraper.parse import construir_atletas  # noqa: E402
 from scraper.publish import escribir_json  # noqa: E402
+from scraper.sitio import TIPOS_MIME, aviso_sin_compilar, sitio_compilado  # noqa: E402
 
 SITIO = RAIZ / "site"
 DEMO = RAIZ / "tmp-demo"
-ESTATICOS = ("index.html", "util.js", "buscador.js", "app.js", "style.css", ".nojekyll")
+EXCLUIDOS = ("data.json",)   # el de la demo lo escribe la simulación, no el de site/
 
 RESULTADOS = ("points", "submission", "decision", "points", "submission", "disqualification")
 
@@ -50,15 +52,20 @@ def log(m):
 
 def preparar_demo():
     """Copia aislada del sitio, con un banner que impida confundirla con la real."""
+    if not sitio_compilado(SITIO):
+        raise SystemExit(aviso_sin_compilar(SITIO))
     DEMO.mkdir(exist_ok=True)
-    for nombre in ESTATICOS:
-        origen = SITIO / nombre
-        if origen.exists():
-            shutil.copy2(origen, DEMO / nombre)
+    shutil.rmtree(DEMO / "assets", ignore_errors=True)   # los de una compilación anterior sobran
+    for origen in SITIO.rglob("*"):
+        relativa = origen.relative_to(SITIO)
+        if origen.is_file() and relativa.as_posix() not in EXCLUIDOS:
+            (DEMO / relativa).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(origen, DEMO / relativa)
 
+    # El banner va fuera de la raíz de React (#raiz): no se lo lleva ningún repintado.
     html = (DEMO / "index.html").read_text(encoding="utf-8")
     if "SIMULACIÓN ·" not in html:
-        html = html.replace("<body>", "<body>\n" + BANNER, 1)
+        html = re.sub(r"<body[^>]*>", lambda m: m.group(0) + "\n" + BANNER, html, count=1)
         (DEMO / "index.html").write_text(html, encoding="utf-8")
 
 
@@ -292,7 +299,10 @@ def resumen(datos):
 
 
 def servir(puerto):
-    handler = partial(SimpleHTTPRequestHandler, directory=str(DEMO))
+    class Handler(SimpleHTTPRequestHandler):
+        extensions_map = {**SimpleHTTPRequestHandler.extensions_map, **TIPOS_MIME}
+
+    handler = partial(Handler, directory=str(DEMO))
     servidor = ThreadingHTTPServer(("127.0.0.1", puerto), handler)
     threading.Thread(target=servidor.serve_forever, daemon=True).start()
     return servidor

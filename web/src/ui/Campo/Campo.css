@@ -1,0 +1,11 @@
+.fc-campo {
+  width: 100%;
+  padding: .6rem .8rem;
+  margin-bottom: .5rem;
+  background: var(--superficie-2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+}
+.fc-campo:focus { outline: 2px solid var(--acento); outline-offset: 1px; }

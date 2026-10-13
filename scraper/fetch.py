@@ -20,6 +20,8 @@ import urllib.request
 from collections import namedtuple
 from contextlib import contextmanager
 
+from scraper.telemetria import contadores, registro
+
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36")
 
@@ -120,6 +122,9 @@ def _pedir(url, timeout, cabeceras, intentos=3, espera_base=1.0):
             espera = espera_base * 2 ** intento
 
         if intento < intentos - 1:
+            contadores.sumar("origen_reintentos")
+            registro.aviso(f"  reintento {intento + 1}/{intentos - 1} en {espera:.0f}s "
+                           f"tras {ultimo}: {url}")
             time.sleep(espera)
 
     raise ErrorOrigen(f"{ultimo} tras {intentos} intentos en {url}", codigo=codigo)

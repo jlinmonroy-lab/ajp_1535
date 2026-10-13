@@ -27,7 +27,7 @@ kill_timeout = 10
     grace_period = "15s"
     interval = "30s"
     method = "GET"
-    path = "/api/config"        # no toca Smoothcomp
+    path = "/api/health"        # no toca Smoothcomp; 503 si un hilo del almacén ha muerto o falta la web
     timeout = "5s"
 
 [[vm]]

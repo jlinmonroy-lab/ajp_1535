@@ -1,0 +1,7 @@
+.fc-titulo-seccion {
+  margin: 1.1rem 0 .5rem;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--texto-tenue);
+}

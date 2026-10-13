@@ -149,9 +149,10 @@ class PruebaBuscador(unittest.TestCase):
     def buscador(self, respuestas, cfg=None):
         self.falso = Falso(respuestas)
         self.reloj = Reloj()
+        self.avisos = []
         return Buscador(cfg or CFG, pedir_html=self.falso.pedir_html,
                         pedir_json=self.falso.pedir_json, reloj=self.reloj,
-                        hoy=lambda: "2026-10-08")
+                        hoy=lambda: "2026-10-08", log=self.avisos.append)
 
 
 class TestBuscar(PruebaBuscador):
@@ -191,6 +192,28 @@ class TestBuscar(PruebaBuscador):
         b = self.buscador({f"{self.BASE}/upcoming": crudos})
         self.assertEqual([e["id"] for e in b.buscar("", "upcoming")["events"]],
                          ["3", "2", "5", "4", "1"])
+
+    def test_proximos_no_incluye_los_finalizados(self):
+        crudos = [
+            evento_crudo(1, "2026-10-01"),                                 # acabó hace días
+            evento_crudo(2, "2026-10-20", eventEnded=True),                # Smoothcomp lo da por terminado
+            evento_crudo(3, "2026-10-07"),                                 # acabó ayer
+            evento_crudo(4, "2026-10-08"),                                 # hoy: todavía no ha terminado
+            evento_crudo(5, "2026-01-01", enddate="2026-12-31"),           # liga en marcha
+            evento_crudo(6, None, enddate=None),                           # sin fechas: no se puede decir
+            evento_crudo(7, "2026-10-20"),
+        ]
+        b = self.buscador({f"{self.BASE}/upcoming": crudos})
+        self.assertEqual([e["id"] for e in b.buscar("", "upcoming")["events"]],
+                         ["4", "7", "6", "5"])
+
+    def test_la_paginacion_de_proximos_no_cuenta_los_finalizados(self):
+        vigentes = [evento_crudo(i, f"2026-11-{(i % 28) + 1:02d}") for i in range(1, 46)]
+        terminados = [evento_crudo(i, "2026-09-01") for i in range(100, 130)]
+        b = self.buscador({f"{self.BASE}/upcoming": terminados + vigentes})
+        p1, p2 = b.buscar("", "upcoming", 1), b.buscar("", "upcoming", 2)
+        self.assertEqual((len(p1["events"]), p1["hasMore"]), (40, True))
+        self.assertEqual((len(p2["events"]), p2["hasMore"]), (5, False))
 
     def test_proximos_se_paginan_en_el_servidor(self):
         crudos = [evento_crudo(i, f"2026-11-{(i % 28) + 1:02d}") for i in range(1, 96)]
@@ -250,12 +273,15 @@ class TestCache(PruebaBuscador):
         self.assertTrue(r["stale"])
         self.assertEqual(len(r["events"]), 4)
         self.assertEqual(len(self.falso.html), 2)
+        self.assertEqual(len(self.avisos), 1, "el fallo no se traga en silencio")
+        self.assertIn("HTTP 502", self.avisos[0])
 
         # No se insiste en cada petición mientras esté caído, y sigue avisando...
         self.reloj.t += 10
         r = b.buscar("madrid", "upcoming")
         self.assertTrue(r["stale"])
         self.assertEqual(len(self.falso.html), 2)
+        self.assertEqual(len(self.avisos), 1, "sin tocar Smoothcomp no hay nada nuevo que contar")
         # ...pero sí pasado un rato, y al recuperarse deja de estar vieja.
         self.reloj.t += 30
         self.falso.respuestas[self.URL] = cargar_fixture()
@@ -465,6 +491,16 @@ class TestBuscarConZona(PruebaBuscador):
         r = b.buscar("", "upcoming", 1, zona=True)
         self.assertEqual(self.ids(r), ["31768", "33588", "33001", "33644"])
         self.assertFalse(r["hasMore"])
+
+    def test_los_finalizados_de_la_zona_no_salen_en_proximos(self):
+        lista = self.lista_de_espana() + [
+            en(30000, "Madrid Open viejo", "Madrid", 40.41, -3.70, fecha="2026-10-05"),
+            en(30001, "Madrid Open cancelado", "Madrid", 40.41, -3.70, fecha="2026-11-20"),
+        ]
+        lista[-1]["eventEnded"] = True
+        b = self.buscador({self.PROXIMOS: lista}, CFG_ZONA)
+        self.assertEqual(self.ids(b.buscar("", "upcoming", 1, zona=True)),
+                         ["31768", "33588", "33001", "33644"])
 
     def test_pide_la_lista_del_pais_entera_y_sin_texto(self):
         b = self.buscador({self.PROXIMOS: self.lista_de_espana()}, CFG_ZONA)

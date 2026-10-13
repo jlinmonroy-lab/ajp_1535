@@ -23,12 +23,14 @@ import queue
 import re
 import threading
 import time
+import traceback
 from collections import OrderedDict, namedtuple
 
 from scraper import fetch
 from scraper.estado import ahora_iso, estado_vacio, marcar_stale
 from scraper.fetch import ErrorOrigen
 from scraper.parse import METADATOS_EVENTO, aplicar_grupo, construir_estado
+from scraper.telemetria import nivel
 
 MAX_EVENTOS_POR_VISTA = 3
 MAX_PENDIENTES = 10          # lecturas en cola a la vez: más es que alguien está sondeando ids
@@ -107,6 +109,8 @@ class Almacen:
         self._candado = threading.Lock()
         self._entradas = OrderedDict()           # clave -> Entrada, de la menos a la más reciente
         self._cola = queue.Queue()
+        self._ultimo_exito = None      # cuándo (según `reloj`) se leyó un evento por última vez
+        self._ultimo_error = None      # (cuándo, código HTTP, ¿era el reto de Cloudflare?)
         self._hilos = []
         for _ in range(servidor.get("workers", 2) if workers is None else workers):
             hilo = threading.Thread(target=self._trabajar, daemon=True)
@@ -155,6 +159,32 @@ class Almacen:
     def cerrar(self):
         for _ in self._hilos:
             self._cola.put(None)
+
+    def resumen(self):
+        """Una foto del estado para `/api/health`. No toca la red.
+
+        Con la caché vacía (nadie mira ningún evento) no hay nada que vigilar: ni
+        `eventosStale` ni `eventosConError` suben por un fallo antiguo.
+        """
+        with self._candado:
+            ahora = self._reloj()
+            entradas = list(self._entradas.values())
+            exito, error = self._ultimo_exito, self._ultimo_error
+            resumen = {
+                "workers": len(self._hilos),
+                "workersVivos": sum(h.is_alive() for h in self._hilos),
+                "eventosEnCache": len(entradas),
+                "enCola": sum(e.en_cola for e in entradas),
+                "eventosStale": sum(bool(e.estado and e.estado.get("stale")) for e in entradas),
+                "eventosConError": sum(e.fase == "error" for e in entradas),
+            }
+        resumen["origen"] = {
+            "ultimoExitoS": None if exito is None else round(ahora - exito),
+            "ultimoErrorS": None if error is None else round(ahora - error[0]),
+            "ultimoErrorCodigo": None if error is None else error[1],
+            "ultimoErrorReto": None if error is None else error[2],
+        }
+        return resumen
 
     # ---- gestión de entradas (siempre con el candado) ----
 
@@ -217,7 +247,9 @@ class Almacen:
         try:
             self._refrescar(entrada)
         except Exception as e:  # noqa: BLE001 - un hilo que muere dejaría la web sin refresco
-            self.log(f"  [{entrada.clave}] error inesperado: {type(e).__name__}: {e}")
+            nivel(self.log, "error")(
+                f"  [{entrada.clave}] error inesperado: {type(e).__name__}: {e}\n"
+                f"{traceback.format_exc().rstrip()}")
             self._fallar(entrada, f"error interno ({type(e).__name__})")
         finally:
             with self._candado:
@@ -236,6 +268,8 @@ class Almacen:
                     eventos.append({"id": event_id, "label": None, "name": None})
                     continue
                 # Sin el título se puede seguir: se lee el schedule igualmente.
+                nivel(self.log, "aviso")(
+                    f"  [{entrada.clave}] sin título de {event_id} ({e}); se lee igualmente")
                 meta = self.buscador.conocido(event_id) or {
                     "id": event_id, "title": f"Evento {event_id}"}
 
@@ -254,6 +288,13 @@ class Almacen:
         base_url, lang = self.cfg["baseUrl"], self.cfg.get("lang", "en")
         grupo = self.grupos.leer(entrada.clave)
 
+        if datos and errores:
+            # Con otro evento de la vista leído esto no llega a `_fallar`: solo esta
+            # línea deja constancia de que una parte de la vista no se pudo leer.
+            nivel(self.log, "aviso")(
+                f"  [{entrada.clave}] lectura parcial: {len(errores)} de "
+                f"{len(entrada.ids)} eventos sin leer ({errores[0]})")
+
         if datos:
             estado = construir_estado(eventos=eventos, datos_por_evento=datos,
                                       fetched_at=ahora_iso(), grupo=grupo,
@@ -261,6 +302,8 @@ class Almacen:
             for e in estado["events"]:
                 e["published"] = e["id"] in datos
             self._guardar(entrada, estado)
+            with self._candado:
+                self._ultimo_exito = self._reloj()
             en_curso = sum(1 for m in estado["matches"] if m["state"] == "running")
             self.log(f"  [{entrada.clave}] {len(estado['matches'])} combates, "
                      f"{len(estado['athletes'])} atletas, {len(estado['mats'])} tatamis, "
@@ -278,7 +321,9 @@ class Almacen:
             error = next(e for e in errores if _es_transitorio(e))
             mensaje = ("Smoothcomp está bloqueando las peticiones del servidor"
                        if error.desafio else str(error))
-            self.log(f"  [{entrada.clave}] fallo: {error}")
+            nivel(self.log, "aviso")(f"  [{entrada.clave}] fallo: {error}")
+            with self._candado:
+                self._ultimo_error = (self._reloj(), error.codigo, bool(error.desafio))
             self._fallar(entrada, mensaje)
 
     # ---- resultados de una lectura ----
@@ -331,4 +376,4 @@ class Almacen:
             with self._candado:
                 entrada.estado = estado
                 entrada.cuerpo, entrada.gz, entrada.etag = cuerpo, gz, etag
-            self.log(f"  [{entrada.clave}] marcado stale desde {desde}")
+            nivel(self.log, "aviso")(f"  [{entrada.clave}] marcado stale desde {desde}")

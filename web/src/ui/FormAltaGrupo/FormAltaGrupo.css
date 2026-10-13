@@ -1,0 +1,4 @@
+/* Alta a mano en el panel (y, con otra cara, el acceso de administrador). */
+.fc-form-grupo .fc-titulo-seccion { margin-top: 0; }
+.fc-form-grupo .fc-boton { width: 100%; padding: .6rem; }
+.fc-form-grupo .fc-sub { margin: .5rem 0 0; }

@@ -1,0 +1,13 @@
+.fc-filtros { display: flex; gap: 6px; margin-bottom: .4rem; }
+.fc-filtro {
+  flex: 1;
+  padding: .55rem .4rem;
+  background: var(--superficie);
+  color: var(--texto-tenue);
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fc-filtro--activo { background: var(--acento); color: var(--equipo-texto); border-color: var(--acento); }

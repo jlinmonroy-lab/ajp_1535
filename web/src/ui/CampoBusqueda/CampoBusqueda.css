@@ -1,0 +1,11 @@
+.fc-campo-busqueda {
+  width: 100%;
+  padding: .8rem 1rem;
+  margin: .2rem 0 .8rem;
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font-size: 1rem;
+}
+.fc-campo-busqueda:focus { outline: 2px solid var(--acento); outline-offset: 1px; }

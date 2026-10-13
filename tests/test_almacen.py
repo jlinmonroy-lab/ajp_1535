@@ -11,6 +11,7 @@ import gzip
 import json
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -272,6 +273,84 @@ class TestResultadosDeLaLectura(PruebaAlmacen):
         r = self.pedir_y_leer()      # no debe propagar la excepción
         self.assertEqual(r.fase, "error")
         self.assertTrue(any("ZeroDivisionError" in a for a in self.avisos))
+        self.assertTrue(any("Traceback" in a for a in self.avisos),
+                        "sin el traceback no hay forma de saber dónde falló")
+
+    def test_si_falla_el_titulo_se_avisa_y_se_lee_igualmente(self):
+        self.montar({"33588": lectura(combate(1))})
+
+        def sin_titulo(event_id):
+            raise ErrorOrigen("HTTP 502", codigo=502)
+        self.buscador.evento = sin_titulo
+        r = self.pedir_y_leer()
+        self.assertEqual(r.fase, "listo")
+        self.assertTrue(any("sin título de 33588" in a for a in self.avisos))
+
+    def test_una_vista_a_medias_deja_constancia_de_lo_que_no_se_pudo_leer(self):
+        self.montar({"1535": lectura(combate(1)), "1526": ErrorOrigen("HTTP 502", codigo=502)})
+        self.pedir_y_leer("1535,1526")
+        self.assertTrue(any("lectura parcial: 1 de 2" in a for a in self.avisos), self.avisos)
+
+
+class TestResumen(PruebaAlmacen):
+    """Lo que enseña /api/health."""
+
+    def test_vacio_no_hay_nada_que_vigilar(self):
+        self.montar({})
+        r = self.almacen.resumen()
+        self.assertEqual((r["eventosEnCache"], r["enCola"], r["eventosStale"],
+                          r["eventosConError"]), (0, 0, 0, 0))
+        self.assertEqual((r["workers"], r["workersVivos"]), (0, 0))
+        self.assertIsNone(r["origen"]["ultimoExitoS"])
+        self.assertIsNone(r["origen"]["ultimoErrorCodigo"])
+
+    def test_cuenta_la_cola_y_el_ultimo_exito(self):
+        self.montar({"33588": lectura(combate(1))})
+        self.almacen.pedir("33588")
+        self.assertEqual(self.almacen.resumen()["enCola"], 1)
+
+        self.almacen.procesar_pendientes()
+        self.reloj.t += 40
+        r = self.almacen.resumen()
+        self.assertEqual((r["eventosEnCache"], r["enCola"]), (1, 0))
+        self.assertEqual(r["origen"]["ultimoExitoS"], 40)
+
+    def test_un_evento_sin_datos_que_servir_cuenta_como_error_y_guarda_el_codigo(self):
+        self.montar({"33588": ErrorOrigen("HTTP 403", codigo=403, desafio=True)})
+        self.pedir_y_leer()
+        r = self.almacen.resumen()
+        self.assertEqual(r["eventosConError"], 1)
+        self.assertEqual((r["origen"]["ultimoErrorCodigo"], r["origen"]["ultimoErrorReto"]),
+                         (403, True))
+        self.assertEqual(r["origen"]["ultimoErrorS"], 0)
+
+    def test_un_403_normal_no_es_un_fallo_de_origen(self):
+        self.montar({"33588": ErrorOrigen("HTTP 403", codigo=403)})   # schedule sin publicar
+        self.pedir_y_leer()
+        r = self.almacen.resumen()
+        self.assertEqual((r["eventosConError"], r["eventosStale"]), (0, 0))
+        self.assertIsNone(r["origen"]["ultimoErrorCodigo"])
+
+    def test_tras_varios_fallos_el_evento_cuenta_como_stale(self):
+        self.montar({"33588": lectura(combate(1))})
+        self.pedir_y_leer()
+        self.lector.respuestas["33588"] = ErrorOrigen("HTTP 503", codigo=503)
+        for _ in range(3):
+            self.reloj.t += 75
+            self.almacen.pedir("33588")
+            self.almacen.procesar_pendientes()
+        r = self.almacen.resumen()
+        self.assertEqual((r["eventosStale"], r["eventosConError"]), (1, 0))
+
+    def test_un_hilo_vivo_se_cuenta(self):
+        self.montar({})
+        hilo = threading.Event()
+        vivo = threading.Thread(target=hilo.wait, daemon=True)
+        vivo.start()
+        self.addCleanup(hilo.set)
+        self.almacen._hilos.append(vivo)
+        r = self.almacen.resumen()
+        self.assertEqual((r["workers"], r["workersVivos"]), (1, 1))
 
 
 class TestStale(PruebaAlmacen):

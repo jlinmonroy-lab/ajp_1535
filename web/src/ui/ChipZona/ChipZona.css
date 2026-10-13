@@ -1,0 +1,11 @@
+.fc-chip-zona {
+  padding: .4rem .8rem;
+  background: transparent;
+  color: var(--texto-tenue);
+  border: 1px dashed var(--borde);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fc-chip-zona--activo { border-style: solid; border-color: var(--acento); color: var(--acento); }

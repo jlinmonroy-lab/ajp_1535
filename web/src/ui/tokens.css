@@ -1,0 +1,26 @@
+/* Tokens de diseño de FC Team. Todo el aspecto sale de estas variables: los
+   componentes no llevan colores propios, salvo el blanco sobre el rojo de «en
+   vivo» y el verde oscuro sobre el verde de «ganó». */
+:root {
+  /* Colores del equipo: cambia solo estos dos.
+     --equipo es el color principal (botones, pestaña activa, línea de la cabecera);
+     --equipo-texto, el del texto encima de él: blanco si --equipo es oscuro,
+     negro si es claro, como ahora. Blanco y negro, como el logo. */
+  --equipo: #fff;
+  --equipo-texto: #000;
+
+  /* Siempre negro, también en móviles con el modo claro activado. */
+  --fondo: #000;
+  --superficie: #111;
+  --superficie-2: #1c1c1c;
+  --borde: #2e2e2e;
+  --texto: #fff;
+  --texto-tenue: #b3b3b3;
+  --acento: var(--equipo);
+  --vivo: #ff4d4f;
+  --ok: #2ecc71;
+  --oro: #f5c518;
+  --plata: #c8d0da;
+  --bronce: #cd7f32;
+  --radio: 12px;
+}
