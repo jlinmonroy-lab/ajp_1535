@@ -153,7 +153,8 @@ describe('textoEstado', () => {
       datos: datos({ stale: true, staleSince: new Date(tFetch).toISOString() }),
     });
     expect(r.vieja).toBe(true);
-    expect(r.texto).toMatch(/^⚠ Datos sin actualizar desde \d{2}:\d{2} · 1 combates/);
+    // La hora sale en el formato del idioma del navegador: «10:00» (24 h) o «10:00 AM» (en-US).
+    expect(r.texto).toMatch(/^⚠ Datos sin actualizar desde \d{1,2}:\d{2}(?: [AP]M)? · 1 combates/);
   });
 
   it('más de 4 min sin datos nuevos avisa, y en el panel estático sugiere mirar el scraper', () => {
