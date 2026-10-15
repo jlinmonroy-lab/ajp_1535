@@ -6,7 +6,7 @@ export interface TituloSeccionProps extends HTMLAttributes<HTMLHeadingElement> {
   nivel?: 2 | 3;
 }
 
-/** Encabezado pequeño en mayúsculas que separa bloques de tarjetas («Próximos combates», «Resultados»). */
+/** Encabezado pequeño en mayúsculas que separa bloques de tarjetas («Próximo combate» o «Próximos combates», «Resultados»). */
 export function TituloSeccion({ nivel = 2, className, ...resto }: TituloSeccionProps) {
   const Etiqueta = nivel === 3 ? 'h3' : 'h2';
   return <Etiqueta {...resto} className={clases('fc-titulo-seccion', className)} />;

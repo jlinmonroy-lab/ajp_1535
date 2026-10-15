@@ -14,8 +14,8 @@ import {
 } from '../ui';
 import { enviarGrupo, leerGrupo, urlGrupo, type Arranque } from './api';
 import {
-  MEDALLA, combatesDe, filaDeAtleta, filaDeTatami, llavesDe, nombreEvento, resultadoDe, rivalDe,
-  sinSchedule, textoEstado, urlDelEvento,
+  MEDALLA, combatesDe, filaDeAtleta, filaDeTatami, llavesDe, nombreEvento, proximosCombates, resultadoDe,
+  rivalDe, sinSchedule, textoEstado, urlDelEvento,
 } from './selectores';
 import { usarAviso } from './usarAviso';
 import { usarSeguidos } from './usarSeguidos';
@@ -251,15 +251,10 @@ export function Evento({ ids, arranque, alTitular }: EventoProps) {
       );
     }
 
-    // Lo primero que quiere ver alguien en el pabellón: qué toca ahora y qué viene.
-    const proximos: Array<{ atleta: Atleta; combate: Combate }> = [];
-    for (const a of mios) {
-      for (const c of combatesDe(a, porId)) {
-        if (c.state !== 'finished') proximos.push({ atleta: a, combate: c });
-      }
-    }
-    proximos.sort((x, y) =>
-      (x.combate.estimatedStart || '').localeCompare(y.combate.estimatedStart || ''));
+    // Lo primero que quiere ver alguien en el pabellón: qué toca ahora o a continuación. Uno solo,
+    // o dos si son de atletas distintos y les toca con menos de una hora de diferencia. Al terminar
+    // uno, `finished` lo saca y entra el siguiente.
+    const proximos = proximosCombates(mios, porId);
 
     return (
       <>
@@ -267,8 +262,8 @@ export function Evento({ ids, arranque, alTitular }: EventoProps) {
         {avisoSinSchedule}
         {proximos.length > 0 && (
           <>
-            <TituloSeccion>Próximos combates</TituloSeccion>
-            {proximos.slice(0, 8).map(({ atleta, combate }) => {
+            <TituloSeccion>{proximos.length > 1 ? 'Próximos combates' : 'Próximo combate'}</TituloSeccion>
+            {proximos.map(({ atleta, combate }) => {
               const fila = filaDeAtleta(combate, atleta.id);
               return (
                 <TarjetaProximo

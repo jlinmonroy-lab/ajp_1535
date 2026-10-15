@@ -106,6 +106,39 @@ export function combatesDe(atleta: Atleta, porId: ReadonlyMap<string, Combate>):
   return atleta.matchIds.map((id) => porId.get(id)).filter((c): c is Combate => !!c);
 }
 
+// Un segundo atleta entra en «Próximo combate» si le toca como mucho una hora después del primero.
+export const VENTANA_PROXIMOS_MS = 60 * 60 * 1000;
+
+export interface Proximo { atleta: Atleta; combate: Combate }
+
+/**
+ * Qué enseñar en «Próximo combate»: el pendiente que toca antes y, si otro atleta tiene el suyo a
+ * una hora o menos de ese, también ese. Entre 0 y 2. Los combates sin hora quedan detrás de todos
+ * y nunca valen como segundo; un combate entre dos atletas seguidos cuenta una sola vez.
+ */
+export function proximosCombates(atletas: readonly Atleta[], porId: ReadonlyMap<string, Combate>): Proximo[] {
+  // `inicio` es Infinity cuando no hay hora (o no se entiende): así quedan al final al ordenar.
+  const pendientes: Array<Proximo & { inicio: number }> = [];
+  const vistos = new Set<string>();
+  for (const atleta of atletas) {
+    for (const combate of combatesDe(atleta, porId)) {
+      if (combate.state === 'finished' || vistos.has(combate.id)) continue;
+      vistos.add(combate.id);
+      const inicio = combate.estimatedStart ? Date.parse(combate.estimatedStart) : NaN;
+      pendientes.push({ atleta, combate, inicio: Number.isNaN(inicio) ? Infinity : inicio });
+    }
+  }
+  // No se resta (Infinity - Infinity daría NaN): se comparan. El orden es estable.
+  pendientes.sort((x, y) => (x.inicio === y.inicio ? 0 : x.inicio < y.inicio ? -1 : 1));
+
+  const primero = pendientes[0];
+  if (!primero) return [];
+  if (primero.inicio === Infinity) return [primero];
+  const segundo = pendientes.find((p) =>
+    p.atleta.id !== primero.atleta.id && p.inicio - primero.inicio <= VENTANA_PROXIMOS_MS);
+  return segundo ? [primero, segundo] : [primero];
+}
+
 // Se compara por athleteId, no por inscripción: la misma persona tiene un
 // event_registration_id distinto en cada uno de los eventos en los que compite.
 export function rivalDe(combate: Combate, athleteId: string) {

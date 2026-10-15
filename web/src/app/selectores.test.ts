@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Atleta, Combate, Datos } from '../tipos';
 import {
-  filaDeAtleta, filaDeTatami, hace, llavesDe, resultadoDe, rivalDe, sinSchedule, textoEstado, urlDelEvento,
+  filaDeAtleta, filaDeTatami, hace, llavesDe, proximosCombates, resultadoDe, rivalDe, sinSchedule, textoEstado,
+  urlDelEvento,
 } from './selectores';
 
 function combate(extra: Partial<Combate> = {}): Combate {
@@ -68,6 +69,77 @@ describe('filas de combate', () => {
       titulo: 'Ana vs Eva', detalle: "Men's GI / Black / 77KG", resultado: { texto: 'EN CURSO' },
     });
     expect(filaDeTatami(combate({ state: 'seeded' })).resultado).toBeUndefined();
+  });
+});
+
+describe('proximosCombates', () => {
+  // Cada combate es de un atleta contra un rival «ficticio» (id propio), pendiente salvo que se diga.
+  const lado = (athleteId: string) =>
+    ({ athleteId, registrationId: athleteId, name: athleteId, club: null, country: null, image: null, isWinner: false });
+  const pelea = (id: string, atleta: string, inicio: string | null, extra: Partial<Combate> = {}) =>
+    combate({ id, estimatedStart: inicio, state: 'seeded', sides: [lado(atleta), lado(`rival-${id}`)], ...extra });
+  const quien = (ids: string[], combates: Combate[]) => {
+    const atletas = ids.map((id) => ({
+      id, matchIds: combates.filter((c) => c.sides.some((s) => s.athleteId === id)).map((c) => c.id),
+    }) as Atleta);
+    return proximosCombates(atletas, new Map(combates.map((c) => [c.id, c])))
+      .map((p) => `${p.atleta.id}:${p.combate.id}`);
+  };
+  const a = (hhmm: string) => `2026-10-17T${hhmm}:00`;
+
+  it('un atleta con varios combates: solo el más temprano', () => {
+    expect(quien(['ana'], [pelea('c2', 'ana', a('11:00')), pelea('c1', 'ana', a('10:00'))])).toEqual(['ana:c1']);
+  });
+
+  it('sin nada pendiente, nada', () => {
+    expect(quien(['ana'], [pelea('c1', 'ana', a('10:00'), { state: 'finished' })])).toEqual([]);
+    expect(quien([], [])).toEqual([]);
+  });
+
+  it('dos atletas con menos de una hora de diferencia: los dos, por orden de hora', () => {
+    expect(quien(['ana', 'eva'], [pelea('c1', 'eva', a('10:00')), pelea('c2', 'ana', a('10:30'))]))
+      .toEqual(['eva:c1', 'ana:c2']);
+  });
+
+  it('la frontera es una hora exacta: 60 min entran, 61 no', () => {
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'eva', a('11:00'))]))
+      .toEqual(['ana:c1', 'eva:c2']);
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'eva', a('11:01'))]))
+      .toEqual(['ana:c1']);
+  });
+
+  it('el segundo combate del mismo atleta no cuenta: tiene que ser otro atleta', () => {
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'ana', a('10:10')),
+      pelea('c3', 'eva', a('12:00'))])).toEqual(['ana:c1']);
+  });
+
+  it('se salta los siguientes del primer atleta hasta dar con otro dentro de la hora', () => {
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'ana', a('10:20')),
+      pelea('c3', 'eva', a('10:40'))])).toEqual(['ana:c1', 'eva:c3']);
+  });
+
+  it('nunca más de dos, aunque haya tres atletas en la misma hora', () => {
+    expect(quien(['ana', 'eva', 'luz'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'eva', a('10:05')),
+      pelea('c3', 'luz', a('10:10'))])).toEqual(['ana:c1', 'eva:c2']);
+  });
+
+  it('un combate entre dos atletas seguidos sale una sola vez', () => {
+    const entreEllas = combate({ id: 'c1', state: 'seeded', estimatedStart: a('10:00'), sides: [lado('ana'), lado('eva')] });
+    expect(quien(['ana', 'eva'], [entreEllas])).toEqual(['ana:c1']);
+  });
+
+  it('los que no tienen hora van detrás y no valen como segundo', () => {
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', null), pelea('c2', 'eva', a('10:00'))])).toEqual(['eva:c2']);
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', a('10:00')), pelea('c2', 'eva', null)])).toEqual(['ana:c1']);
+    expect(quien(['ana', 'eva'], [pelea('c1', 'ana', null), pelea('c2', 'eva', null)])).toEqual(['ana:c1']);
+    expect(quien(['ana'], [pelea('c1', 'ana', 'no es una fecha')])).toEqual(['ana:c1']);
+  });
+
+  it('al terminar el primero, entra el siguiente que cumpla la regla', () => {
+    const combates = [pelea('c1', 'ana', a('10:00')), pelea('c2', 'eva', a('10:30')), pelea('c3', 'ana', a('11:15'))];
+    expect(quien(['ana', 'eva'], combates)).toEqual(['ana:c1', 'eva:c2']);
+    combates[0] = pelea('c1', 'ana', a('10:00'), { state: 'finished' });
+    expect(quien(['ana', 'eva'], combates)).toEqual(['eva:c2', 'ana:c3']);
   });
 });
 

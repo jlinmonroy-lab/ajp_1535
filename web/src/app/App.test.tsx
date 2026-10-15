@@ -156,8 +156,8 @@ describe('evento', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Mis atletas/ }));
     const lista = document.getElementById('lista-seguidos')!;
-    expect(within(lista).getByText('Próximos combates')).toBeInTheDocument();
-    expect(within(lista).getAllByText('Ana Pérez').length).toBeGreaterThanOrEqual(3);   // 2 próximos + ficha
+    expect(within(lista).getByText('Próximo combate')).toBeInTheDocument();
+    expect(within(lista).getAllByText('Ana Pérez')).toHaveLength(2);    // 1 próximo + ficha
     expect(within(lista).getAllByText('EN CURSO')).toHaveLength(2);     // la tarjeta de próximos y la ficha
     expect(within(lista).getByRole('button', { name: 'Siguiendo' })).toBeInTheDocument();
     expect(within(lista).getByRole('link', { name: /Ver llave/ })).toHaveAttribute('href', 'https://x.test/llave/1');
@@ -219,7 +219,7 @@ describe('evento', () => {
   it('tocar el nombre abre la ficha con medallas, llaves y combates, y × la cierra', async () => {
     localStorage.setItem('sbjj:seguidos', JSON.stringify(['ana']));
     await act(async () => { location.hash = '#/evento/1'; render(<App />); });
-    await screen.findByText('Próximos combates');
+    await screen.findByText('Próximo combate');
 
     fireEvent.click(within(document.getElementById('lista-seguidos')!).getAllByText('Ana Pérez').at(-1)!);
     const ficha = await screen.findByRole('dialog', { name: 'Ana Pérez' });
@@ -230,6 +230,105 @@ describe('evento', () => {
 
     fireEvent.click(within(ficha).getByRole('button', { name: 'Cerrar' }));
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  describe('«Próximo combate»', () => {
+    // Ana tiene tres combates pendientes: a las 10:30, a las 10:00 y uno sin hora.
+    const rivalesPendientes = (cambios: Record<string, Partial<Combate>> = {}) => {
+      const rivales: Array<[string, string, string | null]> = [
+        ['p1', 'Luz Díaz', '2026-10-17T10:30:00'],
+        ['p2', 'Eva Gómez', '2026-10-17T10:00:00'],
+        ['p3', 'Zoe Ríos', null],
+      ];
+      const datos: Datos = {
+        ...DATOS,
+        matches: rivales.map(([id, nombre, hora]) =>
+          combate(id, ['ana', 'Ana Pérez'], [id, nombre], { estimatedStart: hora, ...cambios[id] })),
+        athletes: [atleta('ana', 'Ana Pérez', ['p1', 'p2', 'p3'])],
+      };
+      servidor['api/events/1/data'] = () => json(200, datos, { ETag: '"v1"' });
+    };
+
+    // Ana (a1 y a2) y Eva (e1) con un combate cada una. Las horas se pasan por combate.
+    const anaYEva = (horas: { a1: string; e1: string; a2?: string }, cambios: Record<string, Partial<Combate>> = {}) => {
+      const hora = (id: 'a1' | 'e1' | 'a2') => `2026-10-17T${horas[id]}:00`;
+      const matches = [
+        combate('a1', ['ana', 'Ana Pérez'], ['r1', 'Luz Díaz'], { estimatedStart: hora('a1'), ...cambios.a1 }),
+        combate('e1', ['eva', 'Eva Gómez'], ['r2', 'Zoe Ríos'], { estimatedStart: hora('e1'), ...cambios.e1 }),
+        ...(horas.a2 ? [combate('a2', ['ana', 'Ana Pérez'], ['r3', 'Mía Sanz'], { estimatedStart: hora('a2'), ...cambios.a2 })] : []),
+      ];
+      const datos: Datos = {
+        ...DATOS,
+        matches,
+        athletes: [
+          atleta('ana', 'Ana Pérez', horas.a2 ? ['a1', 'a2'] : ['a1']),
+          atleta('eva', 'Eva Gómez', ['e1']),
+        ],
+      };
+      servidor['api/events/1/data'] = () => json(200, datos, { ETag: '"v1"' });
+    };
+
+    const TITULO = /^Próximos? combates?$/;
+
+    // El título y las tarjetas que hay entre «Próximo(s) combate(s)» y «Mis atletas».
+    const proximoEnPantalla = async (seguidos = ['ana']) => {
+      localStorage.setItem('sbjj:seguidos', JSON.stringify(seguidos));
+      await act(async () => { location.hash = '#/evento/1'; render(<App />); });
+      await screen.findByText('Mis atletas', { selector: 'h2' });
+      const titulo = screen.queryByText(TITULO);
+      const tarjetas: Element[] = [];
+      let nodo = titulo?.nextElementSibling ?? null;
+      while (nodo && nodo.tagName !== 'H2') { tarjetas.push(nodo); nodo = nodo.nextElementSibling; }
+      return { titulo: titulo?.textContent ?? null, tarjetas };
+    };
+    const tarjetasDelProximo = async () => (await proximoEnPantalla()).tarjetas;
+
+    it('enseña un solo combate: el de menor hora, y los que no tienen hora van detrás', async () => {
+      rivalesPendientes();
+      const tarjetas = await tarjetasDelProximo();
+      expect(tarjetas).toHaveLength(1);
+      expect(tarjetas[0]).toHaveTextContent('vs Eva Gómez');
+    });
+
+    it('cuando ese combate termina, pasa a verse el siguiente', async () => {
+      rivalesPendientes({ p2: { state: 'finished' } });
+      const tarjetas = await tarjetasDelProximo();
+      expect(tarjetas).toHaveLength(1);
+      expect(tarjetas[0]).toHaveTextContent('vs Luz Díaz');
+    });
+
+    it('sin combates pendientes no hay sección', async () => {
+      rivalesPendientes({ p1: { state: 'finished' }, p2: { state: 'finished' }, p3: { state: 'finished' } });
+      const tarjetas = await tarjetasDelProximo();
+      expect(tarjetas).toHaveLength(0);
+      expect(screen.queryByText(TITULO)).toBeNull();
+    });
+
+    it('dos atletas con combate a menos de una hora: enseña los dos, y el título en plural', async () => {
+      anaYEva({ a1: '10:00', e1: '10:30' });
+      const { titulo, tarjetas } = await proximoEnPantalla(['ana', 'eva']);
+      expect(titulo).toBe('Próximos combates');
+      expect(tarjetas).toHaveLength(2);
+      expect(tarjetas[0]).toHaveTextContent('Ana Pérez');
+      expect(tarjetas[1]).toHaveTextContent('Eva Gómez');
+    });
+
+    it('si el segundo atleta toca pasada la hora, solo se enseña el primero, y el título en singular', async () => {
+      anaYEva({ a1: '10:00', e1: '11:30' });
+      const { titulo, tarjetas } = await proximoEnPantalla(['ana', 'eva']);
+      expect(titulo).toBe('Próximo combate');
+      expect(tarjetas).toHaveLength(1);
+      expect(tarjetas[0]).toHaveTextContent('Ana Pérez');
+    });
+
+    it('al terminar el primero del par, el segundo pasa a ser el primero y entra el siguiente', async () => {
+      anaYEva({ a1: '10:00', e1: '10:30', a2: '11:15' }, { a1: { state: 'finished' } });
+      const { titulo, tarjetas } = await proximoEnPantalla(['ana', 'eva']);
+      expect(titulo).toBe('Próximos combates');
+      expect(tarjetas).toHaveLength(2);
+      expect(tarjetas[0]).toHaveTextContent('vs Zoe Ríos');
+      expect(tarjetas[1]).toHaveTextContent('vs Mía Sanz');
+    });
   });
 
   it('«Tatamis» enseña qué hay en cada uno, con lo que está en curso primero', async () => {
